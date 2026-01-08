@@ -1,0 +1,96 @@
+{
+  "updatedAt": "2025-09-25T14:34:09.000Z",
+  "createdAt": "2025-09-25T11:44:48.916Z",
+  "id": "1SAILcrk2UIzngZ2",
+  "name": "Get Weather (Child Workflow)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "url": "http://api.weatherapi.com/v1/current.json?key=dff501def71c4270b23120537252509&q=casablanca&aqi=yes",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "f24f6f75-ab67-4812-90fe-6e1a2f1a26d3",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -16,
+        0
+      ],
+      "id": "db8918b9-7216-4632-af05-b55190f995c9",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "229998dc-7df4-4232-8d13-76929a4f701f",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "4dc0117f-dddb-458a-9f14-10c6217714bf",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-25T11:44:48.937Z",
+      "createdAt": "2025-09-25T11:44:48.937Z",
+      "role": "workflow:owner",
+      "workflowId": "1SAILcrk2UIzngZ2",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
