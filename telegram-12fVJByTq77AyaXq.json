@@ -1,0 +1,30 @@
+{
+  "updatedAt": "2025-10-03T09:33:26.000Z",
+  "createdAt": "2025-10-03T08:10:23.102Z",
+  "id": "12fVJByTq77AyaXq",
+  "name": "telegram",
+  "active": false,
+  "isArchived": true,
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "77d3af76-286c-43b7-8f74-bd0680443a6a",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-03T08:10:23.118Z",
+      "createdAt": "2025-10-03T08:10:23.118Z",
+      "role": "workflow:owner",
+      "workflowId": "12fVJByTq77AyaXq",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
