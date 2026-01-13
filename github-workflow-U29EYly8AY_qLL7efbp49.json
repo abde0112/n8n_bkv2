@@ -1,0 +1,808 @@
+{
+  "updatedAt": "2026-01-08T15:22:40.877Z",
+  "createdAt": "2026-01-08T14:41:12.568Z",
+  "id": "U29EYly8AY_qLL7efbp49",
+  "name": "GITHUB WORKFLOW",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/abde0112/n8n_bkv2.git",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n_bkv2",
+          "mode": "list",
+          "cachedResultName": "n8n_bkv2",
+          "cachedResultUrl": "https://github.com/abde0112/n8n_bkv2"
+        },
+        "filePath": "={{ $json.path }}",
+        "additionalParameters": {}
+      },
+      "id": "93322dcc-99f5-48f9-8f54-a5e3e67b0d93",
+      "name": "Get file content from GitHub",
+      "type": "n8n-nodes-base.github",
+      "position": [
+        928,
+        1200
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true,
+      "webhookId": "5dc0673d-a547-4626-959d-73f26ced1001",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "K6FWFebHORf32wYN",
+          "name": "GitHub Last one"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "fromJson",
+        "options": {}
+      },
+      "id": "6dca0154-6449-4a44-9d0c-686fa6411d6c",
+      "name": "Convert files to JSON",
+      "type": "n8n-nodes-base.extractFromFile",
+      "position": [
+        1136,
+        1200
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "workflowObject": "={{ JSON.stringify($json.data) }}",
+        "requestOptions": {}
+      },
+      "id": "067d42bd-ed77-4bbe-a5fd-1f978e14d3a7",
+      "name": "Restore n8n Workflows",
+      "type": "n8n-nodes-base.n8n",
+      "position": [
+        1344,
+        1200
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "n8nApi": {
+          "id": "4IZ7MZtCK6ujpM1o",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/abde0112/n8n_bkv2.git",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n_bkv2",
+          "mode": "list",
+          "cachedResultName": "n8n_bkv2",
+          "cachedResultUrl": "https://github.com/abde0112/n8n_bkv2"
+        },
+        "filePath": "=ai-e-commerce-orchestrator-XRxfBhKfbvSIQXyF.json",
+        "additionalParameters": {}
+      },
+      "id": "58baa152-4fed-488b-a4cd-f8360863afb9",
+      "name": "GITHUB",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        912,
+        1456
+      ],
+      "alwaysOutputData": true,
+      "webhookId": "ca56f9b2-15af-4829-a784-05c3325f70eb",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "K6FWFebHORf32wYN",
+          "name": "GitHub Last one"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6cf546c5-5737-4dbd-851b-17d68e0a3780",
+              "name": "repo.owner",
+              "type": "string",
+              "value": "abde0112"
+            },
+            {
+              "id": "452efa28-2dc6-4ea3-a7a2-c35d100d0382",
+              "name": "repo.name",
+              "type": "string",
+              "value": "N8N_BK"
+            },
+            {
+              "id": "81c4dc54-86bf-4432-a23f-22c7ea831e74",
+              "name": "repo.path",
+              "type": "string",
+              "value": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b67914cc-b804-48b2-8b8f-4694a5321ae7",
+      "name": "Globals1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        16,
+        1456
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "path",
+        "options": {}
+      },
+      "id": "c7e56af6-f368-427f-8dea-a997f74adb91",
+      "name": "Split the result1",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        640,
+        1456
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "list",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/abde0112/n8n_bkv2.git",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n_bkv2",
+          "mode": "list",
+          "cachedResultName": "n8n_bkv2",
+          "cachedResultUrl": "https://github.com/abde0112/n8n_bkv2"
+        },
+        "filePath": "={{ $json.repo.path }}"
+      },
+      "id": "25fe99cb-d773-4bdf-af62-f27690e8a654",
+      "name": "List files from repository [GITHUB]1",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        224,
+        1456
+      ],
+      "alwaysOutputData": true,
+      "webhookId": "ca56f9b2-15af-4829-a784-05c3325f70eb",
+      "credentials": {
+        "githubApi": {
+          "id": "unrhzMcm2q1h59BS",
+          "name": "GitHub account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "1be1a14b-fbaf-4fd6-9af3-3dd0d49f99fa",
+      "name": "Set date",
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        64,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $json.currentDate }}",
+        "format": "custom",
+        "customFormat": "dd-MM-yyyy/H:mm",
+        "options": {}
+      },
+      "id": "fcfaabe9-6818-485a-af0a-0a20448eb4b6",
+      "name": "Format date",
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        272,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "keepOnlySet": true,
+        "values": {
+          "string": [
+            {
+              "name": "commitDate",
+              "value": "={{ $json.formattedDate }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2d4ebf6d-c1ba-49fd-b989-66b9530a23eb",
+      "name": "Set commit date",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 2,
+      "position": [
+        464,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "list",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/abde0112/n8n_bk-v2.git",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n_bk-v2",
+          "mode": "name"
+        }
+      },
+      "id": "4a66e8e7-145b-4e00-b4a1-0096eb210fa2",
+      "name": "List files from repository [GITHUB]",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        672,
+        656
+      ],
+      "alwaysOutputData": true,
+      "webhookId": "ca56f9b2-15af-4829-a784-05c3325f70eb",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "zh5oXCV46YQi7UIh",
+          "name": "GT LAST ONE"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "aggregateItems",
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "name"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "50c62da2-cc5b-4c1e-82ae-2f421091ebd3",
+      "name": "Combine file names [GITHUB]",
+      "type": "n8n-nodes-base.itemLists",
+      "typeVersion": 2.1,
+      "position": [
+        864,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "jsonToBinary",
+        "options": {
+          "fileName": "={{ $json.name.replace(/\\s+/g, '-').toLowerCase() }}-{{ $json.id }}.json"
+        }
+      },
+      "id": "86e2a4ed-b830-4b5a-a7bb-7974ef43c5dc",
+      "name": "Move JSON to binary",
+      "type": "n8n-nodes-base.moveBinaryData",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "31cbf2c8-c519-4509-b3c4-54104d84c91e",
+      "name": "Split to single items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 2,
+      "position": [
+        1472,
+        656
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $node['Combine file names [GITHUB]'].json.name }}",
+              "operation": "contains",
+              "value2": "={{ $binary.data.fileName }}"
+            }
+          ]
+        }
+      },
+      "id": "e76e747a-6e84-47dd-ab77-19230b61a4dd",
+      "name": "Check if file exists in repository",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        1744,
+        576
+      ]
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "operation": "edit",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/abde0112/n8n_bk-v2.git",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n_bk-v2",
+          "mode": "list",
+          "cachedResultName": "n8n_bk-v2",
+          "cachedResultUrl": "https://github.com/abde0112/n8n_bk-v2"
+        },
+        "filePath": "={{ $binary.data.fileName }}",
+        "fileContent": "={{ JSON.stringify($(\"Get many workflows\").item.json, null, 2) }}",
+        "commitMessage": "=backup-{{ $node['Set commit date'].json.commitDate }}"
+      },
+      "id": "20882e24-8196-460c-bd7b-318280aa28c5",
+      "name": "Update file [GITHUB]",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        1968,
+        384
+      ],
+      "webhookId": "ae46c503-3016-47ea-80e1-0833743a8170",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "K6FWFebHORf32wYN",
+          "name": "GitHub Last one"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "file",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/abde0112/n8n_bk-v2.git",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "n8n_bkv2",
+          "mode": "list"
+        },
+        "filePath": "={{ $binary.data.fileName }}",
+        "binaryData": true,
+        "commitMessage": "=backup-{{ $node['Set commit date'].json.commitDate }}"
+      },
+      "id": "6f7ea8d9-6e50-4912-bc32-0b4b2e9837cb",
+      "name": "Upload file [GITHUB]",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        1968,
+        784
+      ],
+      "webhookId": "776c60e4-c935-4997-83f2-a605b4a360c0",
+      "credentials": {
+        "githubOAuth2Api": {
+          "id": "K6FWFebHORf32wYN",
+          "name": "GitHub Last one"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Trigger\nYou can change it to [\"Schedule\" trigger](https://docs.n8n.io/integrations/builtin/core-nodes/n8n-nodes-base.scheduletrigger/) to make backups on regular basis.",
+        "height": 339.51767272727324,
+        "width": 182.4715262478496
+      },
+      "id": "03846622-e3e5-47c5-8b4a-4025925e5551",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Set and format date/time\nThose nodes are responsible for setting a current date and time in format `dd-MM-yyyy/H:mm`. Date and time are used to compose commit messages in GitHub, for example: `backup-12-07-2023/14:18`.",
+        "height": 339.42690909090965,
+        "width": 585.4045090909088
+      },
+      "id": "174f5706-2282-41d0-b7fa-cfdd16c286b9",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        32,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Make a list of existing files\nReturn a list of existing files (backups) in GitHub repository. Data returned by those nodes is used by \"IF\" node (later in workflow) to check whether the backup files should be created or updated.",
+        "height": 339.42690909090965,
+        "width": 389.89265454545443
+      },
+      "id": "e862b90c-a411-4a75-b59b-67cf971e7add",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        624,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Retrieve workflows\nGet all workflows form your n8n instance. Remember that **your credentials need to point to the instance that you want to backup.**",
+        "height": 339.42690909090965,
+        "width": 384.14708363636373
+      },
+      "id": "37f4ee21-dd79-4203-9719-5f3f0dd86c76",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        496
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## Upload backup\nSplit JSON files into batches of 1, check if they were uploaded to repository before. If yes (true), upload the new version of the file. Otherwise (false) create the file in repository.",
+        "height": 731.633426614796,
+        "width": 703.8733020263451
+      },
+      "id": "2c6a6959-1169-4b61-b051-22fe5aa9fac6",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1424,
+        256
+      ]
+    },
+    {
+      "parameters": {
+        "content": "## ⚠️ Note\n\n1. Complete video guide for this workflow is available [on my YouTube](https://www.youtube.com/watch?v=dNuVuoPD0Jo). \n2. Remember to add your credentials and configure GitHub nodes (covered in the video guide).\n3. If you like this workflow, please subscribe to [my YouTube channel](https://www.youtube.com/@workfloows) and/or [my newsletter](https://workfloows.com/).\n\n**Thank you for your support!**",
+        "height": 234.82946582693546,
+        "width": 508.8662091091177
+      },
+      "id": "f741170a-3dd1-46b1-b8ae-375d3ffda16f",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -176,
+        240
+      ]
+    },
+    {
+      "parameters": {
+        "filters": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        1088,
+        656
+      ],
+      "id": "5f3ebdde-8a6c-4daa-bf72-459b84964ceb",
+      "name": "Get many workflows",
+      "credentials": {
+        "n8nApi": {
+          "id": "4IZ7MZtCK6ujpM1o",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -144,
+        656
+      ],
+      "id": "142bcb28-edb2-478e-a32b-8c1ca28f2da0",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "Upload\n",
+        "height": 544,
+        "width": 1840
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -144,
+        1136
+      ],
+      "typeVersion": 1,
+      "id": "844a5596-6460-4ec1-8e9a-c0c4d8bb0f9c",
+      "name": "Sticky Note6"
+    }
+  ],
+  "connections": {
+    "Get file content from GitHub": {
+      "main": [
+        [
+          {
+            "node": "Convert files to JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert files to JSON": {
+      "main": [
+        [
+          {
+            "node": "Restore n8n Workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GITHUB": {
+      "main": [
+        [
+          {
+            "node": "Convert files to JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Globals1": {
+      "main": [
+        [
+          {
+            "node": "List files from repository [GITHUB]1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split the result1": {
+      "main": [
+        [
+          {
+            "node": "GITHUB",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Get file content from GitHub",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List files from repository [GITHUB]1": {
+      "main": [
+        [
+          {
+            "node": "Split the result1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set date": {
+      "main": [
+        [
+          {
+            "node": "Format date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format date": {
+      "main": [
+        [
+          {
+            "node": "Set commit date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set commit date": {
+      "main": [
+        [
+          {
+            "node": "List files from repository [GITHUB]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List files from repository [GITHUB]": {
+      "main": [
+        [
+          {
+            "node": "Combine file names [GITHUB]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine file names [GITHUB]": {
+      "main": [
+        [
+          {
+            "node": "Get many workflows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move JSON to binary": {
+      "main": [
+        [
+          {
+            "node": "Split to single items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split to single items": {
+      "main": [
+        [
+          {
+            "node": "Check if file exists in repository",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if file exists in repository": {
+      "main": [
+        [
+          {
+            "node": "Update file [GITHUB]",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Upload file [GITHUB]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update file [GITHUB]": {
+      "main": [
+        [
+          {
+            "node": "Split to single items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file [GITHUB]": {
+      "main": [
+        [
+          {
+            "node": "Split to single items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many workflows": {
+      "main": [
+        [
+          {
+            "node": "Move JSON to binary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set date",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "57cc93e5-aa15-4ca5-a0cb-0251b2bef06d",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-08T14:41:12.585Z",
+      "createdAt": "2026-01-08T14:41:12.585Z",
+      "role": "workflow:owner",
+      "workflowId": "U29EYly8AY_qLL7efbp49",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
