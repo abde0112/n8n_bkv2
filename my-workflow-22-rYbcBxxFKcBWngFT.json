@@ -1,0 +1,102 @@
+{
+  "updatedAt": "2025-12-11T14:01:57.000Z",
+  "createdAt": "2025-12-11T14:01:35.438Z",
+  "id": "rYbcBxxFKcBWngFT",
+  "name": "My workflow 22",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        0,
+        0
+      ],
+      "id": "bdb9f628-4a6b-4774-a6be-1aacf3d492aa",
+      "name": "When chat message received",
+      "webhookId": "dde29c8d-483d-4eca-b1a2-442d00f00216"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "b50d79cf-d40b-43c7-bf27-aff7879beb0a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "ef9f4b0d-efdb-4fe1-a0d4-49d7b7aa69f3",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "2chan"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "2f389bde-f6c5-46d0-bd43-d1a8a9f0a87d",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-11T14:01:35.453Z",
+      "createdAt": "2025-12-11T14:01:35.453Z",
+      "role": "workflow:owner",
+      "workflowId": "rYbcBxxFKcBWngFT",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
