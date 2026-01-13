@@ -1,0 +1,168 @@
+{
+  "updatedAt": "2025-09-27T10:51:23.000Z",
+  "createdAt": "2025-08-11T18:21:51.476Z",
+  "id": "JHawsGYsP0wYq5Q7",
+  "name": "My workflow 2",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "messages"
+        ],
+        "options": {}
+      },
+      "type": "n8n-nodes-base.whatsAppTrigger",
+      "typeVersion": 1,
+      "position": [
+        -208,
+        80
+      ],
+      "id": "d0b16dd5-5f46-492a-984e-7d899d8e5521",
+      "name": "WhatsApp Trigger",
+      "webhookId": "cfd0bea5-86f3-4a86-8df7-03e42daaf33c"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=انت مساعد شخصي لي ترد على استفسارات الواتسب \nراح توصلك رساله من \n {{ $json.contacts[0].profile.name }}\nورقم الجوال التالي\n{{ $json.contacts[0].wa_id }}\nومحتوى الرساله سيكون\n{{ $json.messages[0].text.body }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "أنت موظف خدمة عملاء افتراضي تابع لعيادة أسنان اسمها المدار الذهبي لطلب الاسنان. وظيفتك هي الترحيب بالعميل، وفهم مشكلته أو طلبه، ثم مساعدته في حجز موعد أو إعطائه المعلومات التي يحتاجها، مثل الأسعار، العلاجات، ومواعيد العمل.\n\nكن مهذبًا، احترافيًا، وبأسلوب ودود. لا تعطي تشخيصات طبية، فقط معلومات عامة.\n\nإذا طلب العميل حجز موعد، اجمع منه:\n\nالاسم الكامل\n\nرقم الجوال\n\nنوع الخدمة المطلوبة (تنظيف، تبييض، حشوة، تقويم، إلخ)\n\nالوقت المفضل\n\nبعد جمع المعلومات، قم بتسجيلها في ملف قوقل شيت \n\nإذا لم يفهم العميل أو كان مرتبكًا، اسأله سؤالاً بسيطًا يساعده على تحديد طلبه.\n\nتحدث باللغة العربية فقط.\nلاتجاوب على اي امر خارج هذه المعلومات"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e8aded2f-b12b-4983-a8e4-d1023e9f10b0",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        64,
+        304
+      ],
+      "id": "2a44df8e-848c-48ae-ac44-e73549c96ef3",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Y5EZ7nONrSFTfDWw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}",
+        "contextWindowLength": 10
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        352
+      ],
+      "id": "3d3ee32e-8f41-489d-b46d-1ebce1157773",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "operation": "send",
+        "phoneNumberId": "677609378770639",
+        "recipientPhoneNumber": "={{ $('WhatsApp Trigger').item.json.contacts[0].wa_id }}",
+        "textBody": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.whatsApp",
+      "typeVersion": 1,
+      "position": [
+        432,
+        32
+      ],
+      "id": "2c793553-5e7c-4c4c-a3e1-71b77ccf6cf9",
+      "name": "WhatsApp Business Cloud",
+      "webhookId": "ba25383d-b7a3-4f0a-8c5f-3c663d545b84"
+    }
+  ],
+  "connections": {
+    "WhatsApp Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "WhatsApp Business Cloud",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "48246ff4-7552-448b-8825-17984ad1e8bf",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-08-11T18:21:51.481Z",
+      "createdAt": "2025-08-11T18:21:51.481Z",
+      "role": "workflow:owner",
+      "workflowId": "JHawsGYsP0wYq5Q7",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
