@@ -1,0 +1,330 @@
+{
+  "updatedAt": "2025-09-16T10:40:41.000Z",
+  "createdAt": "2025-09-15T15:55:09.509Z",
+  "id": "F0jlgveWnBfl4NIf",
+  "name": "The Product Data Enricher",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "0fa41996-8b94-4edf-8c3a-f9c22b5cb8c5",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://fakestoreapi.com/products/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        144,
+        0
+      ],
+      "id": "4ce428a9-ff7a-4871-b14c-690c45e3d7de",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "batchSize": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        352,
+        0
+      ],
+      "id": "3c4729b5-7498-4cc2-8b1a-64c18e40a05d",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        1024,
+        64
+      ],
+      "id": "b6fa194a-9a3c-4555-a5ab-f4cc79ecf306"
+    },
+    {
+      "parameters": {
+        "jsCode": "\nreturn [\n  {\n    json: {\n      products: items.map(item => {\n        return {\n          ...item.json,\n          productUrl: `https://mystore.com/products/${item.json.id}`\n        }\n      })\n    }\n  }\n];\n// Input: single item with products array\n// Output: one item per product (for Sheets node)\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        -96
+      ],
+      "id": "6c92397c-a81f-4eb4-a37a-317ee883c3b4",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1_z45Moohqd4iXQ3I8LFV2vQgoaskJnGPow9iE17X3b4",
+          "mode": "list",
+          "cachedResultName": "The Product Data Enricher",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_z45Moohqd4iXQ3I8LFV2vQgoaskJnGPow9iE17X3b4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "The Product Data Enricher",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_z45Moohqd4iXQ3I8LFV2vQgoaskJnGPow9iE17X3b4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "ID": "={{ $json.products[0].id }}",
+            "Title": "={{ $json.products[0].title }}",
+            "Price": "={{ $json.products[0].price }}",
+            "Category": "={{ $json.products[0].category }}",
+            "Rate": "={{ $json.products[0].rating.rate }}",
+            "ProductUrl": "={{ $json.products[0].productUrl }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Price",
+              "displayName": "Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Rate",
+              "displayName": "Rate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "ProductUrl",
+              "displayName": "ProductUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "products",
+              "displayName": "products",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1184,
+        -96
+      ],
+      "id": "c320d59b-d9f2-4e77-8d5a-d9c7806bf739",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: one item with products array\n// Output: 20 individual items (one per product)\n\nconst products = items[0].json.products;\nreturn products.map(product => ({ json: product }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        976,
+        -96
+      ],
+      "id": "9c659678-8098-4f8b-9d88-e9ae9dd929be",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        576,
+        -112
+      ],
+      "id": "58ccfe93-b364-43c6-8ae6-9e7589732104",
+      "name": "Aggregate"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "66284c27-2ecf-4a92-9d83-10c20050e563",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-15T15:55:09.526Z",
+      "createdAt": "2025-09-15T15:55:09.526Z",
+      "role": "workflow:owner",
+      "workflowId": "F0jlgveWnBfl4NIf",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
