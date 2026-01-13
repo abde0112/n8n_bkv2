@@ -1,0 +1,304 @@
+{
+  "updatedAt": "2025-12-02T10:43:51.000Z",
+  "createdAt": "2025-12-02T10:43:51.940Z",
+  "id": "xh6Rr5RMbld9v0pd",
+  "name": "Bodycam Videos",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        32,
+        -96
+      ],
+      "id": "79ffd6c8-925f-4143-bfad-f26db3ea2e18",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "model": "anthropic/claude-sonnet-4.5",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        80,
+        256
+      ],
+      "id": "d662f9e0-139e-4505-b536-8a9713f64670",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Jz6x9n4WM0Sxuntt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "6464",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        112
+      ],
+      "id": "5aa719bf-f421-4250-b9ae-2032ef882bb3",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        304,
+        112
+      ],
+      "id": "b5a58502-9caf-470c-b1a9-97d3c816a252",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "generate a prompt.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a helpfulYou are an AI that generates video prompts for short form content.\nYour ONLY output must strictly follow this JSON structure:\n\n{\n\"title\": \"Exciting, descriptive, simplistic title here\",\n\"description\": \"Short, few sentence description based on the story\",\n\"prompt\": \"AI video generation prompt here\"\n}\n\nGuidelines:\n\nThe \"title\" must be short, eye-catching, and easy to understand.\n\nThe \"description\" should be 1–3 sentences summarizing the crazy event in a fun, engaging way.\n\nThe \"prompt\" must be a detailed AI video generation prompt describing the scene from the primary video types below. Every prompt needs to be a bodycam, nightcam, or doorbell camera video, but it is typically a bodycam video.\n\nNever break JSON format. Never add extra text or explanation outside the JSON.\n\nNever repeat a video, always cycle through them.\n\nPrimary Video Types:\n\nFirefighter rescues someone in a flood\n\nDog stealing meat from costco and being chased by a cop\n\nCat stealing fish from grocery store and is chased by a cop, an old man trips trying to chase the cat\n\nDog being pulled over for driving, then he drives away\n\nCat being pulled over for driving, then he drives away\n\nKid driving car, getting pulled over, and then saying \"fuck off\" and then running off from the cop\n\nKid throwing food to a dangerous animal on doorbell camera assistant"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        -96
+      ],
+      "id": "4e7c975a-324c-4a08-939f-70fe539a97c8",
+      "name": "Prompt Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n    \"type\": \"object\",\n    \"properties\": {\n        \"title\": {\n            \"type\": \"string\",\n            \"description\": \"A short, exciting, descriptive, simplistic YouTube Shorts title\"\n        },\n        \"description\": {\n            \"type\": \"string\", \n            \"description\": \"1-3 sentences summarizing the crazy water event\"\n        },\n        \"prompt\": {\n            \"type\": \"string\",\n            \"description\": \"A detailed AI video generation prompt\"\n        }\n    },\n    \"required\": [\"title\", \"description\", \"prompt\"]\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        112
+      ],
+      "id": "657e8ed2-0ab2-4df7-b626-74396f22ca6e",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n    \"model\": \"sora-2-text-to-video\",\n    \"callBackUrl\": \"https://your-domain.com/api/callback\",\n    \"input\": {\n        \"prompt\": \"{{ $json.output.properties.prompt.description }}\",\n        \"aspect_ratio\": \"portrait\"\n    }\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        592,
+        -96
+      ],
+      "id": "b5d96b1b-c8f4-4d14-b099-5b8c3f95854d",
+      "name": "Create Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YTvEKWVxiYMwfTzj",
+          "name": "Header Auth account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        800,
+        -96
+      ],
+      "id": "ce642437-b87a-4152-8425-8de37fa4a857",
+      "name": "Wait",
+      "webhookId": "54e179b7-7f93-4cef-b013-f3a7e40e9238"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $json.data.taskId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1008,
+        -96
+      ],
+      "id": "71802cc7-ca53-4d2c-be76-44fdb7bf7438",
+      "name": "Get Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "YTvEKWVxiYMwfTzj",
+          "name": "Header Auth account 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prompt Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Prompt Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Prompt Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Prompt Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Prompt Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt Agent": {
+      "main": [
+        [
+          {
+            "node": "Create Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Video": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Create Video": [
+      {
+        "json": {
+          "code": 200,
+          "msg": "success",
+          "data": {
+            "taskId": "626b13906546687cdbfeedbaa992f8fa",
+            "recordId": "626b13906546687cdbfeedbaa992f8fa"
+          }
+        }
+      }
+    ]
+  },
+  "versionId": "62673994-8128-46d1-9ce2-5538cba7e615",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-02T10:43:51.961Z",
+      "createdAt": "2025-12-02T10:43:51.961Z",
+      "role": "workflow:owner",
+      "workflowId": "xh6Rr5RMbld9v0pd",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
