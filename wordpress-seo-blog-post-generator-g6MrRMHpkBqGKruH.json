@@ -1,0 +1,483 @@
+{
+  "updatedAt": "2025-11-01T18:34:07.000Z",
+  "createdAt": "2025-11-01T18:34:07.290Z",
+  "id": "g6MrRMHpkBqGKruH",
+  "name": "WordPress SEO Blog Post Generator",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 9 * * 1"
+            }
+          ]
+        }
+      },
+      "id": "7033b304-520b-486c-b600-fc40608decfe",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1248,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "id": "175ba256-4776-4e85-9869-92d8c23f5710",
+      "name": "Get Blog Topics",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        -1056,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Extract first uncreated topic\nconst topics = $input.all();\nconst pendingTopic = topics.find(item => \n  item.json.Status !== 'Created'\n);\n\nif (!pendingTopic) {\n  return [];\n}\n\nreturn {\n  json: {\n    topic: pendingTopic.json.Topic,\n    keywords: pendingTopic.json.Keywords,\n    category: pendingTopic.json.Category,\n    rowNumber: pendingTopic.json.rowNumber\n  }\n};"
+      },
+      "id": "0639a383-9fde-4ced-a034-df09bdc0eafc",
+      "name": "Process Topic",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -848,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-4o"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [{\"role\": \"system\", \"content\": \"You are an expert SEO content writer. Write comprehensive, engaging blog posts optimized for search engines.\"}, {\"role\": \"user\", \"content\": `Write a detailed blog post about: ${$json.topic}\\n\\nTarget Keywords: ${$json.keywords}\\n\\nRequirements:\\n- 1500-2000 words\\n- SEO optimized with keywords naturally integrated\\n- Include H2 and H3 headings\\n- Engaging introduction and conclusion\\n- Use bullet points and numbered lists where appropriate\\n- Write in a conversational yet professional tone\\n\\nProvide the content in HTML format with proper heading tags.`}] }}"
+            },
+            {
+              "name": "temperature",
+              "value": "0.7"
+            },
+            {
+              "name": "max_tokens",
+              "value": "3000"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e6666b53-abef-4635-8b40-045f88e6c6e6",
+      "name": "Generate Blog Content",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -656,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst content = response.choices[0].message.content;\nconst wordCount = content.split(/\\s+/).length;\n\nreturn {\n  json: {\n    ...($node['Process Topic'].json),\n    content: content,\n    wordCount: wordCount,\n    qualityCheck: wordCount >= 1500 && content.includes('<h2')\n  }\n};"
+      },
+      "id": "7f728a21-c7b1-4d69-91db-b3215887993c",
+      "name": "Extract & Check Content",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -448,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "boolean": [
+            {
+              "value1": "={{ $json.qualityCheck }}",
+              "value2": true
+            }
+          ]
+        }
+      },
+      "id": "22c8608c-8c1d-4ea4-b2b0-af80ab8e75b6",
+      "name": "Quality Check",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "openAiApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-4o"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [{\"role\": \"user\", \"content\": `Generate SEO metadata for this blog post:\\n\\nTopic: ${$json.topic}\\nKeywords: ${$json.keywords}\\n\\nProvide:\\n1. SEO Title (60 chars max)\\n2. Meta Description (155 chars max)\\n3. Focus Keyword\\n4. 5 relevant tags (comma-separated)\\n\\nFormat as JSON with keys: title, description, focusKeyword, tags`}] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0071a988-03bb-450c-88a9-d0ee77482779",
+      "name": "Generate SEO Metadata",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -48,
+        -64
+      ]
+    },
+    {
+      "parameters": {
+        "url": "=https://api.unsplash.com/search/photos?query={{ $json.topic.replace(' ', '+') }}&per_page=1&orientation=landscape",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2c393025-c4b3-4c06-b273-bfdfc47f2656",
+      "name": "Fetch Featured Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -48,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const metadata = JSON.parse($node['Generate SEO Metadata'].json.choices[0].message.content);\nconst image = $node['Fetch Featured Image'].json.results[0];\nconst baseData = $node['Extract & Check Content'].json;\n\nreturn {\n  json: {\n    topic: baseData.topic,\n    content: baseData.content,\n    title: metadata.title,\n    metaDescription: metadata.description,\n    focusKeyword: metadata.focusKeyword,\n    tags: metadata.tags,\n    category: baseData.category,\n    featuredImage: image?.urls?.regular || '',\n    imageAlt: image?.alt_description || baseData.topic,\n    rowNumber: baseData.rowNumber\n  }\n};"
+      },
+      "id": "ceba4ae9-b2df-4eb1-96d9-60359308ce29",
+      "name": "Combine All Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        160,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WORDPRESS_URL }}/wp-json/wp/v2/media",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Disposition",
+              "value": "=attachment; filename=\"{{ $json.topic.replace(/[^a-z0-9]/gi, '-').toLowerCase() }}.jpg\""
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "file",
+              "value": "={{ $json.featuredImage }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          }
+        }
+      },
+      "id": "d4a24916-8620-4cdc-ac0d-00be08154ed1",
+      "name": "Upload Image to WordPress",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        352,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.WORDPRESS_URL }}/wp-json/wp/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpBasicAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $json.title }}"
+            },
+            {
+              "name": "content",
+              "value": "={{ $json.content }}"
+            },
+            {
+              "name": "status",
+              "value": "draft"
+            },
+            {
+              "name": "featured_media",
+              "value": "={{ $node['Upload Image to WordPress'].json.id }}"
+            },
+            {
+              "name": "meta",
+              "value": "={{ { '_yoast_wpseo_metadesc': $json.metaDescription, '_yoast_wpseo_focuskw': $json.focusKeyword } }}"
+            },
+            {
+              "name": "categories",
+              "value": "=[1]"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5468fe13-69c6-40b4-a1c1-f50398e69013",
+      "name": "Create WordPress Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        560,
+        48
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "id": "9e00b220-910d-4b97-a7f8-c0af07182f58",
+      "name": "Update Tracking Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        752,
+        48
+      ]
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Blog Topics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Blog Topics": {
+      "main": [
+        [
+          {
+            "node": "Process Topic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Topic": {
+      "main": [
+        [
+          {
+            "node": "Generate Blog Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Blog Content": {
+      "main": [
+        [
+          {
+            "node": "Extract & Check Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract & Check Content": {
+      "main": [
+        [
+          {
+            "node": "Quality Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quality Check": {
+      "main": [
+        [
+          {
+            "node": "Generate SEO Metadata",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Fetch Featured Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate SEO Metadata": {
+      "main": [
+        [
+          {
+            "node": "Combine All Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Featured Image": {
+      "main": [
+        [
+          {
+            "node": "Combine All Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine All Data": {
+      "main": [
+        [
+          {
+            "node": "Upload Image to WordPress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image to WordPress": {
+      "main": [
+        [
+          {
+            "node": "Create WordPress Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create WordPress Post": {
+      "main": [
+        [
+          {
+            "node": "Update Tracking Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Tracking Sheet": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "e78063b4-9973-43ac-8fa6-92a982e7cd1a",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-01T18:34:07.327Z",
+      "createdAt": "2025-11-01T18:34:07.327Z",
+      "role": "workflow:owner",
+      "workflowId": "g6MrRMHpkBqGKruH",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
