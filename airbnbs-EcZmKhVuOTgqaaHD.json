@@ -1,0 +1,262 @@
+{
+  "updatedAt": "2025-10-29T10:23:37.000Z",
+  "createdAt": "2025-10-29T09:31:44.028Z",
+  "id": "EcZmKhVuOTgqaaHD",
+  "name": "Airbnbs",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "c4b400e6-4974-40c5-b560-95a0689df712",
+      "name": "MCP Client",
+      "credentials": {
+        "mcpClientApi": {
+          "id": "vopx2OCQYQpxZbvf",
+          "name": "Airbnb"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeTool",
+        "toolName": "={{ $json.tools[0].name }}",
+        "toolParameters": "={\n\"location\":\"Agadir\"\n}"
+      },
+      "type": "n8n-nodes-mcp.mcpClient",
+      "typeVersion": 1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "6bf127d4-c6ac-4c26-b819-d8d1a5bf8e22",
+      "name": "MCP Client1",
+      "credentials": {
+        "mcpClientApi": {
+          "id": "vopx2OCQYQpxZbvf",
+          "name": "Airbnb"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        496,
+        208
+      ],
+      "id": "ced59e7c-ab2b-4868-9c9a-86a20f6523df",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        256,
+        208
+      ],
+      "id": "e35696c3-6a76-4736-877b-0f7ef5d8cd29",
+      "name": "When chat message received",
+      "webhookId": "165db78d-63a8-4453-8ef8-7cbc87d2f71b"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        368,
+        416
+      ],
+      "id": "cf02f1db-df57-4f41-8726-95e7687890dc",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-mcp.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        640,
+        432
+      ],
+      "id": "ce626b7d-a29f-4ac2-872d-ea8d3aca0ec3",
+      "name": "MCP Client2",
+      "credentials": {
+        "mcpClientApi": {
+          "id": "vopx2OCQYQpxZbvf",
+          "name": "Airbnb"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "executeTool",
+        "toolName": "=={{ $fromAI(\"tool\", \"the tool selected\", \"string\") }}",
+        "toolParameters": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Tool_Parameters', ``, 'json') }}"
+      },
+      "type": "n8n-nodes-mcp.mcpClientTool",
+      "typeVersion": 1,
+      "position": [
+        864,
+        400
+      ],
+      "id": "952a7281-3374-4306-8fce-95262980e9f0",
+      "name": "Airbnb Tools",
+      "credentials": {
+        "mcpClientApi": {
+          "id": "vopx2OCQYQpxZbvf",
+          "name": "Airbnb"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        512,
+        416
+      ],
+      "id": "d864540b-7eeb-4b86-8513-420d617f48a1",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTimeTool",
+      "typeVersion": 2,
+      "position": [
+        752,
+        512
+      ],
+      "id": "94dcc717-c534-46c6-a737-5d9b7ffe632c",
+      "name": "Date & Time"
+    }
+  ],
+  "connections": {
+    "MCP Client": {
+      "main": [
+        [
+          {
+            "node": "MCP Client1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client1": {
+      "main": [
+        []
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Airbnb Tools": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "07c9f712-8cbc-4c23-b756-7139b06dffc6",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-29T09:31:44.045Z",
+      "createdAt": "2025-10-29T09:31:44.045Z",
+      "role": "workflow:owner",
+      "workflowId": "EcZmKhVuOTgqaaHD",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
