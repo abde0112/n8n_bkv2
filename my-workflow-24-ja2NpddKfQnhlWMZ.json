@@ -1,0 +1,1228 @@
+{
+  "updatedAt": "2026-01-02T10:41:25.000Z",
+  "createdAt": "2025-12-31T14:13:09.775Z",
+  "id": "ja2NpddKfQnhlWMZ",
+  "name": "My workflow 24",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "rag",
+          "mode": "list",
+          "cachedResultName": "rag"
+        },
+        "embeddingBatchSize": 2,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        64,
+        112
+      ],
+      "id": "81e50fdb-fdb4-46ce-a5ea-3ff9232551ca",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "J5OV58JHP3Hn5RYI",
+          "name": "rag"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -96,
+        336
+      ],
+      "id": "5b1d5d76-45c4-4cfc-8aeb-42849a9ef009",
+      "name": "Embeddings OpenAI",
+      "credentials": {
+        "openAiApi": {
+          "id": "KgsXR5Ga5dON4Aie",
+          "name": "SEO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "LEAD_GEN_AI",
+                "value": "={{ $json.name }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        64,
+        288
+      ],
+      "id": "68f5ab96-c4a3-4cab-835f-383989038490",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        160,
+        432
+      ],
+      "id": "9cb4f6af-23ac-4733-9c27-625491c868cb",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "content": "# Uploading to VD\n",
+        "height": 636,
+        "width": 828
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        -416,
+        -32
+      ],
+      "id": "4edd60f6-01b8-48c5-b655-41e50180effa",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "formTitle": "Form Submission",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "PDF File",
+              "fieldType": "file",
+              "acceptFileTypes": "pdf",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -272,
+        208
+      ],
+      "id": "20c997a6-257d-4c79-9d64-c0c5c93e429f",
+      "name": "On form submission",
+      "webhookId": "2004dd85-382d-41fc-a234-dabca5c527e3"
+    },
+    {
+      "parameters": {
+        "content": "# RAG Chatbot\n",
+        "height": 732,
+        "width": 1272,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        560,
+        -80
+      ],
+      "id": "709d0732-f3f1-4c31-8f09-1eb04efb4029",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are IPTV Support AI. Use ONLY the content from the IPTV_RAG_Knowledge_Base.pdf.\n\nUser Question:\n{{ $('When chat message received').item.json.chatInput }}\nIf the answer does not exist in the knowledge base, reply:\n\"This information is not available in the system.\"\n",
+        "options": {
+          "systemMessage": "=You are IPTV Support AI, a professional customer assistant for an IPTV subscription service.\nYour job is to answer only using the information from the provided knowledge base (RAG PDF).\nIf an answer is NOT available in the knowledge base, say:\n“This information is not available in the system.”\n\nYour responsibilities:\n\n🎯 1. Provide accurate IPTV information\n\nUse data strictly from the knowledge base to answer questions about:\n\nPricing & plans\n\nFeatures\n\nChannels & VOD\n\nFree trial\n\nSupported devices\n\nInternet requirements\n\nActivation (M3U & Xtream Codes)\n\nUsage steps\n\nRefund policy\n\nTerms & conditions\n\nSupport contact methods\n\n🎯 2. Respond in a clear, friendly, professional tone\n\nUse short, structured answers:\n\nBullet points\n\nMini-sections\n\nStep-by-step guides\n\nClear instructions\n\nNever invent new prices, channels, policies, or technical details.\n\n🎯 3. Follow strict rules\n\nNO hallucinations\n\nNO guessing\n\nNO external information\n\nUse ONLY the RAG documents\n\nIf unsure, respond with:\n“This information is not available in the system.”\n\n🎯 4. Include these abilities\n\nWhen asked:\n\nProvide plan comparison\n\nExplain activation steps\n\nGuide installation on any device\n\nExplain refund rules\n\nSummarize legal content (Terms & Privacy)\n\nGive troubleshooting guidance based on RAG data\n\nProvide contact info only if found in RAG data\n\n🎯 5. Format of your responses\n\nAlways respond in this structure when answering customer questions:\n\n1. Direct Answer\nClear short explanation.\n\n2. Details\nKey bullet points pulled from RAG.\n\n3. Optional: Steps / CTA\nAction steps or guidance if needed."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        48
+      ],
+      "id": "581176a1-9169-45c2-ad39-d30add6eb235",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1024,
+        240
+      ],
+      "id": "ab7e8f83-8540-4416-848f-2f59a41a1579",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "KgsXR5Ga5dON4Aie",
+          "name": "SEO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        688,
+        208
+      ],
+      "id": "1250953d-f76b-4473-a759-67fc6111f0db",
+      "name": "When chat message received",
+      "webhookId": "584c64c7-44ed-423f-85c5-b8d137ac61bd"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "yyyyyyyyyyyyyyyyyyyyy",
+          "mode": "list",
+          "cachedResultName": "yyyyyyyyyyyyyyyyyyyyy"
+        },
+        "options": {
+          "pineconeNamespace": "={{ $json.File_Name }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        960,
+        432
+      ],
+      "id": "f5c733e8-bc77-4ea4-bb36-521b189465e1",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "id": "akk9g6AgLQCV8UCq",
+          "name": "IP-T"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1472,
+        512
+      ],
+      "id": "674dcefe-6f9d-4bb5-b8ff-1c1a8363d548",
+      "name": "Embeddings OpenAI1",
+      "credentials": {
+        "openAiApi": {
+          "id": "KgsXR5Ga5dON4Aie",
+          "name": "SEO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1728,
+        320
+      ],
+      "id": "5ac41108-a603-4046-88e3-7af42638e205",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "KgsXR5Ga5dON4Aie",
+          "name": "SEO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c183a9f9-0bbd-40e4-ac35-b5111e3ec1ae",
+              "name": "File_Name",
+              "value": "={{$json[\"chatInput\"].match(/Q[1-4]/i) ? ($json[\"chatInput\"].match(/Q[1-4]/i)[0].toUpperCase() + \".pdf\").trim() : \"\"}}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        48
+      ],
+      "id": "b8beea3f-6457-4914-b62d-6f590ed36068",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "git data\n",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "ip",
+          "mode": "list",
+          "cachedResultName": "ip"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        1456,
+        208
+      ],
+      "id": "f7d63ece-d0dd-4125-9dbb-f52092238a5e",
+      "name": "Pinecone Vector Store2",
+      "credentials": {
+        "pineconeApi": {
+          "id": "akk9g6AgLQCV8UCq",
+          "name": "IP-T"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the data from the Webhook 'body'\nconst input = $input.first().json.body || $input.first().json;\n\n// 2. Check for required technical IDs\nif (!input.user_id || !input.batch_id) {\n  throw new Error('Missing required fields: user_id and batch_id');\n}\n\n// 3. Extract industry and location from the new input structure\n// Industry replaces 'term' in your new schema\nlet industry = input.industry || \"\"; \nlet location = input.location || \"\";\n\n// 4. Return the formatted data for the next nodes\nreturn [{\n  json: {\n    term: industry,\n    location: location,\n    // Creates the string for Google Maps search, e.g., \"Restaurants Casablanca\"\n    search_query: `${industry} ${location}`.trim(), \n    batch_id: input.batch_id,\n    user_id: input.user_id,\n    started_at: new Date().toISOString(),\n    status: 'raw' // Helpful for your Airtable status column\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        800
+      ],
+      "id": "27a17695-9c14-491c-97f6-e02f62e29276",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/nwua9Gu5YrADL7ZDj/runs",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"searchStringsArray\": [\n    \"{{ $json.search_query }} in {{ $json.location }}\"\n  ],\n  \"locationQuery\": \"{{ $json.location }}, Morocco\",\n  \"maxCrawledPlacesPerSearch\": 10,\n  \"includeWebsites\": true,\n  \"language\": \"en\",\n  \"allPlacesNoSearch\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        384,
+        800
+      ],
+      "id": "33deb9dd-85cf-4150-b98d-a16aed5621e1",
+      "name": "Start Apify Run"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the runId from the Apify \"Start Run\" node output\nconst inputJson = $input.first().json;\nconst runId = inputJson.data ? inputJson.data.id : inputJson.id;\n\n// 2. FIXED: Reference your actual validation node name: \"Code in JavaScript\"\nlet originalInput;\ntry {\n  // We use the node that contains your batch_id and user_id\n  originalInput = $node[\"Code in JavaScript\"].json;\n} catch (e) {\n  // Fallback for manual testing\n  originalInput = { message: \"Metadata not found\" };\n}\n\nconst apifyToken = 'REDACTED_BY_REGEX'; \nconst maxRetries = 60; // Increased for \"All\" results\nconst pollInterval = 5000; \n\nfor (let i = 0; i < maxRetries; i++) {\n  const response = await this.helpers.httpRequest({\n    method: 'GET',\n    url: `https://api.apify.com/v2/actor-runs/${runId}?token=${apifyToken}`\n  });\n\n  const status = response.data.status;\n\n  if (status === 'SUCCEEDED') {\n    return [{\n      json: {\n        run_id: runId,\n        dataset_id: response.data.defaultDatasetId,\n        status: 'completed',\n        ...originalInput // Now correctly spreads batch_id, user_id, etc.\n      }\n    }];\n  }\n\n  if (status === 'FAILED' || status === 'ABORTED' || status === 'TIMED-OUT') {\n    throw new Error(`Apify Run failed with status: ${status}`);\n  }\n\n  await new Promise(resolve => setTimeout(resolve, pollInterval));\n}\n\nthrow new Error('Apify timed out.');"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        800
+      ],
+      "id": "107b8ea7-6d39-4af5-9fd4-cd530e7e6ecc",
+      "name": "Poll Status"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.apify.com/v2/datasets/{{ $json.dataset_id }}/items",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "REDACTED_HEADER_VALUE"
+            },
+            {
+              "name": "clean",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        816,
+        800
+      ],
+      "id": "397f70d8-feb5-4c1c-b096-f28ab7f8991d",
+      "name": "Fetch Results"
+    },
+    {
+      "parameters": {
+        "tableId": "leads",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "batch_id",
+              "fieldValue": "={{ $node[\"Poll Status\"].json.batch_id }}"
+            },
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $node[\"Poll Status\"].json.user_id }}"
+            },
+            {
+              "fieldId": "business_name",
+              "fieldValue": "={{ $json.title }}"
+            },
+            {
+              "fieldId": "website_url",
+              "fieldValue": "={{ $json.website }}"
+            },
+            {
+              "fieldId": "address",
+              "fieldValue": "={{ $json.address }}"
+            },
+            {
+              "fieldId": "phone_number",
+              "fieldValue": "={{ $json.phone }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "=raw"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        816
+      ],
+      "id": "1df925ed-8bd5-461e-a683-ee1af4953419",
+      "name": "Create a row"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1024,
+        800
+      ],
+      "id": "c52a892c-f839-48d4-bd2d-447ed5049550",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "a28e66b5-c12e-41b8-8a2e-6902ed760d9d",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -304,
+        800
+      ],
+      "id": "a28c9cc7-eb2e-4bfc-b891-9b847a024ce1",
+      "name": "Webhook",
+      "webhookId": "a28e66b5-c12e-41b8-8a2e-6902ed760d9d"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.website_url || 'https://' + $json.domain }}",
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        848,
+        1632
+      ],
+      "id": "9d349169-c9a6-41d8-8255-81a4bf7a249c",
+      "name": "Fetch Website1",
+      "continueOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "81c9d35b-fbf0-41b1-9bf7-46d156f6d0ab",
+              "leftValue": "={{ $json.website_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        448,
+        1280
+      ],
+      "id": "6894d8c3-1c02-4e35-9a90-7365a0cb76e2",
+      "name": "Fetch Website7"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        224,
+        1264
+      ],
+      "id": "b0f57d65-e141-457f-8dad-6ff6266ee284",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "31e24eb0-c1d5-43ec-9a30-4f97a5e4b079",
+              "name": "business_name",
+              "value": "={{ $json.business_name }}",
+              "type": "string"
+            },
+            {
+              "id": "3ed29270-74f7-4756-8aa7-ec02f636713d",
+              "name": "address",
+              "value": "={{ $json.address }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        864,
+        1264
+      ],
+      "id": "ca007dc0-6240-4f5b-aa52-2b481fa6f743",
+      "name": "Set data1"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "leads",
+        "returnAll": true,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "batch_id",
+              "condition": "eq",
+              "keyValue": "={{ $json.batch_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        1264
+      ],
+      "id": "7c1ad03c-1d03-46ef-a449-424f5c63cf7d",
+      "name": "Query Raw Leads1"
+    },
+    {
+      "parameters": {
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1056,
+        1744
+      ],
+      "id": "88188cee-3716-40dd-8662-7b22aac5fa91",
+      "name": "Send a message",
+      "webhookId": "18d26c96-1fed-4483-99c6-47830367068a",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Clean the URL to remove tracking parameters and whitespace\nfor (const item of $input.all()) {\n  let url = item.json.website_url || \"\";\n  if (url) {\n    // Remove everything after '?' (UTM tags, etc)\n    url = url.split('?')[0]; \n    // Remove trailing slashes and whitespace\n    url = url.trim().replace(/\\/+$/, \"\"); \n  }\n  item.json.clean_url = url;\n}\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        1632
+      ],
+      "id": "3495d1c3-0f13-4454-b11e-7ff270c3652c",
+      "name": "URL Cleaning Logic"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nreturn items.map((item, index) => {\n  let originalLead = null;\n  try {\n    const scraped = $(\"Scarp from web site1\").all();\n    if (scraped[index]) originalLead = scraped[index].json;\n  } catch (e) {\n    try {\n      const manual = $(\"Set data1\").all();\n      if (manual[index]) originalLead = manual[index].json;\n    } catch (e2) {}\n  }\n\n  const analysis = JSON.parse(item.json.output.replace(/```json/g, '').replace(/```/g, '').trim());\n\n  return {\n    json: {\n      id: originalLead ? originalLead.id : \"missing_id\", // THIS IS THE CRITICAL LINE\n      business_name: originalLead ? originalLead.business_name : \"Unknown\",\n      fit_score: analysis.fit_score,\n      summary: analysis.summary,\n      is_high_ticket: analysis.is_high_ticket\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1888,
+        1264
+      ],
+      "id": "22f43164-8d4b-4508-b75f-37b6f16e7f7e",
+      "name": "Clean AI Output"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "leads",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Loop Over Items1').item.json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "=contacted"
+            },
+            {
+              "fieldId": "score_reasoning",
+              "fieldValue": "={{ $json.score_reasoning }}"
+            },
+            {
+              "fieldId": "email_draft",
+              "fieldValue": "={{ $json.raw_email_full }}"
+            },
+            {
+              "fieldId": "lead_email",
+              "fieldValue": "={{ $json.all_emails }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2720,
+        1264
+      ],
+      "id": "b964b3d3-2d09-497e-bf64-2236f47b36ca",
+      "name": "Save Score & Summary Draft"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the drafts from the current input\nconst drafts = $input.all();\n\nreturn drafts.map((item, index) => {\n  let leadId = \"missing_id\";\n  let bizName = \"Unknown\";\n  let leadScore = 0;\n  let leadSummary = \"No reasoning available\";\n  let emailList = [];\n\n  // 2. Try to find the original lead data from ANY available previous node\n  try {\n    // Attempt to pull from Clean AI Output2 (The Analysis stage)\n    const analysisData = $(\"Clean AI Output\").all()[index].json;\n    leadId = analysisData.id || leadId;\n    bizName = analysisData.business_name || analysisData.name || bizName;\n    leadScore = analysisData.fit_score || 0;\n    leadSummary = analysisData.summary || leadSummary;\n  } catch (e) {\n    try {\n      // Fallback: Attempt to pull directly from the Loop node\n      const loopData = $(\"Loop Over Items3\").all()[index].json;\n      leadId = loopData.id || leadId;\n      bizName = loopData.business_name || bizName;\n    } catch (e2) {}\n  }\n\n  // 3. Try to recover emails from the scraper path\n  try {\n    const scraped = $(\"Scarp from web site1\").all();\n    const match = scraped.find(s => s.json.id === leadId);\n    emailList = match ? (match.json.all_scraped_emails || []) : [];\n  } catch (e) {}\n\n  try {\n    // 4. Parse the AI Email output\n    let rawAiText = item.json.output || \"\";\n    let cleanedJson = rawAiText.replace(/```json/g, '').replace(/```/g, '').trim();\n    cleanedJson = cleanedJson.replace(/\\\\\"/g, '\"'); // Fix double-escaping\n    const emailData = JSON.parse(cleanedJson);\n\n    return {\n      json: {\n        id: leadId,\n        all_emails: emailList,\n        business_name: bizName,\n        fit_score: leadScore,\n        score_reasoning: leadSummary,\n        raw_email_full: rawAiText,\n        email_subject: emailData.subject,\n        email_body: emailData.body,\n        status: 'ready_for_outreach'\n      }\n    };\n  } catch (error) {\n    return {\n      json: {\n        id: leadId,\n        status: \"error\",\n        error_details: error.message,\n        raw_output: item.json.output\n      }\n    };\n  }\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2448,
+        1264
+      ],
+      "id": "33b177d6-b917-447c-8f4c-0781a88c9990",
+      "name": "Final Scribe Parser"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the following business to determine its fit for our services.\n\nCONTEXT PROVIDED:\n- Business Name: {{ $json.business_name || $json.name }}\n- Location: {{ $json.address }}\n\nWEBSITE CONTENT (If available): \n{{ $json.clean_text || \"NO WEBSITE CONTENT AVAILABLE\" }}\n\nINSTRUCTIONS:\n1. If \"WEBSITE CONTENT\" is available, perform a deep analysis of their services, tone, and quality.\n2. If \"WEBSITE CONTENT\" is NOT available, use your internal knowledge about this specific business name in {{ $json.address || 'Casablanca' }} to provide the best possible estimate.\n3. If the business is unknown to you and there is no website content, provide a generic but professional summary based on the name.\n\nReturn JSON ONLY:\n{\n  \"fit_score\": 0-100,\n  \"summary\": \"2 sentences max highlighting their specialty\",\n  \"is_high_ticket\": boolean\n}",
+        "needsFallback": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1568,
+        1264
+      ],
+      "id": "b71ea25c-f01b-4e8f-9950-f2a6e379cb1d",
+      "name": "Analysis score & summary1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert B2B sales copywriter. Write a highly personalized 3-sentence cold email to the following business.\n\nBUSINESS DETAILS:\n- Name: {{ $json.business_name }}\n- Analysis: {{ $json.summary }}\n\nGOAL:\nAsk for a brief 5-minute chat next week to discuss how we can help them grow.\n\nREQUIREMENTS:\n1. Subject Line: Catchy, non-spammy, and mentions their name or location.\n2. Body: Max 3 sentences. \n3. Tone: Professional, warm, and conversational.\n4. No generic openers like \"I hope this finds you well.\"\n\nRETURN JSON ONLY:\n{\n  \"subject\": \"Subject line here\",\n  \"body\": \"Full email body here\"\n}",
+        "needsFallback": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2096,
+        1264
+      ],
+      "id": "4d220f27-bc8e-487c-add6-59620597a578",
+      "name": "GN Full Email1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1712,
+        1520
+      ],
+      "id": "4fb865bd-d0d2-44ae-bcae-e95850890b3f",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Node: ParseHTML\n// Purpose: Clean HTML and extract ALL unique emails before sending to LLM\n\nconst items = $input.all();\nreturn items.map(item => {\n  const html = item.json.data || \"\";\n\n  // 1. Clean the text for the LLM\n  let text = html.replace(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gm, \"\");\n  text = text.replace(/<style\\b[^>]*>([\\s\\S]*?)<\\/style>/gm, \"\");\n  text = text.replace(/<[^>]+>/g, \" \"); \n  text = text.replace(/\\s+/g, \" \").trim();\n\n  // 2. Extract ALL Emails using Regex\n  const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\\.[a-zA-Z0-9._-]+)/gi;\n  const foundEmails = html.match(emailRegex);\n\n  // 3. Remove duplicates and filter out image-based \"fake\" emails (e.g., info@site.com.png)\n  const uniqueEmails = foundEmails \n    ? [...new Set(foundEmails)].filter(e => !e.match(/\\.(png|jpg|jpeg|gif|svg|webp)$/i))\n    : [];\n\n  // 4. Output for LLM and Database\n  return {\n    json: {\n      ...item.json, // Keeps your original lead ID and data\n      clean_text: text.substring(0, 4000), \n      all_scraped_emails: uniqueEmails,\n      primary_email: uniqueEmails.length > 0 ? uniqueEmails[0] : \"No email found\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        1616
+      ],
+      "id": "be4b12f2-0fa0-4614-a1dd-a57a71984c7e",
+      "name": "Scarp from web site1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bb37c2f9-6c87-471e-871c-c1c7a0f24b2c",
+              "name": "batch_id",
+              "value": "={{ $json.body.batch_id }}",
+              "type": "string"
+            },
+            {
+              "id": "1fce52f9-5a3b-41f1-a4b8-388e97f8c331",
+              "name": "user_id",
+              "value": "={{ $json.body.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "cfd877ea-34fe-43a4-9cd2-e79ca2ea7b85",
+              "name": "industry",
+              "value": "={{ $json.body.industry }}",
+              "type": "string"
+            },
+            {
+              "id": "ff9f7a37-3078-4d81-839d-0b8cd15f01b9",
+              "name": "location",
+              "value": "={{ $json.body.location }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -32,
+        800
+      ],
+      "id": "f5cff1cd-88a4-4417-ba1e-88f3e70743cb",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1504,
+        1520
+      ],
+      "id": "521fb1db-01b9-4786-aedd-75284d71ebd5",
+      "name": "OpenAI Chat Model2"
+    }
+  ],
+  "connections": {
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          },
+          {
+            "node": "Pinecone Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Start Apify Run",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Query Raw Leads1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Apify Run": {
+      "main": [
+        [
+          {
+            "node": "Poll Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Poll Status": {
+      "main": [
+        [
+          {
+            "node": "Fetch Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Results": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Website1": {
+      "main": [
+        [
+          {
+            "node": "Scarp from web site1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Website7": {
+      "main": [
+        [
+          {
+            "node": "Set data1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "URL Cleaning Logic",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Fetch Website7",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set data1": {
+      "main": [
+        [
+          {
+            "node": "Analysis score & summary1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Raw Leads1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message": {
+      "main": [
+        [
+          {
+            "node": "Analysis score & summary1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "URL Cleaning Logic": {
+      "main": [
+        [
+          {
+            "node": "Fetch Website1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean AI Output": {
+      "main": [
+        [
+          {
+            "node": "GN Full Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Score & Summary Draft": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Scribe Parser": {
+      "main": [
+        [
+          {
+            "node": "Save Score & Summary Draft",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analysis score & summary1": {
+      "main": [
+        [
+          {
+            "node": "Clean AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GN Full Email1": {
+      "main": [
+        [
+          {
+            "node": "Final Scribe Parser",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analysis score & summary1",
+            "type": "ai_languageModel",
+            "index": 1
+          },
+          {
+            "node": "GN Full Email1",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Scarp from web site1": {
+      "main": [
+        [
+          {
+            "node": "Analysis score & summary1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analysis score & summary1",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "GN Full Email1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "66ace7f1-3fb3-4512-9050-bbc3a1347ffa",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-31T14:13:09.789Z",
+      "createdAt": "2025-12-31T14:13:09.789Z",
+      "role": "workflow:owner",
+      "workflowId": "ja2NpddKfQnhlWMZ",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
