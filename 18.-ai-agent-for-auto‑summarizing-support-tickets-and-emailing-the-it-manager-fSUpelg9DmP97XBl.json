@@ -1,0 +1,152 @@
+{
+  "updatedAt": "2025-10-05T21:11:02.000Z",
+  "createdAt": "2025-10-05T11:05:54.495Z",
+  "id": "fSUpelg9DmP97XBl",
+  "name": "18. AI Agent for auto‑summarizing support tickets and emailing the IT manager",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "authentication": "airtableTokenApi",
+        "baseId": {
+          "__rl": true,
+          "value": "https://airtable.com/appHBQgelyzjkNDXM/tbliGupS0wrlW8wSi/viwMLe4wgPeeqBCdt?blocks=hide",
+          "mode": "url"
+        },
+        "tableId": {
+          "__rl": true,
+          "value": "https://airtable.com/appHBQgelyzjkNDXM/tbliGupS0wrlW8wSi/viwMLe4wgPeeqBCdt?blocks=hide",
+          "mode": "url"
+        },
+        "triggerField": "Ticket ID",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.airtableTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "235276d0-b356-4a02-8f60-def64f75f992",
+      "name": "Airtable Trigger",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "D5OyRen7Y9yEq0t5",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4.1-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4.1-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are the IT Support Team's coordinator. Your task is to collect\nincoming information about new support tickets and produce a concise\nsummary to email to the IT management. The email should be signed with \"IT\nSupport Team.\"\nHere are the details of the support tickets:\nTicket ID: {{ $json.fields['Ticket ID'] }}\nUser: {{ $json.fields.User }}\nIssue: {{ $json.fields.Issue }}\nPriority: {{ $json.fields.Priorityl }}\nDate Submitted: {{ $json.fields['Date Submitted'] }}\nStatus: {{ $json.fields.Select }}\nPlease provide the following output parameters:\nemail_subject\nemail body\nMake the content clean and with bullet points "
+            }
+          ]
+        },
+        "jsonOutput": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        208,
+        0
+      ],
+      "id": "67410fe5-bd04-48aa-8c44-ed719031a69d",
+      "name": "Message a model",
+      "credentials": {
+        "openAiApi": {
+          "id": "KgsXR5Ga5dON4Aie",
+          "name": "OpenAi account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "abdellahkrimo13@gmail.com",
+        "subject": "={{ $json.message.content.email_subject }}",
+        "message": "={{ $json.message.content.email_body }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        560,
+        0
+      ],
+      "id": "920e3557-9628-48a5-9801-610d69adb2e8",
+      "name": "Send a message",
+      "webhookId": "5c1ad90d-316c-4fc4-9684-6b1e9ea7b440",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "Gmail account 4"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Airtable Trigger": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "f8e02fe5-93ee-4bd0-b07a-e55167bd3578",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-05T11:05:54.514Z",
+      "createdAt": "2025-10-05T11:05:54.514Z",
+      "role": "workflow:owner",
+      "workflowId": "fSUpelg9DmP97XBl",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
