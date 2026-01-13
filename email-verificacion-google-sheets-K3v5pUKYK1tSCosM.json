@@ -1,0 +1,255 @@
+{
+  "updatedAt": "2025-10-21T09:34:07.000Z",
+  "createdAt": "2025-10-21T09:34:07.965Z",
+  "id": "K3v5pUKYK1tSCosM",
+  "name": "email-verificacion-google-sheets",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://docs.google.com/spreadsheets/d/1rzuojNGTaBvaUEON6cakQRDva3ueGg5kNu9v12aaSP4/edit#gid=0"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rzuojNGTaBvaUEON6cakQRDva3ueGg5kNu9v12aaSP4/edit#gid=0",
+          "cachedResultName": "Sheet1"
+        },
+        "options": {}
+      },
+      "id": "82bae118-ea6f-4224-b167-01720ddf02d0",
+      "name": "Google Sheets Trigger",
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "position": [
+        384,
+        -32
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "compare": "selectedFields",
+        "fieldsToCompare": "Email",
+        "options": {}
+      },
+      "id": "d3039b02-1865-4284-b377-ab6bc747498c",
+      "name": "Remove Duplicates",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "position": [
+        832,
+        -48
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://email.effibotics.com/api",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "api_key",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "email",
+              "value": "={{ $json.Email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "59d8af58-cf56-4530-8a3e-53d1ba27ec8e",
+      "name": "Verify your emails",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        992,
+        -48
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.1,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "content": "## Check email deliverability ",
+        "height": 364.82606941347825,
+        "width": 1083.1212624694333,
+        "color": 4
+      },
+      "id": "c78addd6-489a-4c66-9793-e09a61d1e05d",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        304,
+        -128
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1rzuojNGTaBvaUEON6cakQRDva3ueGg5kNu9v12aaSP4",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rzuojNGTaBvaUEON6cakQRDva3ueGg5kNu9v12aaSP4/edit?usp=drivesdk",
+          "cachedResultName": "n8n Template-Email Validation"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rzuojNGTaBvaUEON6cakQRDva3ueGg5kNu9v12aaSP4/edit#gid=0",
+          "cachedResultName": "Sheet1"
+        },
+        "columns": {
+          "value": {},
+          "schema": [
+            {
+              "id": "Email",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "Email",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [
+            "Email"
+          ]
+        },
+        "options": {}
+      },
+      "id": "216822fd-3bc9-4af7-998d-2e5ffaedba78",
+      "name": "Update data to google sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1216,
+        -48
+      ],
+      "typeVersion": 4.3
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "84aff430-6fe2-4c39-940a-178d2dcd1d09",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.Status }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9ae58bde-7411-4fdf-ac0d-faa7039b1067",
+      "name": "If Email Exists",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        608,
+        -32
+      ],
+      "typeVersion": 2
+    }
+  ],
+  "connections": {
+    "If Email Exists": {
+      "main": [
+        [
+          {
+            "node": "Remove Duplicates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Remove Duplicates": {
+      "main": [
+        [
+          {
+            "node": "Verify your emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify your emails": {
+      "main": [
+        [
+          {
+            "node": "Update data to google sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger": {
+      "main": [
+        [
+          {
+            "node": "If Email Exists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "2f042664-690d-456d-af67-7c655b5069c9",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-21T09:34:07.981Z",
+      "createdAt": "2025-10-21T09:34:07.981Z",
+      "role": "workflow:owner",
+      "workflowId": "K3v5pUKYK1tSCosM",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
