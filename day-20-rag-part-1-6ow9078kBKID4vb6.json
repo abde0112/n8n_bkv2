@@ -1,0 +1,303 @@
+{
+  "updatedAt": "2025-10-23T11:56:45.000Z",
+  "createdAt": "2025-10-22T08:38:26.722Z",
+  "id": "6ow9078kBKID4vb6",
+  "name": "Day 20 RAG Part 1",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an Intelligent Support Assistant that helps customer service agents by retrieving accurate, fact-based answers from a company’s internal knowledge base.\n\n🎯 Your purpose:\n- When a new support question arrives, find the most relevant context using the Pinecone vector database.\n- Then generate a **clear, factual, and helpful answer** using the Google Gemini model.\n\n📘 Knowledge Source:\nAll answers must come from the internal knowledge base stored in Pinecone (which was created from PDF and company data). Each chunk of retrieved context represents verified company information.\n\n---\n\n### Rules & Behavior\n\n1. **Always retrieve context** from Pinecone before answering.  \n2. **Never guess, invent, or hallucinate** missing details.  \n3. If the answer cannot be found in context, politely say:  \n   > “I couldn’t find this information in the company knowledge base. Please escalate this to a human agent.”  \n4. Use **bullet points or short paragraphs** for clarity.  \n5. Keep a **professional, warm, and supportive tone.**  \n6. Include relevant **policy names, warranty details, or procedures** if found in context.  \n7. Add a **confidence note** (e.g., “✅ Confirmed from internal docs” or “⚠️ Not found in KB, escalation needed”).  \n\n---\n\n### Example Behavior\n\n**Input:**  \n> “What is the company’s return policy for electronics?”\n\n**Process:**  \nRetrieve context → summarize policy → respond clearly.\n\n**Output Example:**  \n> ✅ **Suggested Answer:**  \n> The company offers a 30-day return window for electronics, provided the product is unused and in original packaging.  \n> Returns can be initiated through the customer dashboard or by contacting support.  \n>  \n> _Source: Internal Warranty & Returns Policy (2024)_\n\n---\n\n### System Mindset\nThink of yourself as the “Brain” inside an automation system. n8n is the “Orchestrator” that triggers your logic — you provide verified knowledge to help human agents respond faster and smarter.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        -80
+      ],
+      "id": "2009416f-b273-4799-8415-a614de9fd2e1",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -224,
+        -80
+      ],
+      "id": "0f1dd74e-b6d2-4c51-9d65-ea6392c34cf5",
+      "name": "When chat message received",
+      "webhookId": "63cf16f5-2f08-4aad-bb9e-14f70ac1097b"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        128,
+        128
+      ],
+      "id": "7b060b3a-0e34-475f-92d0-ddeb6bcfe258",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "nHwi5TJMnbJsLg7O",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        256,
+        304
+      ],
+      "id": "e91870d8-429d-484f-ac5c-0aa4ec94c8db",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        128
+      ],
+      "id": "930107f6-dfca-4c59-bedc-ea4ef19143e3",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "n8N",
+          "mode": "list",
+          "cachedResultName": "n8N"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        672,
+        -80
+      ],
+      "id": "7626ab0e-630d-4114-9c53-e8cedeaa1c0b",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2OCQVeKtbdcL29b2",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        144
+      ],
+      "id": "f6947549-f4c6-42e1-82da-b5aa7f8e0b1f",
+      "name": "Default Data Loader1"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        704,
+        160
+      ],
+      "id": "df363185-6677-4b37-b73d-71e669f6ad05",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "In the Proactive Support Ticket Assistant, Supabase stores:\n\nEach customer question received from the Webhook.\n\nThe AI-generated answer from the RAG system.\n\nWhether the response came from verified sources or was escalated to a human agent.",
+        "tableName": {
+          "__rl": true,
+          "value": "n8N",
+          "mode": "list",
+          "cachedResultName": "n8N"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        336,
+        128
+      ],
+      "id": "882ef1b0-c64d-46f1-bbac-ffbbcc0ed5a6",
+      "name": "Supabase Vector Store2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2OCQVeKtbdcL29b2",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        992,
+        352
+      ],
+      "id": "d046cc9e-068b-403c-8596-83a147cfe8b7",
+      "name": "Recursive Character Text Splitter"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader1": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader1",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "ade8f445-997e-4757-8cdf-51e03bc415d4",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-22T08:38:26.732Z",
+      "createdAt": "2025-10-22T08:38:26.732Z",
+      "role": "workflow:owner",
+      "workflowId": "6ow9078kBKID4vb6",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
