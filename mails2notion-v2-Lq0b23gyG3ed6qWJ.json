@@ -1,0 +1,1133 @@
+{
+  "updatedAt": "2025-10-21T09:35:43.000Z",
+  "createdAt": "2025-10-21T09:35:43.515Z",
+  "id": "Lq0b23gyG3ed6qWJ",
+  "name": "mails2notion V2",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "responseFormat": "json_object",
+          "temperature": 0
+        }
+      },
+      "id": "d1f0d5f5-4a94-430a-8c71-a6558d1b96dc",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        496,
+        272
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "d2b36beb-2120-4872-a55b-c3db74c78914",
+      "name": "Calculator",
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "position": [
+        640,
+        272
+      ],
+      "typeVersion": 1,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n \"summary\": \"Text\",\n \"meta\": {\n \"sender\": \"Text\",\n \"subject\": \"Text\",\n \"date\": \"Text\"\n }\n}"
+      },
+      "id": "3760bdac-29ab-44b5-af36-683a8e1d6a14",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        768,
+        272
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": "={{ $('Globals').item.json.processedLabelID }}"
+      },
+      "id": "c8f36c79-73f9-4ac9-996b-639b0c97072b",
+      "name": "Add Label \"Processed\"",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1808,
+        64
+      ],
+      "typeVersion": 2.1,
+      "webhookId": "c67a6fa8-fde8-4dd9-acd5-94ba7f6ed872"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "02b11920-e737-46cc-b1b9-22ffaf7f3f64",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.Active }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0ffdccd5-bb9d-4127-b9bd-0909acb1b352",
+      "name": "Active Routes Only",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        -64,
+        64
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "acfaf63a-74de-4018-ae30-671f209878ba",
+              "name": "route",
+              "type": "string",
+              "value": "={{ $('Gmail Trigger').item.json.to.text.match(/\\+([^@]+)@/)[1] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "e4a817ee-608d-4e19-a10a-a50fffe3e39c",
+      "name": "Extract Route ID",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -512,
+        256
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "base": {
+          "__rl": true,
+          "mode": "list",
+          "value": "appuqZhHVVGAcMwoA",
+          "cachedResultUrl": "https://airtable.com/appuqZhHVVGAcMwoA",
+          "cachedResultName": "mails2notion"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "tblWL6FqfLkLHmLEo",
+          "cachedResultUrl": "https://airtable.com/appuqZhHVVGAcMwoA/tblWL6FqfLkLHmLEo",
+          "cachedResultName": "Routes"
+        },
+        "columns": {
+          "value": {
+            "id": "={{ $('Get Route by ID').item.json.id }}",
+            "Active": false
+          },
+          "schema": [
+            {
+              "id": "id",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "readOnly": true,
+              "required": false,
+              "displayName": "id",
+              "defaultMatch": true
+            },
+            {
+              "id": "Name",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "readOnly": false,
+              "required": false,
+              "displayName": "Name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Token",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "readOnly": false,
+              "required": false,
+              "displayName": "Token",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "NotionDatabase",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "readOnly": false,
+              "required": false,
+              "displayName": "NotionDatabase",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Email Alias",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "readOnly": true,
+              "required": false,
+              "displayName": "Email Alias",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "User",
+              "type": "array",
+              "display": true,
+              "removed": true,
+              "readOnly": false,
+              "required": false,
+              "displayName": "User",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Active",
+              "type": "boolean",
+              "display": true,
+              "removed": false,
+              "readOnly": false,
+              "required": false,
+              "displayName": "Active",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "type": "string",
+              "display": true,
+              "removed": true,
+              "readOnly": true,
+              "required": false,
+              "displayName": "Status",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "id"
+          ]
+        },
+        "options": {}
+      },
+      "id": "2d6e0365-d6b5-4ef2-bd36-4ab8b7ce2884",
+      "name": "Deactivate Route",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        1360,
+        256
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "operation": "addLabels",
+        "messageId": "={{ $('Gmail Trigger').item.json.id }}",
+        "labelIds": "={{ $('Globals').item.json.errorLabelID }}"
+      },
+      "id": "d5353626-2ea2-4169-9ed4-c503473d5b72",
+      "name": "Add Label \"Error\"",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1808,
+        256
+      ],
+      "typeVersion": 2.1,
+      "webhookId": "48032cac-7e57-4dba-9593-50dcfa115c3d"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Trigger').item.json.from.value[0].address }}",
+        "subject": "A route has been deactivated",
+        "emailType": "text",
+        "message": "=An error happened while trying to create a Notion Page. It can have various reasons, including a temporary outage of the Notion API, missing permissions to the Notion Database or a wrong Notion Database URL.\n\nThe route has been deaktivated to prevent future errors.\n\nPlease double check your configuration and enable the route again.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "e4e6cbf8-4adc-4b63-93a3-4e9cc14c8aa5",
+      "name": "Send notification about deactivated route",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1584,
+        256
+      ],
+      "typeVersion": 2.1,
+      "webhookId": "3a54b884-b91c-471c-9236-706bf070380d"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Gmail Trigger').item.json.from.value[0].address }}",
+        "subject": "Your Message could not be processed",
+        "emailType": "text",
+        "message": "=There seems to be no active route anymore which connects this Alias to a Notion Database.\n\nPlease try again later or double check your configuration.",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "id": "be34f556-05c4-4c5c-9c5b-e255721eb437",
+      "name": "Send notification about missing route",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1584,
+        464
+      ],
+      "typeVersion": 2.1,
+      "webhookId": "aa064d89-007c-4bb7-a89c-4d5d00f5b3b3"
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "mode": "list",
+          "value": "appuqZhHVVGAcMwoA",
+          "cachedResultUrl": "https://airtable.com/appuqZhHVVGAcMwoA",
+          "cachedResultName": "mails2notion"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "list",
+          "value": "tblWL6FqfLkLHmLEo",
+          "cachedResultUrl": "https://airtable.com/appuqZhHVVGAcMwoA/tblWL6FqfLkLHmLEo",
+          "cachedResultName": "Routes"
+        },
+        "id": "={{ $json.route }}",
+        "options": {}
+      },
+      "id": "8f71697d-d85e-4785-88f5-bae46fd9b29f",
+      "name": "Get Route by ID",
+      "type": "n8n-nodes-base.airtable",
+      "position": [
+        -288,
+        256
+      ],
+      "retryOnFail": true,
+      "typeVersion": 2.1,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.notion.com/v1/pages",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "REDACTED_HEADER_VALUE"
+            },
+            {
+              "name": "Notion-Version",
+              "value": "2022-06-28"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ $json.toJsonString() }}",
+        "options": {}
+      },
+      "id": "07064b3d-0671-4574-8e03-e44def4fad12",
+      "name": "Create Notion Page",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1136,
+        64
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.2,
+      "waitBetweenTries": 5000,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "labelIds": "=INBOX"
+        },
+        "options": {}
+      },
+      "id": "63a8e1e4-14bf-489e-9ec3-2f9bd114e752",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "position": [
+        -1168,
+        256
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "28879541-2e66-4a31-b25f-f0419ae45f47",
+              "operator": {
+                "type": "array",
+                "operation": "notContains",
+                "rightType": "any"
+              },
+              "leftValue": "={{ $('Gmail Trigger').item.json.labelIds }}",
+              "rightValue": "={{ $json.errorLabelID }}"
+            },
+            {
+              "id": "259a783f-5954-467b-ad52-c1e0072c2239",
+              "operator": {
+                "type": "array",
+                "operation": "notContains",
+                "rightType": "any"
+              },
+              "leftValue": "={{ $('Gmail Trigger').item.json.labelIds }}",
+              "rightValue": "={{ $json.processedLabelID }}"
+            },
+            {
+              "id": "81ef1ac2-449e-44c2-a94b-2fc9b08ec934",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $('Gmail Trigger').item.json.to.text.match(/\\+([^@]+)@/)[1] }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "22bfb106-47df-40a5-a130-c8b37af84890",
+      "name": "Filter for unprocessed mails",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        -720,
+        256
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {},
+      "id": "4caba05d-62a0-4021-b594-2147e0935026",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -1152,
+        640
+      ],
+      "typeVersion": 1,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "or",
+          "conditions": [
+            {
+              "id": "9bb51a86-76d3-42f7-8362-1931244f8cd9",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              },
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "Error"
+            },
+            {
+              "id": "28b3afb4-d727-4306-9e45-321c9bd688e3",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              },
+              "leftValue": "={{ $json.name }}",
+              "rightValue": "Processed"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "844b34d5-4b42-4c94-82b5-9ffedce3e046",
+      "name": "Required labels",
+      "type": "n8n-nodes-base.filter",
+      "position": [
+        -704,
+        640
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0dcfba61-ddb5-425d-a803-f88cf36d81d9",
+              "name": "errorLabelID",
+              "type": "string",
+              "value": "Label_4248329647975725750"
+            },
+            {
+              "id": "b1505eaa-1d7e-49d7-be2e-cd71f5ec2632",
+              "name": "processedLabelID",
+              "type": "string",
+              "value": "Label_6498950601707174088"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "953e0650-3c28-4f18-aa25-1e76514e0485",
+      "name": "Globals",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -944,
+        256
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "## Setup\n- Disable the Gmail Trigger and enable the manual trigger here\n- Execute the workflow once\n- Copy the Gmail Label IDs from the output of the \"Required labels\" node to the \"Globals\" node\n- Disable the manual trigger here and and enable the Gmail Trigger again\n- Activate the workflow, so it runs automatically in the background\n",
+        "height": 361.9189248985609,
+        "width": 742.4418604651174,
+        "color": 5
+      },
+      "id": "43d08836-5355-494f-8723-b9dd9534d6a6",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1232,
+        464
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Set Globals\nUse the setup instructions below to retrieve the values for both `errorLabelID` and `processedLabelID`",
+        "height": 323.99999999999943,
+        "width": 215.20930232558143
+      },
+      "id": "473529b8-4a0d-44c0-a2d0-39fd2756e335",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1008,
+        96
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Select Base\nSelect the database and the table where the \"Routes\" are defined",
+        "height": 324.4244486294891,
+        "width": 215.49263552738452
+      },
+      "id": "0e20682f-5b6c-42ae-8dca-ca4b054f5e8a",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -352,
+        96
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "The Gmail inbox is checked every minute for new entries",
+        "height": 245.005504426549,
+        "width": 216.47293010628914,
+        "color": 7
+      },
+      "id": "15765920-fa96-4ed4-a3a4-16c9d6c6cf8d",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1232,
+        176
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Extract the Airtable Row ID from the Email address",
+        "height": 245.005504426549,
+        "width": 216.47293010628914,
+        "color": 7
+      },
+      "id": "1129d2b2-21c4-4499-8178-9edc0d9030cc",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -560,
+        176
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Filter by labels to prohibit double-processing",
+        "height": 245.005504426549,
+        "width": 216.47293010628914,
+        "color": 7
+      },
+      "id": "8d54c304-abad-4b64-9317-d4e575167f1e",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -784,
+        176
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Dynamically build request body for Notion, since dynamic auth, and content with optional fields require a custom request",
+        "height": 305.2192252594149,
+        "width": 216.47293010628914,
+        "color": 7
+      },
+      "id": "096a00f5-9096-47b8-8ae2-c85adbb7a207",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        864,
+        -96
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "The custom built request including the user specific authentication is sent to Notion to create a new Page inside of a database",
+        "height": 304.5973623748489,
+        "width": 216.47293010628914,
+        "color": 7
+      },
+      "id": "a525a2b9-5ba3-4719-8781-e5d4b6c2ef3e",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1088,
+        -96
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "The Email is processed in multiple ways:\n- An actionable task is being generated based on the content, consisting of a short title, a short description and optionally a few details as bullet points\n- A detailed Email summary is being generated\n- Meta data is being extracted - so the user has a reference to find the original Email again\n- To get more stable results, the tasks are devided between two Agents",
+        "height": 529.1698390841688,
+        "width": 755.8332895195936,
+        "color": 7
+      },
+      "id": "859234a6-094b-4800-a26a-3e9fa1388040",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        96,
+        -128
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Skip disabled routes (determined by a checkbox attribute in Airtable)",
+        "height": 249.09934448053562,
+        "width": 216.47293010628914,
+        "color": 7
+      },
+      "id": "c52a4546-813e-476f-8aff-649f5293cac3",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -128,
+        -48
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "c75f6bab-09d9-4276-9fe3-d810a5210a1c",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        -64,
+        464
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Send custom Email notifications back to sender, containing an error message and suggestions to fix it",
+        "height": 503.00412949500975,
+        "width": 216.47293010628914,
+        "color": 7
+      },
+      "id": "3a5f7fb7-3011-4c43-be58-ea4632e3d35b",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1520,
+        144
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Add labels which prevent from double-processing",
+        "height": 446.3164817463921,
+        "width": 216.47293010628914,
+        "color": 7
+      },
+      "id": "40fa08d4-584e-444f-97cf-536b7281c466",
+      "name": "Sticky Note11",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1744,
+        -32
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Disable a checkbox attribute in Airtable which determines if a route is active",
+        "height": 261.3816681594028,
+        "width": 216.47293010628914,
+        "color": 7
+      },
+      "id": "25a8880e-5047-4e1e-be77-bf0bf7a86d3b",
+      "name": "Sticky Note12",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1296,
+        160
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "function paragraph(content, annotations={}) {\n return {\n \"object\": \"block\",\n \"type\": \"paragraph\",\n \"paragraph\": {\n \"rich_text\": [\n {\n \"type\": \"text\",\n \"text\": {\n \"content\": content\n },\n \"annotations\": annotations\n }\n ]\n }\n };\n}\nfunction bulletPoint(content) {\n return {\n \"object\": \"block\",\n \"type\": \"bulleted_list_item\",\n \"bulleted_list_item\": {\n \"rich_text\": [\n {\n \"type\": \"text\",\n \"text\": {\n \"content\": content\n }\n }\n ]\n }\n };\n}\n\n// combine AI generated content\nconst content = Object.assign({}, $('Generate Actionable Task').item.json.output, $('Get Summary & Meta Data').item.json.output);\n\nblocks = [];\n\n// append task description\nblocks.push(paragraph(content.description));\n\nif (content.bulletpoints) {\n for (let bulletpoint of content.bulletpoints) {\n blocks.push(bulletPoint(bulletpoint));\n }\n}\n\n// append empty line\nblocks.push(paragraph(\"\"));\n\n// append devider\nblocks.push({\n \"object\": \"block\",\n \"type\": \"divider\",\n \"divider\": {}\n});\n\n// append summary & meta data\nblocks.push(paragraph(\"Email summary:\"));\nblocks.push(paragraph(content.summary));\nblocks.push(paragraph(\"\"));\nblocks.push(paragraph(content.meta.sender + \"\\n\" + content.meta.subject + \"\\n\" + content.meta.date, {\"italic\": true}));\n\n// build final object\noutput = {\n \"parent\": {\n \"database_id\": $('Get Route by ID').item.json.NotionDatabase.match(/https:\\/\\/www\\.notion\\.so\\/[a-zA-Z0-9-]+\\/([a-zA-Z0-9]{32})/)[1]\n },\n \"properties\": {\n \"Name\": {\n \"title\": [\n {\n \"text\": {\n \"content\": content.title\n }\n }\n ]\n }\n },\n \"children\": blocks\n};\n\nreturn { json: output };"
+      },
+      "id": "748bb23a-6a6c-43cc-a1d1-261287213fcb",
+      "name": "Format Notion Page Blocks",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        928,
+        64
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "resource": "label",
+        "returnAll": true
+      },
+      "id": "fb9ad9ea-8724-4d31-8f2b-1264478bb6a2",
+      "name": "Get all labels",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        -928,
+        640
+      ],
+      "typeVersion": 2.1,
+      "webhookId": "bd85cf74-10ca-4e8d-864b-f6f17df3a45e"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n \"title\": \"Title\",\n \"description\": \"Text\",\n \"bulletpoints\": [\n \"Text\",\n \"Text\"\n ]\n}"
+      },
+      "id": "05ea93d0-cbee-49b4-89ff-ca283cbb506e",
+      "name": "Structured Output Parser1",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        384,
+        272
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {},
+      "id": "6a59e8c8-b109-412d-b436-59c7026f4587",
+      "name": "Calculator1",
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "position": [
+        256,
+        272
+      ],
+      "typeVersion": 1,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "model": "gpt-4o",
+        "options": {
+          "responseFormat": "json_object",
+          "temperature": 0
+        }
+      },
+      "id": "b50f41d6-68d6-4090-a166-325f59dbfcea",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        128,
+        272
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Gmail Trigger').item.json.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Your task is to understand the Email content and extract one actionable task. If there is no obvious actionable task, then just create a title which implies to take a look at this Email by addressing the content summarized to 5 words. The title should be quite decided. This attribute is called title.\n\nCreate a proper description for the task. Be precise but detailed. Start with a short sentence and if it is worth adding more information, add bulletpoints after that containing additional information which help to understand the context of the task better, like links and other references, or just more detailed instructions. Add the description to the output as attribute output. Add the bulletpoints to the output as attribute output, but remember, bullet points are optional.\n\nReturn all attributes in a JSON format."
+        }
+      },
+      "id": "b958d037-e960-4b98-92ac-1237b9e931d2",
+      "name": "Generate Actionable Task",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        160,
+        64
+      ],
+      "typeVersion": 1.6
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Gmail Trigger').item.json.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "Summarize the email (as much detail as possible) and add it to the output as the attribute summary.\n\nExtract the email sender, subject and date of receipt. If this is a forwarded email, then get this data from the original message, otherwise use the meta data of this Email. Format the Email Adress as follows, and add it to the JSON output as the attribute meta.sender: \"From: Full Name <mail@example.com\". Format the the subject as follows and add it to the output as attribute meta.subject: \"Subject: SubjectGoesHere\". Format the the date as follows and add it to the output as attribute meta.date: \"Date: DateStringGoesHere\" (Date format: RFC 2822).\n\nReturn all attributes in a JSON format."
+        }
+      },
+      "id": "29322a5e-648c-4b29-a20f-7f64d772f86f",
+      "name": "Get Summary & Meta Data",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        544,
+        64
+      ],
+      "typeVersion": 1.6
+    }
+  ],
+  "connections": {
+    "Globals": {
+      "main": [
+        [
+          {
+            "node": "Filter for unprocessed mails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "Get Summary & Meta Data",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Generate Actionable Task",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Globals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all labels": {
+      "main": [
+        [
+          {
+            "node": "Required labels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Route by ID": {
+      "main": [
+        [
+          {
+            "node": "Active Routes Only",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Deactivate Route": {
+      "main": [
+        [
+          {
+            "node": "Send notification about deactivated route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Route ID": {
+      "main": [
+        [
+          {
+            "node": "Get Route by ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Get Summary & Meta Data",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Active Routes Only": {
+      "main": [
+        [
+          {
+            "node": "Generate Actionable Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Notion Page": {
+      "main": [
+        [
+          {
+            "node": "Add Label \"Processed\"",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Deactivate Route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Actionable Task",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Summary & Meta Data": {
+      "main": [
+        [
+          {
+            "node": "Format Notion Page Blocks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Actionable Task": {
+      "main": [
+        [
+          {
+            "node": "Get Summary & Meta Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "No Operation, do nothing": {
+      "main": [
+        [
+          {
+            "node": "Send notification about missing route",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Get Summary & Meta Data",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Notion Page Blocks": {
+      "main": [
+        [
+          {
+            "node": "Create Notion Page",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Generate Actionable Task",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter for unprocessed mails": {
+      "main": [
+        [
+          {
+            "node": "Extract Route ID",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get all labels",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send notification about missing route": {
+      "main": [
+        [
+          {
+            "node": "Add Label \"Error\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send notification about deactivated route": {
+      "main": [
+        [
+          {
+            "node": "Add Label \"Error\"",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "58de4d20-94f5-4e84-96af-b8df462b1537",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-21T09:35:43.545Z",
+      "createdAt": "2025-10-21T09:35:43.545Z",
+      "role": "workflow:owner",
+      "workflowId": "Lq0b23gyG3ed6qWJ",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
