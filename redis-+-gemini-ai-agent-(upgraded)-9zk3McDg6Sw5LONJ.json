@@ -1,0 +1,345 @@
+{
+  "updatedAt": "2025-11-10T13:30:37.000Z",
+  "createdAt": "2025-11-10T11:48:31.161Z",
+  "id": "9zk3McDg6Sw5LONJ",
+  "name": "Redis + Gemini AI Agent (Upgraded)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "redis",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "72525bd6-063c-4508-b70b-7243c6d1ce55",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        -848,
+        80
+      ],
+      "webhookId": "generated-webhook-id"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $json.body.userId }}",
+        "options": {}
+      },
+      "id": "db140f03-b2ea-4ba2-9d7f-7651270df64f",
+      "name": "Get Session",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        -608,
+        80
+      ],
+      "credentials": {
+        "redis": {
+          "id": "xuIhZM4B9ekzet7a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "cond1",
+              "leftValue": "={{ !!$json.data }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "isTrue"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "c109dd59-c8ae-4c8e-a6b4-a5e048c88322",
+      "name": "If session exist?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -384,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Safe init session\nconst userId = $('Webhook').first().json.body.userId;\nreturn [{ json: { userId: userId, step: 1, history: [] } }];"
+      },
+      "id": "c451c143-99a7-4ec0-9f68-3637cbcf23da",
+      "name": "Initialize Session (if not exist)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        -48
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Safely merge Redis session (if any) with incoming message\nconst userId = $('Webhook').first().json.body.userId;\nconst message = $('Webhook').first().json.body.message || '';\nconst redisRaw = $('Get Session').first() ? $('Get Session').first().json.data : null;\nlet session;\nif (redisRaw && redisRaw !== 'null') {\n  try {\n    session = JSON.parse(redisRaw);\n  } catch (e) {\n    session = { userId, step: 1, history: [] };\n  }\n} else {\n  session = { userId, step: 1, history: [] };\n}\n// add new user message\nsession.history = session.history || [];\nsession.history.push({ role: 'user', text: message, ts: new Date().toISOString() });\nsession.step = (session.step || 1) + 1;\nreturn [{ json: session }];"
+      },
+      "id": "5a71157d-101f-4935-b843-aa32c9e9d746",
+      "name": "Update Session (add new message)",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -128,
+        192
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Very small keyword-based intent detection. Expand as needed.\nconst session = $json;\nconst last = session.history && session.history.length ? session.history[session.history.length - 1].text.toLowerCase() : '';\nlet intent = 'general';\nif (/help|support|problem|issue/.test(last)) intent = 'support';\nelse if (/buy|price|cost|pricing|plan/.test(last)) intent = 'sales';\nelse if (/hello|hi|hey|greetings/.test(last)) intent = 'greeting';\nreturn [{ json: { ...session, intent } }];"
+      },
+      "id": "a9cde4e1-ba47-4053-b073-f8951dcfa961",
+      "name": "Intent Detection",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        96,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Load session safely\nlet session = items[0].json || {};\n\n// 2. Fix missing session data\nif (!session.userId) {\n  session = {\n    userId: $('Webhook').first().json.body.userId,\n    step: 1,\n    history: []\n  };\n}\n\n// 3. Ensure history exists\nif (!Array.isArray(session.history)) {\n  session.history = [];\n}\n\n// 4. Directly get AI response text safely\nlet aiText = '';\nif ($input.first().json.content && Array.isArray($input.first().json.content.parts)) {\n  aiText = $input.first().json.content.parts.map(p => p.text || '').join(' ');\n}\n\n// 5. Remove wrapping quotes if they exist\nif (aiText.startsWith('\"') && aiText.endsWith('\"')) {\n  aiText = aiText.slice(1, -1);\n}\n\n// 6. Push into session\nsession.history.push({\n  role: 'assistant',\n  text: aiText,\n  ts: new Date().toISOString()\n});\n\nsession.last_ai = aiText;\nsession.step = (session.step || 1) + 1;\n\nreturn [{ json: session }];\n"
+      },
+      "id": "26a04248-3431-4217-a4a5-e0e4558772ac",
+      "name": "Apply AI Response",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ $json.userId }}",
+        "value": "={{ JSON.stringify($json) }}"
+      },
+      "id": "23e050e2-b823-4991-a620-32832e4eb9c7",
+      "name": "Save Session",
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        832,
+        80
+      ],
+      "credentials": {
+        "redis": {
+          "id": "xuIhZM4B9ekzet7a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"message\": {{$json.last_ai ? JSON.stringify($json.last_ai) : '\"\"'}},\n  \"step\": {{$json.step}},\n  \"history_count\": {{$json.history.length}}\n}\n",
+        "options": {}
+      },
+      "id": "5b429526-0a2c-48ac-b1de-71a17d5f90a6",
+      "name": "Respond to User",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        304,
+        80
+      ],
+      "id": "cf17e128-322e-4870-a269-71a05916327d",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Session": {
+      "main": [
+        [
+          {
+            "node": "If session exist?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If session exist?": {
+      "main": [
+        [
+          {
+            "node": "Initialize Session (if not exist)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Session (add new message)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Session (add new message)": {
+      "main": [
+        [
+          {
+            "node": "Intent Detection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize Session (if not exist)": {
+      "main": [
+        [
+          {
+            "node": "Intent Detection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Intent Detection": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Apply AI Response": {
+      "main": [
+        [
+          {
+            "node": "Save Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Session": {
+      "main": [
+        [
+          {
+            "node": "Respond to User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Apply AI Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "content-type": "application/json",
+            "user-agent": "PostmanRuntime/7.49.1",
+            "accept": "*/*",
+            "postman-token": "REDACTED_POSTMAN-TOKEN",
+            "host": "localhost:5678",
+            "accept-encoding": "gzip, deflate, br",
+            "connection": "keep-alive",
+            "content-length": "46"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "userId": "12345",
+            "message": "Hello"
+          },
+          "webhookUrl": "http://localhost:5678/webhook-test/redis",
+          "executionMode": "test"
+        }
+      }
+    ]
+  },
+  "versionId": "2140401f-5202-4b87-9822-90484c06b186",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-11-10T11:48:31.323Z",
+      "createdAt": "2025-11-10T11:48:31.323Z",
+      "role": "workflow:owner",
+      "workflowId": "9zk3McDg6Sw5LONJ",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
