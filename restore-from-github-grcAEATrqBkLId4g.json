@@ -1,0 +1,492 @@
+{
+  "updatedAt": "2025-10-28T11:19:58.000Z",
+  "createdAt": "2025-10-16T11:33:32.771Z",
+  "id": "grcAEATrqBkLId4g",
+  "name": "Restore from GitHub",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "f992f0d7-c845-4599-956f-464ac46a79aa",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -1072,
+        448
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6cf546c5-5737-4dbd-851b-17d68e0a3780",
+              "name": "repo.owner",
+              "type": "string",
+              "value": "abde0112"
+            },
+            {
+              "id": "452efa28-2dc6-4ea3-a7a2-c35d100d0382",
+              "name": "repo.name",
+              "type": "string",
+              "value": "N8N_BK"
+            },
+            {
+              "id": "81c4dc54-86bf-4432-a23f-22c7ea831e74",
+              "name": "repo.path",
+              "type": "string",
+              "value": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "47f03910-ae38-4c4d-9ecf-44bfa2a3f972",
+      "name": "Globals",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -800,
+        448
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "url": "=https://api.github.com/repos/{{ $json.repo.owner }}/{{ $json.repo.name }}/contents/{{ $json.repo.path }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "githubApi",
+        "options": {}
+      },
+      "id": "4dde9f53-39e5-4ca2-a45c-5fbc896b0aff",
+      "name": "Get all files in given path",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -368,
+        448
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "githubApi": {
+          "id": "unrhzMcm2q1h59BS",
+          "name": "GitHub account 3"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "path",
+        "options": {}
+      },
+      "id": "d304ee55-931d-4f7c-9d25-f9fc2155f2c2",
+      "name": "Split the result",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        -160,
+        448
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "workflowObject": "{\n\"createdAt\": \n\"2025-09-16T10:41:50.794Z\",\n\"updatedAt\": \n\"2025-09-17T11:18:38.000Z\",\n\"id\": \n\"XRxfBhKfbvSIQXyF\",\n\"name\": \n\"AI E-commerce Orchestrator\",\n\"active\": \nfalse,\n\"isArchived\": \nfalse,\n\"nodes\": \n[\n{\n\"parameters\": \n{...}, // 1 items\n\"type\": \n\"n8n-nodes-base.scheduleTrigger\",\n\"typeVersion\": \n1.2,\n\"position\": \n[...], // 2 items\n\"id\": \n\"3f07e13a-f53f-4700-8a25-ef9faf447400\",\n\"name\": \n\"Schedule Trigger\"\n},\n{\n\"parameters\": \n{...}, // 2 items\n\"type\": \n\"n8n-nodes-base.set\",\n\"typeVersion\": \n3.4,\n\"position\": \n[...], // 2 items\n\"id\": \n\"4cf8cb83-5d4e-466c-b206-32df368de9d4\",\n\"name\": \n\"Edit Fields\"\n},\n{\n\"parameters\": \n{...}, // 3 items\n\"type\": \n\"@n8n/n8n-nodes-langchain.agent\",\n\"typeVersion\": \n2.2,\n\"position\": \n[...], // 2 items\n\"id\": \n\"e22c2a97-5c5b-4315-ba38-cf6134dcbe38\",\n\"name\": \n\"AI Agent\"\n},\n{\n\"parameters\": \n{...}, // 0 items\n\"type\": \n\"n8n-nodes-base.manualTrigger\",\n\"typeVersion\": \n1,\n\"position\": \n[...], // 2 items\n\"id\": \n\"6f45546e-ce32-4487-9ea0-ac4da9522a16\",\n\"name\": \n\"When clicking ‘Execute workflow’\"\n},\n{\n\"parameters\": \n{...}, // 2 items\n\"type\": \n\"n8n-nodes-base.httpRequest\",\n\"typeVersion\": \n4.2,\n\"position\": \n[...], // 2 items\n\"id\": \n\"ebb628ea-11a1-422a-bc59-0a3c7e5aa732\",\n\"name\": \n\"HTTP Request\"\n},\n{\n\"parameters\": \n{...}, // 2 items\n\"type\": \n\"n8n-nodes-base.splitInBatches\",\n\"typeVersion\": \n3,\n\"position\": \n[...], // 2 items\n\"id\": \n\"dc5f1f84-bc60-4454-a016-8f1de5be11aa\",\n\"name\": \n\"Loop Over Items\"\n},\n{\n\"parameters\": \n{...}, // 5 items\n\"type\": \n\"n8n-nodes-base.googleSheets\",\n\"typeVersion\": \n4.7,\n\"position\": \n[...], // 2 items\n\"id\": \n\"5686965e-8608-4dd7-ae28-2d38f5ed343a\",\n\"name\": \n\"Append or update row in sheet\",\n\"credentials\": \n{...} // 1 items\n},\n{\n\"parameters\": \n{...}, // 1 items\n\"type\": \n\"@n8n/n8n-nodes-langchain.lmChatGoogleGemini\",\n\"typeVersion\": \n1,\n\"position\": \n[...], // 2 items\n\"id\": \n\"017ed399-670a-4aca-bb73-332993670d5a\",\n\"name\": \n\"Google Gemini Chat Model1\",\n\"credentials\": \n{...} // 1 items\n},\n{\n\"parameters\": \n{...}, // 2 items\n\"type\": \n\"n8n-nodes-base.aggregate\",\n\"typeVersion\": \n1,\n\"position\": \n[...], // 2 items\n\"id\": \n\"d1ce8a3a-6713-4ab1-9247-5a939bdd8e53\",\n\"name\": \n\"Aggregate\"\n},\n{\n\"parameters\": \n{...}, // 1 items\n\"type\": \n\"n8n-nodes-base.code\",\n\"typeVersion\": \n2,\n\"position\": \n[...], // 2 items\n\"id\": \n\"1e436c9c-e3be-42ac-97ec-7e0f4c769ea8\",\n\"name\": \n\"Code2\"\n},\n{\n\"parameters\": \n{...}, // 3 items\n\"type\": \n\"n8n-nodes-base.merge\",\n\"typeVersion\": \n3.2,\n\"position\": \n[...], // 2 items\n\"id\": \n\"43b10ccc-d712-43cf-8836-a5c45be49d02\",\n\"name\": \n\"Merge\"\n},\n{\n\"parameters\": \n{...}, // 2 items\n\"type\": \n\"n8n-nodes-base.set\",\n\"typeVersion\": \n3.4,\n\"position\": \n[...], // 2 items\n\"id\": \n\"4eb4e374-7d5b-4569-8580-6a691c3f30ad\",\n\"name\": \n\"Edit Fields1\"\n}\n],\n\"connections\": \n{\n\"Schedule Trigger\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Edit Fields\": \n{\n\"main\": \n[...] // 1 items\n},\n\"When clicking ‘Execute workflow’\": \n{\n\"main\": \n[...] // 1 items\n},\n\"HTTP Request\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Loop Over Items\": \n{\n\"main\": \n[...] // 2 items\n},\n\"Google Gemini Chat Model1\": \n{\n\"ai_languageModel\": \n[...] // 1 items\n},\n\"AI Agent\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Aggregate\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Code2\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Merge\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Edit Fields1\": \n{\n\"main\": \n[...] // 1 items\n}\n},\n\"settings\": \n{\n\"executionOrder\": \n\"v1\"\n},\n\"staticData\": \nnull,\n\"meta\": \n{\n\"templateCredsSetupCompleted\": \ntrue\n},\n\"pinData\": \n{\n\"AI Agent\": \n[\n{...}, // 1 items\n{...}, // 1 items\n{...}, // 1 items\n{...}, // 1 items\n{...} // 1 items\n]\n},\n\"versionId\": \n\"f1871e3c-ed95-4497-8676-effce3e254fd\",\n\"triggerCount\": \n0,\n\"shared\": \n[\n{\n\"createdAt\": \n\"2025-09-16T10:41:50.816Z\",\n\"updatedAt\": \n\"2025-09-16T10:41:50.816Z\",\n\"role\": \n\"workflow:owner\",\n\"workflowId\": \n\"XRxfBhKfbvSIQXyF\",\n\"projectId\": \n\"HHopAZ4lOFgjhBzT\"\n}\n],\n\"tags\": \n[\n]\n}",
+        "requestOptions": {}
+      },
+      "id": "edb52c4e-c4a5-4c03-ba9e-c3e5ba46b749",
+      "name": "Restore n8n Credentials",
+      "type": "n8n-nodes-base.n8n",
+      "position": [
+        1616,
+        560
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "n8nApi": {
+          "id": "4IZ7MZtCK6ujpM1o",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "or",
+          "conditions": [
+            {
+              "id": "ad031296-4ac0-4087-bc35-7975a2cc25e6",
+              "operator": {
+                "type": "object",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.data }}",
+              "rightValue": ""
+            },
+            {
+              "id": "ca912a57-6a4b-4b9a-be0e-37b69d3e4917",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              },
+              "leftValue": "={{ $json.data.name }}",
+              "rightValue": "n8n account"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b3153164-2355-4424-a208-cc1de7e3c7f1",
+      "name": "Check for skipped Credentials",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1280,
+        448
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "list",
+        "owner": {
+          "__rl": true,
+          "value": "https://github.com/abde0112/N8N_BK.git",
+          "mode": "url"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "N8N_BK",
+          "mode": "list",
+          "cachedResultName": "N8N_BK",
+          "cachedResultUrl": "https://github.com/abde0112/N8N_BK"
+        },
+        "filePath": "={{ $json.repo.path }}"
+      },
+      "id": "51a9d951-d0c1-4390-8cc9-1ec9053f274d",
+      "name": "List files from repository [GITHUB]",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        448
+      ],
+      "alwaysOutputData": true,
+      "webhookId": "ca56f9b2-15af-4829-a784-05c3325f70eb",
+      "credentials": {
+        "githubApi": {
+          "id": "unrhzMcm2q1h59BS",
+          "name": "GitHub account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "workflowObject": "",
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-base.n8n",
+      "typeVersion": 1,
+      "position": [
+        1648,
+        320
+      ],
+      "id": "7b522119-11ff-4283-995b-ba6090cc2e6b",
+      "name": "Create a workflow",
+      "credentials": {
+        "n8nApi": {
+          "id": "4IZ7MZtCK6ujpM1o",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "workflowObject": "={\n\"createdAt\": \n\"2025-09-16T10:41:50.794Z\",\n\"updatedAt\": \n\"2025-09-17T11:18:38.000Z\",\n\"id\": \n\"XRxfBhKfbvSIQXyF\",\n\"name\": \n\"AI E-commerce Orchestrator\",\n\"active\": \nfalse,\n\"isArchived\": \nfalse,\n\"nodes\": \n[\n{\n\"parameters\": \n{...}, // 1 items\n\"type\": \n\"n8n-nodes-base.scheduleTrigger\",\n\"typeVersion\": \n1.2,\n\"position\": \n[...], // 2 items\n\"id\": \n\"3f07e13a-f53f-4700-8a25-ef9faf447400\",\n\"name\": \n\"Schedule Trigger\"\n},\n{\n\"parameters\": \n{...}, // 2 items\n\"type\": \n\"n8n-nodes-base.set\",\n\"typeVersion\": \n3.4,\n\"position\": \n[...], // 2 items\n\"id\": \n\"4cf8cb83-5d4e-466c-b206-32df368de9d4\",\n\"name\": \n\"Edit Fields\"\n},\n{\n\"parameters\": \n{...}, // 3 items\n\"type\": \n\"@n8n/n8n-nodes-langchain.agent\",\n\"typeVersion\": \n2.2,\n\"position\": \n[...], // 2 items\n\"id\": \n\"e22c2a97-5c5b-4315-ba38-cf6134dcbe38\",\n\"name\": \n\"AI Agent\"\n},\n{\n\"parameters\": \n{...}, // 0 items\n\"type\": \n\"n8n-nodes-base.manualTrigger\",\n\"typeVersion\": \n1,\n\"position\": \n[...], // 2 items\n\"id\": \n\"6f45546e-ce32-4487-9ea0-ac4da9522a16\",\n\"name\": \n\"When clicking ‘Execute workflow’\"\n},\n{\n\"parameters\": \n{...}, // 2 items\n\"type\": \n\"n8n-nodes-base.httpRequest\",\n\"typeVersion\": \n4.2,\n\"position\": \n[...], // 2 items\n\"id\": \n\"ebb628ea-11a1-422a-bc59-0a3c7e5aa732\",\n\"name\": \n\"HTTP Request\"\n},\n{\n\"parameters\": \n{...}, // 2 items\n\"type\": \n\"n8n-nodes-base.splitInBatches\",\n\"typeVersion\": \n3,\n\"position\": \n[...], // 2 items\n\"id\": \n\"dc5f1f84-bc60-4454-a016-8f1de5be11aa\",\n\"name\": \n\"Loop Over Items\"\n},\n{\n\"parameters\": \n{...}, // 5 items\n\"type\": \n\"n8n-nodes-base.googleSheets\",\n\"typeVersion\": \n4.7,\n\"position\": \n[...], // 2 items\n\"id\": \n\"5686965e-8608-4dd7-ae28-2d38f5ed343a\",\n\"name\": \n\"Append or update row in sheet\",\n\"credentials\": \n{...} // 1 items\n},\n{\n\"parameters\": \n{...}, // 1 items\n\"type\": \n\"@n8n/n8n-nodes-langchain.lmChatGoogleGemini\",\n\"typeVersion\": \n1,\n\"position\": \n[...], // 2 items\n\"id\": \n\"017ed399-670a-4aca-bb73-332993670d5a\",\n\"name\": \n\"Google Gemini Chat Model1\",\n\"credentials\": \n{...} // 1 items\n},\n{\n\"parameters\": \n{...}, // 2 items\n\"type\": \n\"n8n-nodes-base.aggregate\",\n\"typeVersion\": \n1,\n\"position\": \n[...], // 2 items\n\"id\": \n\"d1ce8a3a-6713-4ab1-9247-5a939bdd8e53\",\n\"name\": \n\"Aggregate\"\n},\n{\n\"parameters\": \n{...}, // 1 items\n\"type\": \n\"n8n-nodes-base.code\",\n\"typeVersion\": \n2,\n\"position\": \n[...], // 2 items\n\"id\": \n\"1e436c9c-e3be-42ac-97ec-7e0f4c769ea8\",\n\"name\": \n\"Code2\"\n},\n{\n\"parameters\": \n{...}, // 3 items\n\"type\": \n\"n8n-nodes-base.merge\",\n\"typeVersion\": \n3.2,\n\"position\": \n[...], // 2 items\n\"id\": \n\"43b10ccc-d712-43cf-8836-a5c45be49d02\",\n\"name\": \n\"Merge\"\n},\n{\n\"parameters\": \n{...}, // 2 items\n\"type\": \n\"n8n-nodes-base.set\",\n\"typeVersion\": \n3.4,\n\"position\": \n[...], // 2 items\n\"id\": \n\"4eb4e374-7d5b-4569-8580-6a691c3f30ad\",\n\"name\": \n\"Edit Fields1\"\n}\n],\n\"connections\": \n{\n\"Schedule Trigger\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Edit Fields\": \n{\n\"main\": \n[...] // 1 items\n},\n\"When clicking ‘Execute workflow’\": \n{\n\"main\": \n[...] // 1 items\n},\n\"HTTP Request\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Loop Over Items\": \n{\n\"main\": \n[...] // 2 items\n},\n\"Google Gemini Chat Model1\": \n{\n\"ai_languageModel\": \n[...] // 1 items\n},\n\"AI Agent\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Aggregate\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Code2\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Merge\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Edit Fields1\": \n{\n\"main\": \n[...] // 1 items\n}\n},\n\"settings\": \n{\n\"executionOrder\": \n\"v1\"\n},\n\"staticData\": \nnull,\n\"meta\": \n{\n\"templateCredsSetupCompleted\": \ntrue\n},\n\"pinData\": \n{\n\"AI Agent\": \n[\n{...}, // 1 items\n{...}, // 1 items\n{...}, // 1 items\n{...}, // 1 items\n{...} // 1 items\n]\n},\n\"versionId\": \n\"f1871e3c-ed95-4497-8676-effce3e254fd\",\n\"triggerCount\": \n0,\n\"shared\": \n[\n{\n\"createdAt\": \n\"2025-09-16T10:41:50.816Z\",\n\"updatedAt\": \n\"2025-09-16T10:41:50.816Z\",\n\"role\": \n\"workflow:owner\",\n\"workflowId\": \n\"XRxfBhKfbvSIQXyF\",\n\"projectId\": \n\"HHopAZ4lOFgjhBzT\"\n}\n],\n\"tags\": \n[\n]\n}",
+        "requestOptions": {}
+      },
+      "id": "04a092d9-a1d8-41d3-bbde-3aa94a928123",
+      "name": "Restore n8n Credentials1",
+      "type": "n8n-nodes-base.n8n",
+      "position": [
+        1440,
+        192
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "n8nApi": {
+          "id": "4IZ7MZtCK6ujpM1o",
+          "name": "n8n account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "\nif (!$binary || !$binary.data || !$binary.data.data) {\n    return [\n        { json: $json } // pass the item along without changes\n    ];\n}\n\n\n// Convert binary Buffer to string\nconst fileContent = $binary.data.data.toString('utf8');\n\n// Parse JSON safely\nlet parsedContent;\ntry {\n    parsedContent = JSON.parse(fileContent);\n} catch (err) {\n    throw new Error('File is not valid JSON: ' + err.message);\n}\n\n// Return parsed JSON\nreturn [\n    { json: parsedContent }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        528,
+        448
+      ],
+      "id": "80094ea4-fede-4cce-bf19-421d5568c2de",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "operation": "get",
+        "owner": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://github.com/abde0112/N8N_BK.git",
+          "__regex": "https:\\/\\/(?:[^/]+)\\/([-_0-9a-zA-Z]+)"
+        },
+        "repository": {
+          "__rl": true,
+          "value": "N8N_BK",
+          "mode": "list",
+          "cachedResultName": "N8N_BK",
+          "cachedResultUrl": "https://github.com/abde0112/N8N_BK"
+        },
+        "filePath": "=ai-e-commerce-orchestrator-XRxfBhKfbvSIQXyF.json",
+        "additionalParameters": {}
+      },
+      "id": "a95f4225-aee3-43f7-b762-c763784267a1",
+      "name": "GITHUB",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [
+        320,
+        448
+      ],
+      "alwaysOutputData": true,
+      "webhookId": "ca56f9b2-15af-4829-a784-05c3325f70eb",
+      "credentials": {
+        "githubApi": {
+          "id": "unrhzMcm2q1h59BS",
+          "name": "GitHub account 3"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        48,
+        448
+      ],
+      "id": "0c7ea078-e768-4691-9751-a35143840fc5",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "text": "={{ $json.path }}",
+        "schemaType": "fromJson",
+        "jsonSchemaExample": "{\n\"createdAt\": \n\"2025-09-16T10:41:50.794Z\",\n\"updatedAt\": \n\"2025-09-17T11:18:38.000Z\",\n\"id\": \n\"XRxfBhKfbvSIQXyF\",\n\"name\": \n\"AI E-commerce Orchestrator\",\n\"active\": \nfalse,\n\"isArchived\": \nfalse,\n\"nodes\": \n[\n{\n\"parameters\": ,\n \n\"type\": \n\"n8n-nodes-base.scheduleTrigger\",\n\"typeVersion\": \n1.2,\n\"position\": \n[...], // 2 items\n\"id\": \n\"3f07e13a-f53f-4700-8a25-ef9faf447400\",\n\"name\": \n\"Schedule Trigger\"\n},\n{\n\"parameters\": \n{...}, // 2 items\n\"type\": \n\"n8n-nodes-base.set\",\n\"typeVersion\": \n3.4,\n\"position\": \n[...], // 2 items\n\"id\": \n\"4cf8cb83-5d4e-466c-b206-32df368de9d4\",\n\"name\": \n\"Edit Fields\"\n},\n{\n\"parameters\": \n{...}, // 3 items\n\"type\": \n\"@n8n/n8n-nodes-langchain.agent\",\n\"typeVersion\": \n2.2,\n\"position\": \n[...], // 2 items\n\"id\": \n\"e22c2a97-5c5b-4315-ba38-cf6134dcbe38\",\n\"name\": \n\"AI Agent\"\n},\n{\n\"parameters\": \n{...}, // 0 items\n\"type\": \n\"n8n-nodes-base.manualTrigger\",\n\"typeVersion\": \n1,\n\"position\": \n[...], // 2 items\n\"id\": \n\"6f45546e-ce32-4487-9ea0-ac4da9522a16\",\n\"name\": \n\"When clicking ‘Execute workflow’\"\n},\n{\n\"parameters\": \n{...}, // 2 items\n\"type\": \n\"n8n-nodes-base.httpRequest\",\n\"typeVersion\": \n4.2,\n\"position\": \n[...], // 2 items\n\"id\": \n\"ebb628ea-11a1-422a-bc59-0a3c7e5aa732\",\n\"name\": \n\"HTTP Request\"\n},\n{\n\"parameters\": \n{...}, // 2 items\n\"type\": \n\"n8n-nodes-base.splitInBatches\",\n\"typeVersion\": \n3,\n\"position\": \n[...], // 2 items\n\"id\": \n\"dc5f1f84-bc60-4454-a016-8f1de5be11aa\",\n\"name\": \n\"Loop Over Items\"\n},\n{\n\"parameters\": \n{...}, // 5 items\n\"type\": \n\"n8n-nodes-base.googleSheets\",\n\"typeVersion\": \n4.7,\n\"position\": \n[...], // 2 items\n\"id\": \n\"5686965e-8608-4dd7-ae28-2d38f5ed343a\",\n\"name\": \n\"Append or update row in sheet\",\n\"credentials\": \n{...} // 1 items\n},\n{\n\"parameters\": \n{...}, // 1 items\n\"type\": \n\"@n8n/n8n-nodes-langchain.lmChatGoogleGemini\",\n\"typeVersion\": \n1,\n\"position\": \n[...], // 2 items\n\"id\": \n\"017ed399-670a-4aca-bb73-332993670d5a\",\n\"name\": \n\"Google Gemini Chat Model1\",\n\"credentials\": \n{...} // 1 items\n},\n{\n\"parameters\": \n{...}, // 2 items\n\"type\": \n\"n8n-nodes-base.aggregate\",\n\"typeVersion\": \n1,\n\"position\": \n[...], // 2 items\n\"id\": \n\"d1ce8a3a-6713-4ab1-9247-5a939bdd8e53\",\n\"name\": \n\"Aggregate\"\n},\n{\n\"parameters\": \n{...}, // 1 items\n\"type\": \n\"n8n-nodes-base.code\",\n\"typeVersion\": \n2,\n\"position\": \n[...], // 2 items\n\"id\": \n\"1e436c9c-e3be-42ac-97ec-7e0f4c769ea8\",\n\"name\": \n\"Code2\"\n},\n{\n\"parameters\": \n{...}, // 3 items\n\"type\": \n\"n8n-nodes-base.merge\",\n\"typeVersion\": \n3.2,\n\"position\": \n[...], // 2 items\n\"id\": \n\"43b10ccc-d712-43cf-8836-a5c45be49d02\",\n\"name\": \n\"Merge\"\n},\n{\n\"parameters\": \n{...}, // 2 items\n\"type\": \n\"n8n-nodes-base.set\",\n\"typeVersion\": \n3.4,\n\"position\": \n[...], // 2 items\n\"id\": \n\"4eb4e374-7d5b-4569-8580-6a691c3f30ad\",\n\"name\": \n\"Edit Fields1\"\n}\n],\n\"connections\": \n{\n\"Schedule Trigger\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Edit Fields\": \n{\n\"main\": \n[...] // 1 items\n},\n\"When clicking ‘Execute workflow’\": \n{\n\"main\": \n[...] // 1 items\n},\n\"HTTP Request\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Loop Over Items\": \n{\n\"main\": \n[...] // 2 items\n},\n\"Google Gemini Chat Model1\": \n{\n\"ai_languageModel\": \n[...] // 1 items\n},\n\"AI Agent\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Aggregate\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Code2\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Merge\": \n{\n\"main\": \n[...] // 1 items\n},\n\"Edit Fields1\": \n{\n\"main\": \n[...] // 1 items\n}\n},\n\"settings\": \n{\n\"executionOrder\": \n\"v1\"\n},\n\"staticData\": \nnull,\n\"meta\": \n{\n\"templateCredsSetupCompleted\": \ntrue\n},\n\"pinData\": \n{\n\"AI Agent\": \n[\n{...}, // 1 items\n{...}, // 1 items\n{...}, // 1 items\n{...}, // 1 items\n{...} // 1 items\n]\n},\n\"versionId\": \n\"f1871e3c-ed95-4497-8676-effce3e254fd\",\n\"triggerCount\": \n0,\n\"shared\": \n[\n{\n\"createdAt\": \n\"2025-09-16T10:41:50.816Z\",\n\"updatedAt\": \n\"2025-09-16T10:41:50.816Z\",\n\"role\": \n\"workflow:owner\",\n\"workflowId\": \n\"XRxfBhKfbvSIQXyF\",\n\"projectId\": \n\"HHopAZ4lOFgjhBzT\"\n}\n],\n\"tags\": \n[\n]\n}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.informationExtractor",
+      "typeVersion": 1.2,
+      "position": [
+        544,
+        656
+      ],
+      "id": "dc328e74-88f3-4ba3-a8fd-b5bbefec9fa5",
+      "name": "Information Extractor",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        480,
+        864
+      ],
+      "id": "87dddb8f-d9f6-4598-80e7-87c268cf627f",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Globals": {
+      "main": [
+        [
+          {
+            "node": "List files from repository [GITHUB]",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split the result": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get all files in given path": {
+      "main": [
+        [
+          {
+            "node": "Split the result",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check for skipped Credentials": {
+      "main": [
+        [
+          {
+            "node": "Create a workflow",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Restore n8n Credentials1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Restore n8n Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Globals",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "List files from repository [GITHUB]": {
+      "main": [
+        [
+          {
+            "node": "Get all files in given path",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        []
+      ]
+    },
+    "GITHUB": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Information Extractor",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Restore n8n Credentials1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "GITHUB",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Information Extractor": {
+      "main": [
+        [
+          {
+            "node": "Check for skipped Credentials",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Information Extractor",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "b3752c50-cd45-4f76-86bf-5797723deb55",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-16T11:33:32.788Z",
+      "createdAt": "2025-10-16T11:33:32.788Z",
+      "role": "workflow:owner",
+      "workflowId": "grcAEATrqBkLId4g",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
