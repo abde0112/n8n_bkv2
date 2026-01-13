@@ -1,0 +1,1098 @@
+{
+  "updatedAt": "2025-09-27T18:06:48.000Z",
+  "createdAt": "2025-09-24T10:10:40.147Z",
+  "id": "ilarmgjtl2Y5nJSr",
+  "name": "Transform Reddit Questions into SEO Blog Posts with OpenAI and Google Sheets",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "b5fb91dd-9994-4ad2-81e6-d3b49c247875",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -3744,
+        -128
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "subreddit": "n8n",
+        "limit": 30,
+        "filters": {
+          "category": "new"
+        }
+      },
+      "id": "a1672a36-55b3-4913-977b-e73206427890",
+      "name": "Reddit",
+      "type": "n8n-nodes-base.reddit",
+      "position": [
+        -3520,
+        -128
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "egji61gmx0oZk5RO",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const questionWords = ['who', 'what', 'when', 'where', 'why', 'how', 'can', 'does', 'is', 'should', 'do', 'are', 'could', 'would'];\n\nreturn $input.all().filter(item => {\n  const rawTitle = item.json.title;\n  if (!rawTitle) return false;\n\n  const title = rawTitle.trim().toLowerCase();\n\n  const isQuestion =\n    title.endsWith('?') ||\n    questionWords.some(word =>\n      title.startsWith(word + ' ') ||\n      title.includes(' ' + word + ' ')\n    );\n\n  // 🪵 Debug log goes here:\n  if (isQuestion) console.log('✅ Question found:', title);\n\n  return isQuestion;\n});\n"
+      },
+      "id": "1ef10fa5-b5ef-4fa0-84a3-2d729a98dc6c",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -3296,
+        -128
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is a question:  {{ $json.Title }}\n\nRephrase it without changing the meaning. Keep it as a question.\n\nI just need the question as the output nothing else",
+        "options": {}
+      },
+      "id": "368814a9-4be1-4f5a-8835-e525c8123197",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -2592,
+        -96
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "59be53d0-c0ad-48b6-a786-d9b6e5fc9b4e",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -2688,
+        352
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "Y5EZ7nONrSFTfDWw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.Title }}"
+      },
+      "id": "33d3e589-641f-42c1-b356-7412a7f7e5ef",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -2416,
+        208
+      ],
+      "typeVersion": 1.3,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.name }}"
+      },
+      "id": "f02c0383-ad04-4da2-b6e7-95d26024f94c",
+      "name": "Simple Memory1",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -1392,
+        -320
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Append or update row in sheet').item.json.name }}"
+      },
+      "id": "2c08af83-5ecd-4230-96ab-6e8d76b578e6",
+      "name": "Simple Memory2",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -1376,
+        -64
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Append or update row in sheet').item.json.name }}"
+      },
+      "id": "aff0881d-8de4-4e64-80a0-a30966e1c0c3",
+      "name": "Simple Memory3",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -1376,
+        256
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Append or update row in sheet').item.json.name }}"
+      },
+      "id": "452e559b-ab46-4a5a-8461-cc20c2ea5381",
+      "name": "Simple Memory4",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -1376,
+        560
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1fIk66lycsodCwVWY_3Jz8ReQBeo0_nOHaFuv427pzKQ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fIk66lycsodCwVWY_3Jz8ReQBeo0_nOHaFuv427pzKQ/edit?usp=drivesdk",
+          "cachedResultName": "VOC to blog"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 1732850028,
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fIk66lycsodCwVWY_3Jz8ReQBeo0_nOHaFuv427pzKQ/edit#gid=1732850028",
+          "cachedResultName": "Blog"
+        },
+        "columns": {
+          "value": {
+            "name": "={{ $json.name }}",
+            "slug": "={{ $json.slug }}",
+            "Intro": "={{ $json.Intro }}",
+            "Steps": "={{ $json.Steps }}",
+            "Conclusion": "={{ $json.Conclusion }}"
+          },
+          "schema": [
+            {
+              "id": "name",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "slug",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "slug",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Intro",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Intro",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Steps",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Steps",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Conclusion",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Conclusion",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "6491c0d4-5910-4766-8979-f7ccd07f31b8",
+      "name": "Google Sheets2",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -192,
+        768
+      ],
+      "typeVersion": 4.5,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "89c11812-98e8-45fc-993e-9938b772051b",
+              "name": "Intro",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6d3889d8-4c9e-4197-ba95-12b29f736cab",
+      "name": "Edit Fields1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1184,
+        -208
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "db117030-0614-4d4b-9779-a2128eb08c84",
+              "name": "Steps",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "45fae29e-d76d-4d7a-ae70-83ff4baeebb4",
+      "name": "Edit Fields2",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1184,
+        112
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a short intro for a blog post titled:  {{ $json.name }}\n\nMake it easy to read, with easy vocabulary\n\nJust give me the intro as the output",
+        "options": {}
+      },
+      "id": "103c15c2-d922-433e-9738-5fc07417c0bc",
+      "name": "Intro",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -1536,
+        -208
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a 'step by step guide' section for a blog post titled:  {{ $json.name }}\n\nMake it easy to read, with easy vocabulary\nBut make it very detailed\n\nJust give me the output",
+        "options": {}
+      },
+      "id": "516f9949-c79a-406f-8ef9-fdd2362dc1fa",
+      "name": "Steps",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -1536,
+        112
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a short conclusion for a blog post titled:  {{ $json.name }}\n\nMake it easy to read, with easy vocabulary\n\nJust give me the conclusion as the output",
+        "options": {}
+      },
+      "id": "6743cb2d-02ec-457d-97dd-454ea6b66255",
+      "name": "Conclusion",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -1536,
+        416
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "86fc0fde-f55c-445c-8ebd-828c505a730e",
+              "name": "Conclusion",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "89ee4af3-3246-4505-857d-29b45a21ceac",
+      "name": "Edit Fields3",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1184,
+        416
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Based on {{ $json.name }}\n\nCreate a website slug for it. For example: best-website-builder\n\nJust give me the slug as output nothing else",
+        "options": {}
+      },
+      "id": "377b8ea4-187e-4645-8754-ca7cb754ee1a",
+      "name": "slug",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -1536,
+        -448
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a8a698ac-11ee-4623-8cce-8a9900d2ba08",
+              "name": "name",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a6d7885b-4a94-41bb-8f41-a9e77f43bab8",
+      "name": "Edit Fields4",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -2240,
+        -96
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1pUeUR9kkW1aAHKa1BSJYNs735fnh-kfLjERkRoDTGB8",
+          "mode": "list",
+          "cachedResultName": "VOC to blog",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pUeUR9kkW1aAHKa1BSJYNs735fnh-kfLjERkRoDTGB8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": " Queries",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pUeUR9kkW1aAHKa1BSJYNs735fnh-kfLjERkRoDTGB8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Query": "={{ $json.selftext }}",
+            "Title": "={{ $json.title }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "018cbab0-81ca-4bfc-b23b-6a58e668d599",
+      "name": "Append row in sheet1",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -3072,
+        -128
+      ],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "grIKBT6wTka2shuk",
+          "name": "Google Sheets account 4"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1fIk66lycsodCwVWY_3Jz8ReQBeo0_nOHaFuv427pzKQ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fIk66lycsodCwVWY_3Jz8ReQBeo0_nOHaFuv427pzKQ/edit?usp=drivesdk",
+          "cachedResultName": "VOC to blog"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 1732850028,
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fIk66lycsodCwVWY_3Jz8ReQBeo0_nOHaFuv427pzKQ/edit#gid=1732850028",
+          "cachedResultName": "Blog"
+        },
+        "columns": {
+          "value": {
+            "name": "={{ $json.name }}"
+          },
+          "schema": [
+            {
+              "id": "name",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "slug",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "slug",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Intro",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Intro",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Steps",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Steps",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Conclusion",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Conclusion",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "name"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "46d3df40-89bc-4c6f-8d0f-c8d7574ce48e",
+      "name": "Append or update row in sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -1984,
+        -96
+      ],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "H3cbxdGjv6qzZVhw",
+          "name": "Google Sheets account 2"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "094685db-0446-43a8-8a0d-4fb09c4411d3",
+      "name": "Loop Over Items1",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        -2864,
+        -128
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d07c915b-b5c9-454c-8d4b-cdc91f31696c",
+              "name": "slug",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3f39eb8c-16d0-4744-a749-caf5e1914279",
+      "name": "Edit Fields5",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1184,
+        -448
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "# Send data",
+        "height": 280,
+        "width": 460,
+        "color": 3
+      },
+      "id": "3961651f-977c-4521-ba80-5a30e85afd1d",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3824,
+        -208
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# Enhancer",
+        "height": 440,
+        "width": 780
+      },
+      "id": "4a7bd0d5-c62b-40b1-a25d-71d016ec642d",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2672,
+        -208
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# Data cleaner",
+        "height": 280,
+        "width": 400,
+        "color": 3
+      },
+      "id": "23c6a3e1-5d9c-44e7-bcd2-de126bfd2568",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -3344,
+        -208
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1904,
+        432
+      ],
+      "id": "25049c40-c9c1-4865-a5e6-c0f99bc2a048",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "title": "={{ $('Code').item.json.title }}",
+        "additionalFields": {
+          "content": "={{ $json.Intro }}\n{{ $json.Steps }}",
+          "slug": "={{ $json.slug }}",
+          "status": "={{ $json.Conclusion }}"
+        }
+      },
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        -64
+      ],
+      "id": "8fa39889-1bf0-48b5-a00e-610a53e0ac5c",
+      "name": "Create a post",
+      "credentials": {
+        "wordpressApi": {
+          "id": "37d6ieAJ3OpJgcQt",
+          "name": "Wordpress account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 4
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -448,
+        -96
+      ],
+      "id": "95e37623-5ecb-4d92-aa56-6230f4a26dfb",
+      "name": "Merge"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Reddit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reddit": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        []
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "slug",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory2": {
+      "ai_memory": [
+        [
+          {
+            "node": "Intro",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory3": {
+      "ai_memory": [
+        [
+          {
+            "node": "Steps",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory4": {
+      "ai_memory": [
+        [
+          {
+            "node": "Conclusion",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets2": {
+      "main": [
+        []
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Intro": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Steps": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conclusion": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "slug": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Intro",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Steps",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Conclusion",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "slug",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "slug",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Intro",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Steps",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Conclusion",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a post": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Create a post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "AI Agent": [
+      {
+        "json": {
+          "output": "Which question should I rephrase for you?"
+        }
+      }
+    ],
+    "slug": [
+      {
+        "json": {
+          "output": "which-question-rephrase"
+        }
+      }
+    ],
+    "Intro": [
+      {
+        "json": {
+          "output": "Sometimes, the way a question is asked can make all the difference. Maybe you're stuck, or maybe my answer wasn't quite right because the original question wasn't clear enough. This is your chance to tell me! What question would you like me to try rephrasing for you? Let's make sure we get it right together."
+        }
+      }
+    ],
+    "Steps": [
+      {
+        "json": {
+          "output": "Here’s a simple guide to help me rephrase your question perfectly. Think of it like a little puzzle we're solving together!\n\n### Your Step-by-Step Guide to Rephrasing Questions\n\n**Step 1: Show Me the Original Question**\n\nFirst things first, I need to see the exact question you're thinking about.\n\n*   **What to do:** Just type or paste the question you want me to rephrase.\n*   **Why it's important:** This makes sure we're both looking at the exact same words. No guessing games! If you just describe it, I might get it wrong. So, copy it over exactly as it is.\n\n**Step 2: Tell Me What's Not Working With It**\n\nNow, let's talk about why the original question isn't quite right. What's the problem?\n\n*   **Think about:**\n    *   **Is it too general?** Maybe your question is too broad, and you're getting answers that cover too much, not enough, or are not specific to what you really want. (Example: If you asked \"Tell me about dogs,\" but you really only care about \"service dogs.\")\n    *   **Is it too specific?** Sometimes a question can be so detailed that it's hard to get an answer, or it makes the answer too narrow. (Example: If you asked \"What's the best brand of purple shoelaces for a size 7 left shoe made on a Tuesday in 2021?\" when you just want to know \"Where can I buy purple shoelaces?\")\n    *   **Is it confusing?** Do the words not make sense together? Is the sentence structure a bit messy?\n    *   **Did you get an answer you didn't expect?** You asked something, and the answer you got wasn't what you were hoping for. This often means the question itself was leading to a different kind of answer.\n    *   **Are there words you don't understand?** Maybe the question itself uses complicated words, and you want it simpler.\n    *   **Does it have a hidden meaning?** Sometimes we ask a question, but we really mean something else.\n\n*   **What to do:** In simple words, tell me what you feel is wrong. You can say things like:\n    *   \"It's too vague.\"\n    *   \"It's not focused enough.\"\n    *   \"I got an answer about X, but I wanted Y.\"\n    *   \"It's a bit unclear.\"\n    *   \"I want it to be simpler.\"\n\n**Step 3: Tell Me What You Want to Achieve (Your Goal)**\n\nThis is the most important part! What kind of answer are you hoping for with the *new*, rephrased question? What information are you *really* trying to get?\n\n*   **Think about:**\n    *   **Do you want more details?** If so, what kind of details?\n    *   **Do you want a simpler explanation?** For whom? (e.g., for a child, for someone new to the topic).\n    *   **Do you want to compare different things?** Which things?\n    *   **Do you want steps on how to do something?**\n    *   **Do you want an answer focused on a specific part of a topic?** (Example: If the original was about \"cars,\" do you want to focus on \"electric cars\" or \"how cars are made\"?)\n    *   **Are you looking for an opinion, a fact, or an explanation?**\n    *   **What kind of person are you asking this for?** (e.g., \"I'm asking for a school project,\" \"I'm trying to fix something at home,\" \"I'm just curious.\")\n\n*   **What to do:** Describe what you want the *rephrased* question to help you find out. You can say things like:\n    *   \"I want the new question to get a more specific answer about [topic].\"\n    *   \"I'd like it to be phrased in a way that gets a step-by-step guide.\"\n    *   \"Can you make it simpler so a beginner can understand?\"\n    *   \"I want to compare X and Y, so the question should reflect that.\"\n    *   \"The goal is to understand *why* something happens, not just *what* happens.\"\n\n**Step 4: Add Any Helpful Background (Context)**\n\nSometimes, knowing the bigger picture helps a lot! This step is optional, but it can make my rephrasing even better.\n\n*   **Think about:**\n    *   **What is the overall topic you're exploring?**\n    *   **What have you already tried or learned?**\n    *   **Who is the information for?** (e.g., \"I'm writing a paper for school,\" \"I'm researching for a business idea,\" \"I'm just curious for myself.\")\n    *   **Is there any special reason you're asking this question now?**\n\n*   **What to do:** If you have any extra details that might help me understand your situation better, share them here!\n\nOnce you give me these details, I'll do my best to rephrase your question to get you exactly the answer you're looking for!"
+        }
+      }
+    ],
+    "Conclusion": [
+      {
+        "json": {
+          "output": "So, don't hold back! Clear questions lead to clear answers, and I'm here to help you get the best information possible. Just follow these simple steps, tell me what you need, and let's work together to make your questions perfectly clear. I'm ready when you are!"
+        }
+      }
+    ]
+  },
+  "versionId": "b39dd152-3546-4910-9fbe-9c0f08ae9586",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-24T10:10:40.160Z",
+      "createdAt": "2025-09-24T10:10:40.160Z",
+      "role": "workflow:owner",
+      "workflowId": "ilarmgjtl2Y5nJSr",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
