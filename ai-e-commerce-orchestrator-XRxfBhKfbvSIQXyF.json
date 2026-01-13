@@ -1,0 +1,493 @@
+{
+  "updatedAt": "2025-09-17T11:18:38.000Z",
+  "createdAt": "2025-09-16T10:41:50.794Z",
+  "id": "XRxfBhKfbvSIQXyF",
+  "name": "AI E-commerce Orchestrator",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -112,
+        32
+      ],
+      "id": "3f07e13a-f53f-4700-8a25-ef9faf447400",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "20a68b7d-5c92-4621-bec4-0f8f9329a12c",
+              "name": "description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        848,
+        -144
+      ],
+      "id": "4cf8cb83-5d4e-466c-b206-32df368de9d4",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a creative marketing assistant.\nLook at this product description:\n\"{{ $json[\"description\"] }}\"\n\nTask:\n1. Suggest a single tone that would make this product appealing (examples: funny, luxury, eco-friendly, bold, casual, inspirational).\n2. Rewrite the description in that tone.\n\nReturn JSON ONLY in this format:\n{\n  \"tone\": \"<tone>\",\n  \"rewrittenDescription\": \"<new description>\"\n}\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        48
+      ],
+      "id": "e22c2a97-5c5b-4315-ba38-cf6134dcbe38",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -160,
+        -160
+      ],
+      "id": "6f45546e-ce32-4487-9ea0-ac4da9522a16",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://fakestoreapi.com/products/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        48,
+        -160
+      ],
+      "id": "ebb628ea-11a1-422a-bc59-0a3c7e5aa732",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "batchSize": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        560,
+        -160
+      ],
+      "id": "dc5f1f84-bc60-4454-a016-8f1de5be11aa",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1_z45Moohqd4iXQ3I8LFV2vQgoaskJnGPow9iE17X3b4",
+          "mode": "list",
+          "cachedResultName": "The Product Data Enricher",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_z45Moohqd4iXQ3I8LFV2vQgoaskJnGPow9iE17X3b4/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "The Product Data Enricher",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1_z45Moohqd4iXQ3I8LFV2vQgoaskJnGPow9iE17X3b4/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ID": "={{ $json.ID }}",
+            "original description": "={{ $('Edit Fields1').item.json.description }}",
+            "enhanced description": "={{ $json.enhancedDescription }}",
+            "tone": "={{ $json.tone }}",
+            "timestamp": "={{ $now }}"
+          },
+          "matchingColumns": [
+            "ID"
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "original description",
+              "displayName": "original description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "enhanced description",
+              "displayName": "enhanced description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "tone",
+              "displayName": "tone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "enhancedDescription",
+              "displayName": "enhancedDescription",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1088,
+        -464
+      ],
+      "id": "5686965e-8608-4dd7-ae28-2d38f5ed343a",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        592,
+        96
+      ],
+      "id": "017ed399-670a-4aca-bb73-332993670d5a",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "fieldsToAggregate": {
+          "fieldToAggregate": [
+            {
+              "fieldToAggregate": "output"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        848,
+        -288
+      ],
+      "id": "d1ce8a3a-6713-4ab1-9247-5a939bdd8e53",
+      "name": "Aggregate"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get array of JSON strings from Aggregate node\nconst rawOutputs = $json.output;\n\n// Map each string → clean it → parse into real JSON\nconst parsed = rawOutputs.map((str, i) => {\n  // remove ```json and ```\n  const clean = str.replace(/```json\\n?/, '').replace(/```$/, '').trim();\n  const obj = JSON.parse(clean);\n\n  return {\n    json: {\n      ID: i + 1, // or replace with real product id if available\n      originalDescription: $json.description,   // from your product node (merge if needed)\n      enhancedDescription: obj.rewrittenDescription,\n      tone: obj.tone,\n      timestamp: $json.timestamp                // from your product/original node\n    }\n  };\n});\n\nreturn parsed;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        -288
+      ],
+      "id": "1e436c9c-e3be-42ac-97ec-7e0f4c769ea8",
+      "name": "Code2"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        752,
+        -464
+      ],
+      "id": "43b10ccc-d712-43cf-8836-a5c45be49d02",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c380a8a2-0718-4b1d-8993-281436a2ee77",
+              "name": "description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        256,
+        -160
+      ],
+      "id": "4eb4e374-7d5b-4569-8580-6a691c3f30ad",
+      "name": "Edit Fields1"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Aggregate",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate": {
+      "main": [
+        [
+          {
+            "node": "Code2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code2": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "AI Agent": [
+      {
+        "json": {
+          "output": "```json\n{\n  \"tone\": \"Casual Cool\",\n  \"rewrittenDescription\": \"Level up your everyday look with our ultimate casual cool piece: the 2-For-One Hooded Faux Leather Jacket. Why choose when you can have both? This genius design gives you the laid-back vibe of a denim-style hoodie seamlessly combined with the edgy appeal of sleek faux leather. Crafted from a 100% polyurethane shell for that authentic look and feel, paired with a cozy 100% polyester lining and a comfortable 75% polyester, 25% cotton sweater layer – it's all about comfort that doesn't compromise on style. Stow your essentials in the two front pockets, admire the thoughtful button detail on the waist, and appreciate the subtle detail stitching at the sides that speaks to quality. Keep this effortlessly stylish jacket in prime condition with a simple hand wash and line dry. No bleach, no iron – because some things are just too cool for complicated care.\"\n}\n```"
+        }
+      },
+      {
+        "json": {
+          "output": "```json\n{\n  \"tone\": \"Casual\",\n  \"rewrittenDescription\": \"Meet your new favorite everyday raincoat! It's wonderfully lightweight, making it perfect for spontaneous trips or just keeping you dry on a casual outing. Designed with comfy long sleeves and an adjustable drawstring waist for a flattering, relaxed fit. Stay snug with a secure button and zipper front closure, and enjoy the playful surprise of a fully striped lining. You'll love the two roomy side pockets – perfect for stashing your phone, keys, and whatever else your day brings. It hits just right, covering your hips, and the generous, cotton-lined hood with adjustable drawstrings adds an effortlessly cool, styled look without being over the top. Easy, breezy, and always ready for whatever the weather (or your plans) have in store!\"\n}\n```"
+        }
+      },
+      {
+        "json": {
+          "output": "```json\n{\n  \"tone\": \"casual\",\n  \"rewrittenDescription\": \"Meet your new favorite everyday essential. Crafted from a super-soft 95% Rayon and 5% Spandex blend, this piece offers an unbelievably lightweight feel with the perfect amount of stretch for all-day comfort. Designed for laid-back living, it features classic ribbed details on the sleeves and neckline, complemented by durable double stitching on the bottom hem for a finish that looks as good as it feels. Effortless style, supreme comfort. (Made in USA or Imported. Just remember, skip the bleach for lasting freshness!)\"\n}\n```"
+        }
+      },
+      {
+        "json": {
+          "output": "```json\n{\n  \"tone\": \"Inspirational\",\n  \"rewrittenDescription\": \"Unleash your potential with our inspiring V-neck top. Engineered from 100% cationic polyester interlock, this pre-shrunk, machine-washable wonder is built for your active life. Its lightweight, highly breathable, and advanced moisture-wicking fabric keeps you cool and dry, empowering you to conquer any challenge. Designed with a soft, comfortable V-neck and a sleek, slimmer fit, it sculpts a feminine silhouette that moves with you, boosting your confidence with every step. Experience unparalleled comfort and feel ready to shine, day in and day out.\"\n}\n```"
+        }
+      },
+      {
+        "json": {
+          "output": "```json\n{\n  \"tone\": \"casual\",\n  \"rewrittenDescription\": \"Meet your new favorite everyday tee. Crafted from a sumptuously soft and wonderfully stretchy blend (95% Cotton, 5% Spandex), this V-neck, short-sleeve top features a chic letter print for effortless style. It's the ultimate 'just throw it on' staple, ready for anything and everything – from laid-back weekends at home to busy street adventures, office casual, beach days, or school runs. Your go-to comfort, all year round.\"\n}\n```"
+        }
+      }
+    ]
+  },
+  "versionId": "f1871e3c-ed95-4497-8676-effce3e254fd",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-16T10:41:50.816Z",
+      "createdAt": "2025-09-16T10:41:50.816Z",
+      "role": "workflow:owner",
+      "workflowId": "XRxfBhKfbvSIQXyF",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
