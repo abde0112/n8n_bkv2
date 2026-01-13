@@ -1,0 +1,617 @@
+{
+  "updatedAt": "2026-01-04T12:20:36.869Z",
+  "createdAt": "2025-11-18T21:07:09.908Z",
+  "id": "5I9XwND1YFU3GEjK",
+  "name": "P2 Zoom TIZI Email Automation",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w",
+          "mode": "list",
+          "cachedResultName": "Ark-x Days",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1892321146,
+          "mode": "list",
+          "cachedResultName": "TIZI Invitation P2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit#gid=1892321146"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1248,
+        352
+      ],
+      "id": "0d576499-4f97-4d1b-ad82-25b11d4556e8",
+      "name": "Get Contact List",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "87506979-afa7-46f5-b1ad-0ddbb01b83ab",
+              "leftValue": "={{ $('Get Contact List').item.json.Status }}",
+              "rightValue": "Mark as Sent",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -1056,
+        352
+      ],
+      "id": "b1a56efd-c9c0-4e44-9264-bcc8545e83ee",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "content": "Get Contacts\n\nDescription: Pull all contacts from Google Sheets.\n\nNode: Get Contact List",
+        "height": 384,
+        "width": 192
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1312,
+        176
+      ],
+      "typeVersion": 1,
+      "id": "ea480aa8-1c7e-44ac-871e-e25881fdd252",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Filter → keep only rows where Status ≠ “Mark as Sent”",
+        "height": 384,
+        "width": 176,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1104,
+        176
+      ],
+      "typeVersion": 1,
+      "id": "1e8552c6-f274-4cb4-8d51-4a12a5033ebc",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Send email to each remaining contact",
+        "height": 384,
+        "width": 256,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -256,
+        176
+      ],
+      "typeVersion": 1,
+      "id": "2cba708e-e901-4e28-82c6-474ce7ba97a1",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w",
+          "mode": "list",
+          "cachedResultName": "Ark-x Days",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1892321146,
+          "mode": "list",
+          "cachedResultName": "TIZI Invitation P2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit#gid=1892321146"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Mark as Sent",
+            ":البريد الإلكتروني": "={{ $('Limit').item.json[':البريد الإلكتروني'] }}",
+            "Failed Reason": "={{ $json.labelIds[0] }}"
+          },
+          "matchingColumns": [
+            ":البريد الإلكتروني"
+          ],
+          "schema": [
+            {
+              "id": ": الاسم الكامل",
+              "displayName": ": الاسم الكامل",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": ":البريد الإلكتروني",
+              "displayName": ":البريد الإلكتروني",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Failed Reason",
+              "displayName": "Failed Reason",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        416,
+        336
+      ],
+      "id": "52500ad1-e334-455d-a1ce-fa99c98fbb64",
+      "name": "Update status",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "[Track Success & Failure]\nSeparate success & failed emails\nLog errors/reason in 'raison' column",
+        "height": 384,
+        "width": 272,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        32,
+        176
+      ],
+      "typeVersion": 1,
+      "id": "ce005bbc-2ce6-43c4-8aea-b5f729133ac5",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function Node Example\nreturn $items().filter((item, index, self) =>\n    index === self.findIndex((t) => t.json['Email '] === item.json['Email '])\n);\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -800,
+        336
+      ],
+      "id": "be8d3ee2-f58b-40fd-9ab9-3529ffbe5eaa",
+      "name": "Duplicate Emails"
+    },
+    {
+      "parameters": {
+        "jsCode": "let success = [];\nlet failed = [];\n\nfor (const item of $items()) {\n  if (item.json.error) {\n    // Add the error message to the 'raison' field\n    item.json.raison = item.json.error.message || \"Unknown Error\";\n    failed.push({ json: item.json }); // wrap in json\n  } else {\n    item.json.raison = \"Sent\"; // Optional: mark success\n    success.push({ json: item.json }); // wrap in json\n  }\n}\n\n// Return as a single array\nreturn [...success, ...failed];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        128,
+        336
+      ],
+      "id": "0fac2b2f-d125-4d9f-bc85-b201de814b82",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "content": "[Batch Processing]\nProcess emails in batches (e.g., 5 at a time)",
+        "height": 384,
+        "width": 304
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -592,
+        176
+      ],
+      "typeVersion": 1,
+      "id": "acdad435-842d-4bbe-8e13-959cba9256bb",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "[Remove Duplicates]\nRemove contacts with duplicate emails",
+        "height": 384,
+        "width": 288,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -912,
+        176
+      ],
+      "typeVersion": 1,
+      "id": "63120263-08e1-4d33-8dec-8453ff143220",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "[Update Google Sheet]\nUpdate Status = \"Mark as Sent\" for success\nLog failure reason in 'raison'",
+        "height": 384
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        336,
+        176
+      ],
+      "typeVersion": 1,
+      "id": "7c94f4f1-56bd-42ef-a1a3-1a1b209da64f",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "Count total sent and send summary email",
+        "height": 352,
+        "width": 576,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -256,
+        -208
+      ],
+      "typeVersion": 1,
+      "id": "3460cd11-8146-447d-80b2-77d2a3fae783",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "TIZI Invitation Email Automation",
+        "height": 864,
+        "width": 2256,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1584,
+        -224
+      ],
+      "typeVersion": 1,
+      "id": "79664cef-acf0-4f68-b3a3-5d7ba5fde901",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 5
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1648,
+        352
+      ],
+      "id": "fbd35aa8-6aa1-4e0f-b750-24aa80b0402e",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -1648,
+        144
+      ],
+      "id": "d2fced52-0dcd-469e-8ef1-7e7f019d8bd7",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        336
+      ],
+      "id": "5049b6fa-7fed-4091-a9c8-560d8f5836a3",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "sendTo": "=Abidinouhaila3gmail.com",
+        "subject": " دعوة لحضور الوحدة الأولى من الأكاديمية الرقمية للمواطنة والمشاركة المدنية – TIZI",
+        "message": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "TIZI ADMIN"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -864,
+        -80
+      ],
+      "id": "2c31d274-261a-4f56-ab49-d23bde1b4136",
+      "name": "Send Invitation",
+      "webhookId": "3a1d8f70-84d2-4255-a978-01bd1a1bbe82",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zCKZm9NWFpPMNBX2",
+          "name": "TIZI"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "html": "<!doctype html>\n<html lang=\"ar\" dir=\"rtl\">\n<head>\n  <meta charset=\"utf-8\" />\n  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\" />\n</head>\n<body style=\"margin:0;padding:0;background:#f4f4f4;\">\n  <div style=\"font-family: Arial, sans-serif; direction: rtl; text-align: right; line-height: 1.7; color: #333333; max-width: 600px; margin: 30px auto; padding: 0; background:#ffffff; border-radius:8px; overflow:hidden;\">\n\n          <div style=\" background-color:#C8001A;text-align:center; margin-bottom:18px;\">\n      <!-- optional inline logo -->\n      <!-- <img src=\"https://share.google/images/cD7fhkBdUIqgt1YQz\" alt=\"TIZI\" style=\"width:140px; display:block; margin:0 auto 10px;\" /> -->\n      <div style=\"font-weight:700; color:#FFFFFF; font-size:20px;\">مبادرة طارق بن زياد – TIZI</div>\n    </div>\n\n    <div style=\"padding:20px;\">\n\n      <!-- Greeting -->\n      <p style=\"margin:0 0 12px 0;\">السلام عليكم ورحمة الله وبركاته،</p>\n\n      <!-- Name -->\n      <p style=\"margin:0 0 12px 0;\">السيد(ة): <strong><span dir=\"ltr\">نهيلة عبيدي </span></strong></p>\n\n      <!-- Intro -->\n      <p style=\"margin:0 0 12px 0;\">\n        يسعدنا في مبادرة <strong>طارق بن زياد – TIZI</strong> أن ندعوكم لحضور الوحدة الأولى من\n        <strong>الأكاديمية الرقمية للمواطنة والمشاركة المدنية</strong>، وذلك بعد اختياركم ضمن المشاركين الذين تم قبولهم من بين أكثر من\n        <strong>1000 طلب تسجيل</strong>.\n      </p>\n\n      <!-- Session box -->\n      <div style=\"background:#f7fbff; border:1px solid #e6f0ff; padding:12px; border-radius:6px; margin:16px 0;\">\n        <p style=\"margin:0 0 6px 0;\"><strong>✅ معلومات الجلسة:</strong></p>\n        <p style=\"margin:0 0 6px 0;\"><strong>عنوان الوحدة:</strong> المؤسسات الدستورية وأدوار الفاعلين في الحياة العامة</p>\n        <p style=\"margin:0 0 6px 0;\"><strong>من تأطير:</strong> الدكتورة مريم ابليل</p>\n        <p style=\"margin:0 0 6px 0;\"><strong>التاريخ:</strong> الخميس 13 نونبر</p>\n        <p style=\"margin:0 0 6px 0;\"><strong>الوقت:</strong> <span dir=\"ltr\">21:00</span> مساء</p>\n        <p style=\"margin:0;\"><strong>المنصة:</strong> <span dir=\"ltr\">Zoom</span></p>\n      </div>\n\n<!-- Link / Button -->\n<div style=\"text-align:center; margin:18px 0;\">\n\n  <!-- ✅ Green background wrapper to force the text to appear -->\n  <div style=\"; padding:10px; border-radius:6px; display:inline-block; margin-bottom:10px;\">\n    <p style=\"margin:0; color:#0a8025; font-weight:bold; font-size:16px;\">\n      🔗 رابط الحضور:\n    </p>\n  </div>\n\n\n  <!-- Button using table with green background -->\n  <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" align=\"center\" style=\"margin:0 auto;\">\n    <tr>\n      <td align=\"center\" bgcolor=\"#d8f7dc\" style=\"border-radius:8px;\">\n        <a href=\"https://us06web.zoom.us/j/89187545454?pwd=b1pquZplwJAv5p7zde40hXAJXckLbf.1\"\n           target=\"_blank\"\n           style=\"background:#F52B07; display:inline-block; padding:12px 20px; text-decoration:none; font-weight:600; font-family: Arial, sans-serif; color:#FFFFFF; font-size:16px;\">\n           الانضمام إلى الجلسة عبر Zoom\n        </a>\n      </td>\n    </tr>\n  </table>\n\n  <p style=\"font-size:13px; color:#666; margin:12px 0 0 0;\">يرجى الانضمام عبر الرابط السابق قبل <strong>5 دقائق</strong> من موعد الانطلاق.</p>\n  <p style=\"font-size:13px; color:#666; margin:6px 0 0 0;\"><strong>🔒 يرجى عدم مشاركة الرابط مع غير المسجلين في البرنامج.</strong></p>\n</div>\n\n\n\n      <!-- Reminder -->\n      <div style=\"margin-top:10px;\">\n        <p style=\"margin:0 0 6px 0;\"><strong>✅ تذكير مهم:</strong></p>\n        <p style=\"margin:0 0 6px 0;\">حضور هذه الوحدة يدخل ضمن نسبة الحضور المطلوبة للحصول على شهادة المشاركة النهائية.</p>\n        <p style=\"margin:0 0 6px 0;\">عدد المقاعد محدود في <strong>300 مقعد</strong> فقط، حاول الدخول مبكراً لضمان مكانك.</p>\n      </div>\n\n    </div>\n\n    <!-- Footer -->\n    <div style=\"background-color:#f7f7f7; padding:15px; text-align:center; color:#777; font-size:13px;\">\n      © 2025 TIZI – جميع الحقوق محفوظة\n    </div>\n\n  </div>\n</body>\n</html>\n"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -1104,
+        -80
+      ],
+      "id": "e11ae5b1-2ecc-49d3-a8c6-5f1b79b25d30",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "html": "<!doctype html>\n<html lang=\"ar\" dir=\"rtl\">\n<head>\n  <meta charset=\"utf-8\" />\n  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\" />\n</head>\n<body style=\"margin:0;padding:0;background:#f4f4f4;\">\n  <div style=\"font-family: Arial, sans-serif; direction: rtl; text-align: right; line-height: 1.7; color: #333333; max-width: 600px; margin: 30px auto; padding: 0; background:#ffffff; border-radius:8px; overflow:hidden;\">\n\n          <div style=\" background-color:#C8001A;text-align:center; margin-bottom:18px;\">\n      <!-- optional inline logo -->\n      <!-- <img src=\"https://share.google/images/cD7fhkBdUIqgt1YQz\" alt=\"TIZI\" style=\"width:140px; display:block; margin:0 auto 10px;\" /> -->\n      <div style=\"font-weight:700; color:#FFFFFF; font-size:20px;\">مبادرة طارق بن زياد – TIZI</div>\n    </div>\n\n    <div style=\"padding:20px;\">\n\n      <!-- Greeting -->\n      <p style=\"margin:0 0 12px 0;\">السلام عليكم ورحمة الله وبركاته،</p>\n\n      <!-- Name -->\n      <p style=\"margin:0 0 12px 0;\">السيد(ة): <strong><span dir=\"ltr\">{{ $json[': الاسم الكامل'] }}</span></strong></p>\n\n      <!-- Intro -->\n      <p style=\"margin:0 0 12px 0;\">\n        يسعدنا في مبادرة <strong>طارق بن زياد – TIZI</strong> أن ندعوكم لحضور الوحدة الأولى من\n        <strong>الأكاديمية الرقمية للمواطنة والمشاركة المدنية</strong>، وذلك بعد اختياركم ضمن المشاركين الذين تم قبولهم من بين أكثر من\n        <strong>1000 طلب تسجيل</strong>.\n      </p>\n\n      <!-- Session box -->\n      <div style=\"background:#f7fbff; border:1px solid #e6f0ff; padding:12px; border-radius:6px; margin:16px 0;\">\n        <p style=\"margin:0 0 6px 0;\"><strong>✅ معلومات الجلسة:</strong></p>\n        <p style=\"margin:0 0 6px 0;\"><strong>عنوان الوحدة:</strong> المؤسسات الدستورية وأدوار الفاعلين في الحياة العامة</p>\n        <p style=\"margin:0 0 6px 0;\"><strong>من تأطير:</strong> الدكتورة مريم ابليل</p>\n        <p style=\"margin:0 0 6px 0;\"><strong>التاريخ:</strong> الخميس 13 نونبر</p>\n        <p style=\"margin:0 0 6px 0;\"><strong>الوقت:</strong> <span dir=\"ltr\">21:00</span> مساء</p>\n        <p style=\"margin:0;\"><strong>المنصة:</strong> <span dir=\"ltr\">Zoom</span></p>\n      </div>\n\n<!-- Link / Button -->\n<div style=\"text-align:center; margin:18px 0;\">\n\n  <!-- ✅ Green background wrapper to force the text to appear -->\n  <div style=\"; padding:10px; border-radius:6px; display:inline-block; margin-bottom:10px;\">\n    <p style=\"margin:0; color:#0a8025; font-weight:bold; font-size:16px;\">\n      🔗 رابط الحضور:\n    </p>\n  </div>\n\n\n  <!-- Button using table with green background -->\n  <table role=\"presentation\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" align=\"center\" style=\"margin:0 auto;\">\n    <tr>\n      <td align=\"center\" bgcolor=\"#d8f7dc\" style=\"border-radius:8px;\">\n        <a href=\"https://us06web.zoom.us/j/89187545454?pwd=b1pquZplwJAv5p7zde40hXAJXckLbf.1\"\n           target=\"_blank\"\n           style=\"background:#F52B07; display:inline-block; padding:12px 20px; text-decoration:none; font-weight:600; font-family: Arial, sans-serif; color:#FFFFFF; font-size:16px;\">\n           الانضمام إلى الجلسة عبر Zoom\n        </a>\n      </td>\n    </tr>\n  </table>\n\n  <p style=\"font-size:13px; color:#666; margin:12px 0 0 0;\">يرجى الانضمام عبر الرابط السابق قبل <strong>5 دقائق</strong> من موعد الانطلاق.</p>\n  <p style=\"font-size:13px; color:#666; margin:6px 0 0 0;\"><strong>🔒 يرجى عدم مشاركة الرابط مع غير المسجلين في البرنامج.</strong></p>\n</div>\n\n\n\n      <!-- Reminder -->\n      <div style=\"margin-top:10px;\">\n        <p style=\"margin:0 0 6px 0;\"><strong>✅ تذكير مهم:</strong></p>\n        <p style=\"margin:0 0 6px 0;\">حضور هذه الوحدة يدخل ضمن نسبة الحضور المطلوبة للحصول على شهادة المشاركة النهائية.</p>\n        <p style=\"margin:0 0 6px 0;\">عدد المقاعد محدود في <strong>300 مقعد</strong> فقط، حاول الدخول مبكراً لضمان مكانك.</p>\n      </div>\n\n    </div>\n\n    <!-- Footer -->\n    <div style=\"background-color:#f7f7f7; padding:15px; text-align:center; color:#777; font-size:13px;\">\n      © 2025 TIZI – جميع الحقوق محفوظة\n    </div>\n\n  </div>\n</body>\n</html>\n"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -544,
+        -128
+      ],
+      "id": "be13c7ad-15a2-4607-9846-a0184fc27426",
+      "name": "HTML2"
+    },
+    {
+      "parameters": {
+        "html": "<!doctype html>\n<html lang=\"ar\" dir=\"rtl\">\n<head>\n  <meta charset=\"utf-8\" />\n  <meta name=\"viewport\" content=\"width=device-width,initial-scale=1\" />\n</head>\n\n<body style=\"margin:0;padding:0;background:#f4f4f4;\">\n\n  <div style=\"\n    font-family: Arial, sans-serif;\n    direction: rtl;\n    text-align: right;\n    line-height: 1.8;\n    color: #333333;\n    max-width: 600px;\n    margin: 30px auto;\n    background:#ffffff;\n    border-radius:8px;\n    overflow:hidden;\n  \">\n\n    <!-- Header -->\n    <div style=\"background-color:#C8001A;text-align:center;padding:12px;\">\n      <div style=\"font-weight:700;color:#FFFFFF;font-size:20px;\">\n        الأكاديمية الرقمية للمواطنة والمشاركة المدنية – TIZI\n      </div>\n    </div>\n\n    <!-- Content -->\n    <div style=\"padding:20px;\">\n\n      <p>السلام عليكم ورحمة الله وبركاته،</p>\n\n      <p>السيد(ة): {{ $json[': الاسم الكامل'] }}</p>\n\n      <p>\n        في إطار استكمال إجراءات تسليم\n        <strong>شواهد المشاركة</strong>\n        الخاصة ببرنامج\n        <strong>الأكاديمية الرقمية للمواطنة والمشاركة المدنية – TIZI</strong>،\n        نرجو منكم التفضل بملء الاستمارة المخصصة لهذا الغرض، وذلك قبل التاريخ أسفله.\n      </p>\n\n      <p>\n        يهدف هذا النموذج إلى التأكد من صحة المعطيات الشخصية المعتمدة في إعداد الشواهد،\n        وضمان توصل كل المشاركين بشهاداتهم بشكل صحيح.\n      </p>\n\n      <!-- Form link -->\n      <p><strong>📌 رابط الاستمارة:</strong></p>\n\n      <p style=\"word-break:break-all;\">\n        <a href=\"https://docs.google.com/forms/d/e/1FAIpQLSeP5i9SfCvQo1oVq_sRPEsTIRimIPuIZifMwf16LLJio43tbQ/viewform?usp=publish-editor\"\n           target=\"_blank\"\n           style=\"color:#1a73e8;text-decoration:none;\">\n          https://docs.google.com/forms/d/e/1FAIpQLSeP5i9SfCvQo1oVq_sRPEsTIRimIPuIZifMwf16LLJio43tbQ/viewform\n        </a>\n      </p>\n\n      <!-- Note -->\n      <div style=\"background:#fff4e5;border-right:4px solid #ffa500;padding:12px;border-radius:6px;margin:16px 0;\">\n        <p style=\"margin:0 0 6px 0;\"><strong>⚠️ ملاحظة هامة:</strong></p>\n        <p style=\"margin:0;\">\n          يرجى التأكد من إدخال المعلومات بدقة، خاصة الاسم الكامل وعنوان البريد الإلكتروني،\n          حيث سيتم اعتمادها كما هي في الشهادة.\n        </p>\n      </div>\n\n      <p>\n        <strong>آخر أجل لملء الاستمارة:</strong><br>\n        📅 التلاثاء 06 يناير 2026\n      </p>\n\n      <p>\n        نشكر لكم تعاونكم، ونتمنى أن تكون هذه التجربة التكوينية قد حققت لكم الإضافة المرجوة.\n      </p>\n\n      <p>\n        مع خالص التقدير والاحترام،<br>\n        <strong>فريق الأكاديمية الرقمية للمواطنة والمشاركة المدنية – TIZI</strong>\n      </p>\n\n    </div>\n\n    <!-- Footer -->\n    <div style=\"background-color:#f7f7f7;padding:15px;text-align:center;color:#777;font-size:13px;\">\n      © 2026 TIZI – جميع الحقوق محفوظة\n    </div>\n\n  </div>\n\n</body>\n</html>\n"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        -384,
+        336
+      ],
+      "id": "f605802b-5845-46eb-9af9-9722aaeb05b5",
+      "name": "HTML3"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Limit').item.json[':البريد الإلكتروني'] }}",
+        "subject": "الموضوع: دعوة لملء استمارة الحصول على شهادة المشاركة – الأكاديمية الرقمية TIZI",
+        "message": "={{ $json.html }}",
+        "options": {
+          "appendAttribution": false,
+          "senderName": "TIZI ADMIN"
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        -144,
+        336
+      ],
+      "id": "b8db6fa0-263c-4f43-a046-e6aa6a6b2dd9",
+      "name": "Send Invitation2",
+      "webhookId": "c7b11f55-66be-4d9e-a158-5e09960d6673",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "zCKZm9NWFpPMNBX2",
+          "name": "TIZI"
+        }
+      },
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "connections": {
+    "Get Contact List": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Duplicate Emails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update status": {
+      "main": [
+        []
+      ]
+    },
+    "Duplicate Emails": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript1": {
+      "main": [
+        [
+          {
+            "node": "Update status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Contact List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Contact List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "HTML3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Send Invitation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML3": {
+      "main": [
+        [
+          {
+            "node": "Send Invitation2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Invitation2": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "6985f82e-cba5-405e-93fb-5085fe3fdc72",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-11-18T21:07:09.926Z",
+      "createdAt": "2025-11-18T21:07:09.926Z",
+      "role": "workflow:owner",
+      "workflowId": "5I9XwND1YFU3GEjK",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
