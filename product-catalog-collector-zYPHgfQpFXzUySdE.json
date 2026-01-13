@@ -1,0 +1,620 @@
+{
+  "updatedAt": "2025-09-10T09:40:32.000Z",
+  "createdAt": "2025-09-10T08:55:22.348Z",
+  "id": "zYPHgfQpFXzUySdE",
+  "name": "Product Catalog Collector",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1056,
+        208
+      ],
+      "id": "4914780e-95b0-4005-8ea4-66b398a1d275",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://fakestoreapi.com/products",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -848,
+        208
+      ],
+      "id": "ed7ce25a-ebb2-43a5-9ca5-9d9d4b845b50",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b8529de8-690c-4dd5-9b4f-812057485cfe",
+              "name": "productName",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "b6aa0277-e528-4ad0-85c1-8dcf59dd9820",
+              "name": "price",
+              "value": "={{ $json.price }}",
+              "type": "string"
+            },
+            {
+              "id": "8a2f10f0-7ea0-45df-b4bd-a2fcbdea0598",
+              "name": "description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "7f8e8456-551e-4efe-a464-6de14dabc039",
+              "name": "imageUrl",
+              "value": "={{ $json.image }}",
+              "type": "string"
+            },
+            {
+              "id": "063d8ad6-9b10-443c-b1c2-4bf8c2e7b892",
+              "name": "rawCategory",
+              "value": "={{ $json.category }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -640,
+        208
+      ],
+      "id": "2ff32351-f03b-4053-861f-30decb8ef7e2",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=SYSTEM:\nYou are a product data standardization assistant. Return ONLY valid JSON (no extra text, no markdown). The JSON must match this schema:\n{\n  \"productName\": string | null,\n  \"price\": number | null,\n  \"description\": string | null,             // neutral, concise, inclusive language\n  \"category\": string | null,                // use taxonomy \"Top > Sub > Sub\"\n  \"biasNotes\": [ string ],                  // short notes about potential bias (empty array if none)\n  \"imageTags\": [ string ],                  // short list of tags describing the image content\n  \"confidence\": number                      // 0.0 - 1.0 estimate of your classification confidence\n}\n\nUSER:\nHere is the raw product data. Use it to produce the JSON exactly as specified above.\n\ntitle: {{$json[\"productName\"]}}\nprice: {{$json[\"price\"]}}\ndescription: {{$json[\"description\"]}}\nimageUrl: {{$json[\"imageUrl\"]}}\nrawCategory: {{$json[\"rawCategory\"]}}\n\nRules:\n1. Standardize the title to a short neutral `productName`. Remove emojis, promo words, and gendered marketing where possible.\n2. Rewrite description to be neutral, concise (1-2 sentences), and inclusive. If you must keep original specifics, keep them but remove biased language.\n3. Map `rawCategory` to a taxonomy. If rawCategory is empty or ambiguous, infer from description/title. Use format \"Top > Sub > Sub\" (e.g., \"Clothing > Jackets > Cotton\").\n4. `biasNotes`: include 0–3 short findings (e.g., \"Uses gendered term 'men's'\", \"Images show only one demographic\", \"Price distribution indicates exclusivity\"). If none, return [].\n5. `imageTags`: suggest 3–6 short tags describing main objects/people (neutral).\n6. `confidence`: return a decimal between 0.0 and 1.0 representing your confidence in the category + bias detection.\n7. If a field is missing, use null (or empty array for biasNotes / imageTags).\n8. Output must be parsable JSON ONLY. No commentary.\n\nProduce the JSON now.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -240,
+        192
+      ],
+      "id": "d4e24901-8c44-4083-b11f-f03c39366e71",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        -224,
+        384
+      ],
+      "id": "8a8cbf37-5400-41c7-9c35-69ff153207fc",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Y5EZ7nONrSFTfDWw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function node: parse AI assistant's text output into real JSON fields\nconst item = items[0].json;\n\n// try common response places\nconst rawText =\n  item.choices?.[0]?.message?.content\n  || item.choices?.[0]?.text\n  || item.text\n  || item.output\n  || item.response\n  || item.data;\n\n// If still undefined, try the whole json as string\nconst candidate = typeof rawText === 'string' ? rawText.trim() : JSON.stringify(rawText);\n\ntry {\n  const parsed = JSON.parse(candidate);\n  // wrap parsed with original product for traceability\n  return [{ json: { ...parsed, _rawAI: candidate, _original: item } }];\n} catch (err) {\n  return [{ json: { _error: true, errorMessage: err.message, _rawAI: candidate, _original: item } }];\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        176
+      ],
+      "id": "96eb149d-a008-459e-adc7-e41805ea15f5",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c600d774-7a06-498a-85dd-8312dcb5922d",
+              "name": "productName",
+              "value": "={{ $json.productName }}",
+              "type": "string"
+            },
+            {
+              "id": "9bda9049-78f4-46e3-a566-055bee0e2758",
+              "name": "price",
+              "value": "={{ $json.price }}",
+              "type": "string"
+            },
+            {
+              "id": "82700002-2141-4bd7-82e5-345f318d5d5b",
+              "name": "description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "ed9f933f-cef8-4753-a515-90d766eb7a5d",
+              "name": "category",
+              "value": "={{ $json.category }}",
+              "type": "string"
+            },
+            {
+              "id": "fc18ca48-7bf1-4c9f-be41-9164a8e101aa",
+              "name": "biasNotes",
+              "value": "={{ $json.biasNotes }}",
+              "type": "string"
+            },
+            {
+              "id": "a07c2833-f5d8-4ba6-9afe-7b9f3c98f127",
+              "name": "imageTags",
+              "value": "={{ $json.imageTags }}",
+              "type": "string"
+            },
+            {
+              "id": "a6abd44f-fa7a-458c-956b-04475dbe437b",
+              "name": "confidence",
+              "value": "={{ $json.confidence }}",
+              "type": "string"
+            },
+            {
+              "id": "6814cada-b466-4fef-bbc4-e10c92460d5a",
+              "name": "_rawAI",
+              "value": "={{ $json._rawAI }}",
+              "type": "string"
+            },
+            {
+              "id": "cf6e91fc-1b7c-4d52-adcc-f01f16b7e31a",
+              "name": "_original",
+              "value": "={{ $json._original }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        480,
+        160
+      ],
+      "id": "85a4814f-0da2-4aba-9021-bd8f4b76d729",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1WBWShAkQGMH8MQlIqTo5tttmFSBUxNQGYOWMfYTKLZQ",
+          "mode": "list",
+          "cachedResultName": "TSET",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBWShAkQGMH8MQlIqTo5tttmFSBUxNQGYOWMfYTKLZQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBWShAkQGMH8MQlIqTo5tttmFSBUxNQGYOWMfYTKLZQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "productName": "={{ $json.productName }}",
+            "price": "={{ $json.price }}",
+            "description": "={{ $json.description }}",
+            "category": "={{ $json.category }}"
+          },
+          "matchingColumns": [
+            "output"
+          ],
+          "schema": [
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "productName",
+              "displayName": "productName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "biasNotes",
+              "displayName": "biasNotes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "imageTags",
+              "displayName": "imageTags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "confidence",
+              "displayName": "confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "_rawAI",
+              "displayName": "_rawAI",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "_original",
+              "displayName": "_original",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        656,
+        176
+      ],
+      "id": "a32a5302-b340-4028-805b-b627b487e5f8",
+      "name": "Append row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1WBWShAkQGMH8MQlIqTo5tttmFSBUxNQGYOWMfYTKLZQ",
+          "mode": "list",
+          "cachedResultName": "TSET",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBWShAkQGMH8MQlIqTo5tttmFSBUxNQGYOWMfYTKLZQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1WBWShAkQGMH8MQlIqTo5tttmFSBUxNQGYOWMfYTKLZQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "productName": "={{ $('HTTP Request').item.json.title }}",
+            "price": "={{ $('HTTP Request').item.json.price }}",
+            "description": "={{ $('HTTP Request').item.json.description }}",
+            "imageTags": "={{ $('HTTP Request').item.json.image }}",
+            "category": "={{ $('HTTP Request').item.json.category }}"
+          },
+          "matchingColumns": [
+            "output"
+          ],
+          "schema": [
+            {
+              "id": "productName",
+              "displayName": "productName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "biasNotes",
+              "displayName": "biasNotes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "imageTags",
+              "displayName": "imageTags",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "confidence",
+              "displayName": "confidence",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "_rawAI",
+              "displayName": "_rawAI",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "_original",
+              "displayName": "_original",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        96,
+        304
+      ],
+      "id": "dbec93a9-562b-497d-a490-3c5ccc8d3654",
+      "name": "Append row in sheet3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        []
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet3",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet2": {
+      "main": [
+        []
+      ]
+    },
+    "Append row in sheet3": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "5d876cc1-5426-4170-8c62-fbf62946cba3",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-10T08:55:22.386Z",
+      "createdAt": "2025-09-10T08:55:22.386Z",
+      "role": "workflow:owner",
+      "workflowId": "zYPHgfQpFXzUySdE",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
