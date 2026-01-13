@@ -1,0 +1,786 @@
+{
+  "updatedAt": "2025-10-14T13:38:58.000Z",
+  "createdAt": "2025-10-13T12:15:44.104Z",
+  "id": "DEz6Lx5Tps5HRLVd",
+  "name": "Amine day14 copy 3 with product's image",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        832,
+        384
+      ],
+      "id": "06363531-f3bd-4184-a9aa-c1074913e9a1",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an inclusive product description assistant.\n\nWrite a **short, friendly, one-line summary** for a product.\nInclude:\n- The product title\n- Price\n- One **unique or special feature** of the product\nKeep it:\n- Concise (1 sentence)\n- Easy to read\n- Accessible to everyone\n- Avoid marketing fluff\n\nProduct data:\nproduct_id: {{ $json.productId }}\nTitle: {{ $json.name }}\nPrice: {{ $json.price }}\nDescription: {{ $json.description }}\nCategory: \n",
+        "options": {
+          "systemMessage": "You write concise, human-sounding summaries suitable for text, voice, or SMS outputs.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        160
+      ],
+      "id": "65be4eea-277d-460b-b57f-696e0969fb0b",
+      "name": "🧠 Text Summary1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "4913fa6a-cd7a-4447-849c-bd7b52f87a74",
+              "name": "output",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1184,
+        160
+      ],
+      "id": "0920e963-45dc-4980-98be-326f32df6eba",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "language": "javascript",
+        "jsCode": "// --- Code à coller dans le nœud Code (JavaScript pur) ---\n\n// 1️⃣ Récupérer le productId envoyé par le webhook / chat\nconst productId = $json.productId || $json.id;\nif (!productId) {\n  return [{ json: { error: \"Aucun productId fourni par le webhook.\" } }];\n}\n\n// 2️⃣ Récupérer proprement la réponse du nœud HTTP Request\nlet httpResponse;\ntry {\n  // ⚠️ Remplace \"HTTP Request\" par le nom exact de ton nœud s’il est différent\n  httpResponse = $items(\"HTTP Request\", 0).json;\n} catch (e) {\n  try {\n    httpResponse = $items()[0].json;\n  } catch (err) {\n    return [{ json: { error: \"Impossible de lire la sortie du nœud HTTP Request.\" } }];\n  }\n}\n\n// 3️⃣ Normaliser le format (liste d’objets ou objet unique)\nlet products = [];\nif (Array.isArray(httpResponse)) {\n  products = httpResponse;\n} else if (httpResponse.products) {\n  products = httpResponse.products;\n} else if (httpResponse.data && Array.isArray(httpResponse.data)) {\n  products = httpResponse.data;\n} else {\n  products = [httpResponse];\n}\n\n// 4️⃣ Trouver le produit correspondant (tolérant aux variations de type)\nconst product = products.find(p =>\n  String(p.id) === String(productId) || String(p.productId) === String(productId)\n);\n\nif (!product) {\n  return [{\n    json: {\n      error: `Aucun produit trouvé avec l'ID ${productId}.`,\n      availableCount: products.length\n    }\n  }];\n}\n\n// 5️⃣ Extraire les champs utiles (avec fallback intelligents)\nconst description =\n  product.description ||\n  product.short_description ||\n  product.summary ||\n  \"Aucune description disponible.\";\n\nconst imageUrl =\n  product.image ||\n  product.image_url ||\n  product.thumbnail ||\n  (product.images && product.images[0]) ||\n  \"https://via.placeholder.com/512x512?text=Image+indisponible\";\n\nconst price =\n  product.price ||\n  product.prix ||\n  product.cost ||\n  product.amount ||\n  \"Prix non communiqué\";\n\n// 6️⃣ Retourner un objet propre et standardisé\nreturn [{\n  json: {\n    productId: product.id || product.productId || productId,\n    name: product.title || product.name || `Produit #${productId}`,\n    description,\n    price,\n    imageUrl,\n    retrievedAt: new Date().toISOString()\n  }\n}];"
+      },
+      "id": "83b8df38-c6d2-4cb9-88f6-8cd2342a5c45",
+      "name": "Générer texte produit1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        736,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "numberInputs": 3,
+        "options": {
+          "includeUnpaired": true
+        }
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        2336,
+        16
+      ],
+      "id": "1b40bf57-286d-42b2-8083-aff9433bc624",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5f6ced9e-76aa-4106-ae02-f7de946f5847",
+              "name": "productId",
+              "value": "={{ $json.productId }}",
+              "type": "string"
+            },
+            {
+              "id": "b8a9bfb2-9411-4ae1-9976-f14c182cf412",
+              "name": "description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "85c75bdf-9259-428f-82cc-4a55af7be10d",
+              "name": "price",
+              "value": "={{ $json.price }}",
+              "type": "string"
+            },
+            {
+              "id": "0d5485b0-a73e-4a29-a45c-820b5bcc0981",
+              "name": "image",
+              "value": "={{ $json.image }}",
+              "type": "string"
+            },
+            {
+              "id": "14dd2c34-96e6-42f4-99e4-11e17241f560",
+              "name": "audio",
+              "value": "={{ $json.audio }}",
+              "type": "string"
+            },
+            {
+              "id": "a77238e4-346d-4d7f-9d70-cb8f7ba2bdc7",
+              "name": "name",
+              "value": "={{ $('Merge').item.json.name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2736,
+        32
+      ],
+      "id": "0af754d4-f13c-47e8-949e-94fbc9b94404",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "language": "javascript",
+        "jsCode": "return [{\n  json: {\n    productId: $json.productId,\n    description: $json.description,\n    price: $json.price,\n    image: $json.imageUrl || \"https://lh3.googleusercontent.com/a/ACg8ocLhlovNA5Qn0y1yuF9hHDZbZ4d7VUoDslBlUICt8T4ePyJJlw=s64\",\n    audio: $json.audioUrl || \"https://drive.google.com/uc?id=1mJTnXaGo1Wn4Wx3XGpcYDMpIwg8-M3Ch&export=downloadk\",\n  }\n}];"
+      },
+      "id": "b6ae3d22-699a-4288-a058-805aa04417b2",
+      "name": "Assembler la réponse finale1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        2544,
+        32
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "url": "=https://fakestoreapi.com/products/{{ $json.body.id }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        528,
+        0
+      ],
+      "id": "01c97dab-51cb-41b4-9680-637a25bea20f",
+      "name": "Chercher produit"
+    },
+    {
+      "parameters": {
+        "language": "javascript",
+        "jsCode": "// --- Étape 1 : Récupérer l'ID du fichier depuis le nœud d'upload ---\nlet finalImageUrl = \"Image non disponible\";\n\ntry {\n  // CORRECTION ICI : On utilise le bon nom de nœud \"drive image\"\n  const uploadNode = $items(\"Drive image\")[0];\n\n  // On vérifie que le nœud et son ID existent\n  if (uploadNode && uploadNode.json && uploadNode.json.id) {\n    const fileId = uploadNode.json.id;\n\n    // --- Étape 2 : Construire l'URL de téléchargement direct ---\n    finalImageUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;\n  }\n} catch (e) {\n  console.warn(\"⚠️ Impossible de lire l'ID depuis le nœud 'drive image' :\", e.message);\n}\n\n// --- Étape 3 : Retourner l'URL correctement construite ---\nreturn [{\n  json: {\n    imageUrl: finalImageUrl\n  }\n}];"
+      },
+      "id": "dea4d6fb-030a-4437-84a3-7cc3b724dbea",
+      "name": "url image",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1952,
+        288
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Drive image').item.json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone",
+            "allowFileDiscovery": true
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1760,
+        288
+      ],
+      "id": "b61bcba5-0412-49fa-89c1-50fca0fdf0c6",
+      "name": "Share image",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "HUgBuWJOD3ngv7CC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Product_Engine",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        304,
+        0
+      ],
+      "id": "be93c210-ed9f-422e-bdf0-19e30b0caa85",
+      "name": "Webhook",
+      "webhookId": "442952d3-9060-47c7-ac85-43a6e58c9923"
+    },
+    {
+      "parameters": {
+        "name": "=image: {{ $('Chercher produit').item.json.title }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1tq4Uvt_0_pGB89TBW8lKM4BcnaARIzmH",
+          "mode": "list",
+          "cachedResultName": "n8n upload",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1tq4Uvt_0_pGB89TBW8lKM4BcnaARIzmH"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1552,
+        288
+      ],
+      "id": "843ec88b-3d06-4881-90bf-2a1486c10a42",
+      "name": "Drive image",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "HUgBuWJOD3ngv7CC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash-preview-image-generation",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.0-flash-preview-image-generation"
+        },
+        "prompt": "=Photographie de produit de haute qualité pour un site e-commerce.\nSujet : product image, décrit comme suit : \"{{ $('🧠 Text Summary1').item.json.output }}\".\nStyle : Image claire et nette, sur un fond blanc uni, éclairage de studio professionnel.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        288
+      ],
+      "id": "f96aacd8-e48a-4a92-938a-e8847934bef5",
+      "name": "Generate an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "html_content": "={{ $json.html }}",
+        "viewPortWidth": 720,
+        "viewPortHeight": 420,
+        "response_format_html": "png"
+      },
+      "type": "n8n-nodes-htmlcsstoimage.htmlCssToImage",
+      "typeVersion": 1,
+      "position": [
+        1568,
+        528
+      ],
+      "id": "220f9787-1e8a-460f-9b6c-3caf9b06f6cb",
+      "name": "HTML/CSS to Image",
+      "credentials": {
+        "htmlcsstoimgApi": {
+          "id": "Agus8xaWKOjJ6Yub",
+          "name": "Htmlcsstoimg account 2"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6ff4d4e2-6551-46e7-9284-6a68133b85d6",
+              "name": "html",
+              "value": "=<table cellpadding=0 cellspacing=0 role=presentation width=100% style=\"max-width:480px;border:1px solid #e6e8ee;border-radius:14px\"><tr><td style=padding:16px;font-family:Inter,Arial,Helvetica,sans-serif><img alt=\"{{ $('HTTP Request').item.json.title }}\"src=\"{{ $('HTTP Request').item.json.image }}\"style=display:block;border-radius:12px;height:auto width=100%><h2 style=\"margin:12px 0 6px;font-size:18px;line-height:1.3;color:#111\">{{ $('HTTP Request').item.json.title }}</h2><p style=\"margin:0 0 10px;color:#555;font-size:14px;line-height:1.45\">{{ $('HTTP Request').item.json.description }}<p style=\"margin:0 0 14px\"><a href=\"{{ $json.audioUrl }}\"style=\"display:inline-block;background:#0b5fff;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-size:14px\">🔊 Listen to Voice</a><table cellpadding=0 cellspacing=0 role=presentation width=100%><tr><td style=font-weight:700;font-size:16px;color:#111>{{ $('HTTP Request').item.json.price }}<td align=right><a href=\"\"style=\"display:inline-block;padding:8px 12px;border:1px solid #0b5fff;border-radius:10px;color:#0b5fff;text-decoration:none;font-size:14px\">View</a></table></table>",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1360,
+        528
+      ],
+      "id": "fa047fa3-5859-4f04-9b3a-ead395073517",
+      "name": "HTML",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "data.mp3",
+        "name": "=test",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1tq4Uvt_0_pGB89TBW8lKM4BcnaARIzmH",
+          "mode": "list",
+          "cachedResultName": "n8n upload",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1tq4Uvt_0_pGB89TBW8lKM4BcnaARIzmH"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1552,
+        80
+      ],
+      "id": "c41ef648-776f-4b48-91c5-e79fe77d9295",
+      "name": "Drive audio1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "HUgBuWJOD3ngv7CC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "http://api.voicerss.org",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "e529ed32530e461ca82de116a6919fa8"
+            },
+            {
+              "name": "hl",
+              "value": "en-us"
+            },
+            {
+              "name": "src",
+              "value": "={{ $json.output }}"
+            },
+            {
+              "name": "c",
+              "value": "mp3"
+            },
+            {
+              "name": "f",
+              "value": "44khz_16bit_stereo"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data.mp3"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1376,
+        80
+      ],
+      "id": "85d3b7b7-babf-4c96-9f06-8e26c6f92734",
+      "name": "voicerss.org1"
+    },
+    {
+      "parameters": {
+        "language": "javascript",
+        "jsCode": "// --- Étape 1 : Récupérer l'ID du fichier depuis le nœud d'upload ---\nlet finalAudioUrl = \"Audio non disponible\";\n\ntry {\n  // ⚠️ Assurez-vous que \"Drive audio\" est le nom exact de votre nœud d'upload\n  const uploadNode = $items(\"Drive audio1\")[0];\n\n  // On vérifie que le nœud et son ID existent\n  if (uploadNode && uploadNode.json && uploadNode.json.id) {\n    const fileId = uploadNode.json.id;\n\n    // --- Étape 2 : Construire l'URL de lecture/téléchargement direct ---\n    // C'est le format le plus fiable pour les fichiers publics sur Google Drive.\n    finalAudioUrl = `https://drive.google.com/uc?id=${fileId}&export=download`;\n\n  }\n} catch (e) {\n  console.warn(\"⚠️ Impossible de lire l'ID depuis le nœud 'Drive audio' :\", e.message);\n}\n\n// --- Étape 3 : Retourner l'URL correctement formatée ---\nreturn [{\n  json: {\n    audioUrl: finalAudioUrl\n  }\n}];"
+      },
+      "id": "99827636-caa4-421d-9254-1d6d968e7fc7",
+      "name": "url audio",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 1,
+      "position": [
+        1936,
+        80
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $('Drive audio1').item.json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone",
+            "allowFileDiscovery": true
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1728,
+        80
+      ],
+      "id": "1aa37286-dd55-49d9-bd86-9b8c823cbd61",
+      "name": "Share audio",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "HUgBuWJOD3ngv7CC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Access-Control-Allow-Methods",
+                "value": "POST, GET, OPTIONS"
+              },
+              {
+                "name": "Access-Control-Allow-Headers",
+                "value": "Content-Type, ngrok-skip-browser-warning"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2928,
+        32
+      ],
+      "id": "95b8897f-9f72-439e-85c5-011e82cbcd07",
+      "name": "Respond to Webhook1"
+    }
+  ],
+  "connections": {
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "🧠 Text Summary1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Text Summary1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Generate an image",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "voicerss.org1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Générer texte produit1": {
+      "main": [
+        [
+          {
+            "node": "🧠 Text Summary1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Assembler la réponse finale1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assembler la réponse finale1": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Chercher produit": {
+      "main": [
+        [
+          {
+            "node": "Générer texte produit1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "url image": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Share image": {
+      "main": [
+        [
+          {
+            "node": "url image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Chercher produit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive image": {
+      "main": [
+        [
+          {
+            "node": "Share image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate an image": {
+      "main": [
+        [
+          {
+            "node": "Drive image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "HTML/CSS to Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Drive audio1": {
+      "main": [
+        [
+          {
+            "node": "Share audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "voicerss.org1": {
+      "main": [
+        [
+          {
+            "node": "Drive audio1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share audio": {
+      "main": [
+        [
+          {
+            "node": "url audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "url audio": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Webhook": [
+      {
+        "json": {
+          "headers": {
+            "host": "unexpectingly-uninsinuating-arthur.ngrok-free.dev",
+            "user-agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36",
+            "content-length": "10",
+            "accept": "*/*",
+            "accept-encoding": "gzip, deflate, br, zstd",
+            "accept-language": "en-US,en;q=0.9",
+            "content-type": "application/json",
+            "origin": "https://aiprod-sight.lovable.app",
+            "priority": "u=1, i",
+            "referer": "https://aiprod-sight.lovable.app/",
+            "sec-ch-ua": "\"Chromium\";v=\"140\", \"Not=A?Brand\";v=\"24\", \"Google Chrome\";v=\"140\"",
+            "sec-ch-ua-mobile": "?0",
+            "sec-ch-ua-platform": "\"Windows\"",
+            "sec-fetch-dest": "empty",
+            "sec-fetch-mode": "cors",
+            "sec-fetch-site": "cross-site",
+            "x-forwarded-for": "160.176.89.96",
+            "x-forwarded-host": "unexpectingly-uninsinuating-arthur.ngrok-free.dev",
+            "x-forwarded-proto": "https"
+          },
+          "params": {},
+          "query": {},
+          "body": {
+            "id": "1"
+          },
+          "webhookUrl": "https://unexpectingly-uninsinuating-arthur.ngrok-free.dev/webhook/Product_Engine",
+          "executionMode": "production"
+        }
+      }
+    ]
+  },
+  "versionId": "0741f346-2d02-4f75-90d7-0171f7db5995",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-10-13T12:15:44.132Z",
+      "createdAt": "2025-10-13T12:15:44.132Z",
+      "role": "workflow:owner",
+      "workflowId": "DEz6Lx5Tps5HRLVd",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
