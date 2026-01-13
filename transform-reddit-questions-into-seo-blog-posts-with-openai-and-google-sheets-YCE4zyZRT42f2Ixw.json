@@ -1,0 +1,1164 @@
+{
+  "updatedAt": "2025-09-24T10:21:10.000Z",
+  "createdAt": "2025-09-23T08:32:06.154Z",
+  "id": "YCE4zyZRT42f2Ixw",
+  "name": "Transform Reddit Questions into SEO Blog Posts with OpenAI and Google Sheets",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "62a9bbc2-6c9f-455f-8634-e92c7d3b5e64",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -2144,
+        352
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "subreddit": "n8n",
+        "limit": 30,
+        "filters": {
+          "category": "new"
+        }
+      },
+      "id": "dfdea798-22a8-4ac7-a120-88eb085c6680",
+      "name": "Reddit",
+      "type": "n8n-nodes-base.reddit",
+      "position": [
+        -1920,
+        352
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "redditOAuth2Api": {
+          "id": "egji61gmx0oZk5RO",
+          "name": "Reddit account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const questionWords = ['who', 'what', 'when', 'where', 'why', 'how', 'can', 'does', 'is', 'should', 'do', 'are', 'could', 'would'];\n\nreturn $input.all().filter(item => {\n  const rawTitle = item.json.title;\n  if (!rawTitle) return false;\n\n  const title = rawTitle.trim().toLowerCase();\n\n  const isQuestion =\n    title.endsWith('?') ||\n    questionWords.some(word =>\n      title.startsWith(word + ' ') ||\n      title.includes(' ' + word + ' ')\n    );\n\n  // 🪵 Debug log goes here:\n  if (isQuestion) console.log('✅ Question found:', title);\n\n  return isQuestion;\n});\n"
+      },
+      "id": "e9423396-b05c-4487-9077-c0fb05de03af",
+      "name": "Code",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        -1696,
+        352
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Here is a question:  {{ $json.Title }}\n\nRephrase it without changing the meaning. Keep it as a question.\n\nI just need the question as the output nothing else",
+        "options": {}
+      },
+      "id": "9ee2a015-1ece-471d-bd5f-a6dd130c1090",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -992,
+        384
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "2fbd59cb-9508-4c86-b3b4-45494f269748",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -1024,
+        576
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "Y5EZ7nONrSFTfDWw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.Title }}"
+      },
+      "id": "f65e82cb-81c2-401b-92b2-4302edc42653",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        -832,
+        512
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "334d5871-0e92-4ad5-a1c7-d2f63a712de9",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        64,
+        160
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.name }}"
+      },
+      "id": "7d7a81f2-e73f-457d-9fa5-6f39b3d87bda",
+      "name": "Simple Memory1",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        208,
+        160
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "b80949ff-cae5-4cd8-81db-a1156c3a319d",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        -1264,
+        352
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "6497dcfa-00e9-4322-b207-ea6eca1d92de",
+      "name": "OpenAI Chat Model2",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        64,
+        416
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Append or update row in sheet').item.json.name }}"
+      },
+      "id": "375d811e-285e-42ca-ba1c-a80781ec6605",
+      "name": "Simple Memory2",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        224,
+        416
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "aa72e43d-7e27-4e63-a58e-781d36265c40",
+      "name": "OpenAI Chat Model3",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        64,
+        720
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Append or update row in sheet').item.json.name }}"
+      },
+      "id": "06a6ca4f-f849-40b5-b7bd-554ecc6c52f5",
+      "name": "Simple Memory3",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        224,
+        720
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "a19420f9-3b76-469b-adc0-c0f72db3878c",
+      "name": "OpenAI Chat Model4",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        64,
+        1024
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Append or update row in sheet').item.json.name }}"
+      },
+      "id": "d922c9ff-28f7-4d09-bef4-95f46896e599",
+      "name": "Simple Memory4",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "position": [
+        224,
+        1024
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1fIk66lycsodCwVWY_3Jz8ReQBeo0_nOHaFuv427pzKQ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fIk66lycsodCwVWY_3Jz8ReQBeo0_nOHaFuv427pzKQ/edit?usp=drivesdk",
+          "cachedResultName": "VOC to blog"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 1732850028,
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fIk66lycsodCwVWY_3Jz8ReQBeo0_nOHaFuv427pzKQ/edit#gid=1732850028",
+          "cachedResultName": "Blog"
+        },
+        "columns": {
+          "value": {
+            "name": "={{ $json.name }}",
+            "slug": "={{ $json.slug }}",
+            "Intro": "={{ $json.Intro }}",
+            "Steps": "={{ $json.Steps }}",
+            "Conclusion": "={{ $json.Conclusion }}"
+          },
+          "schema": [
+            {
+              "id": "name",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "slug",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "slug",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Intro",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Intro",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Steps",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Steps",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Conclusion",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Conclusion",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "20c10dcf-d083-4e0d-9e0c-51f76e025a9d",
+      "name": "Google Sheets2",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1280,
+        1184
+      ],
+      "typeVersion": 4.5
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d07c915b-b5c9-454c-8d4b-cdc91f31696c",
+              "name": "slug",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0eca8365-d688-4f19-8a97-cef8c3f48d2c",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        416,
+        32
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "89c11812-98e8-45fc-993e-9938b772051b",
+              "name": "Intro",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2ae647d1-d4f2-4e46-9510-2ed8881329b2",
+      "name": "Edit Fields1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        416,
+        272
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "db117030-0614-4d4b-9779-a2128eb08c84",
+              "name": "Steps",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dae1b896-c554-46c0-a17e-123f5d08baf0",
+      "name": "Edit Fields2",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        416,
+        576
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a short intro for a blog post titled:  {{ $json.name }}\n\nMake it easy to read, with easy vocabulary\n\nJust give me the intro as the output",
+        "options": {}
+      },
+      "id": "fad99f18-d0de-4046-837d-a26aa13c8d82",
+      "name": "Intro",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        64,
+        272
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a 'step by step guide' section for a blog post titled:  {{ $json.name }}\n\nMake it easy to read, with easy vocabulary\nBut make it very detailed\n\nJust give me the output",
+        "options": {}
+      },
+      "id": "08e64b54-c459-44d6-828a-a293f8691ba0",
+      "name": "Steps",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        64,
+        576
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write a short conclusion for a blog post titled:  {{ $json.name }}\n\nMake it easy to read, with easy vocabulary\n\nJust give me the conclusion as the output",
+        "options": {}
+      },
+      "id": "f3c5de3a-6bb8-4bd0-8502-f770d5ff3893",
+      "name": "Conclusion",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        64,
+        880
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "86fc0fde-f55c-445c-8ebd-828c505a730e",
+              "name": "Conclusion",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "6c52c08d-922f-4214-921f-c6971a39c334",
+      "name": "Edit Fields3",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        416,
+        880
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Based on {{ $json.name }}\n\nCreate a website slug for it. For example: best-website-builder\n\nJust give me the slug as output nothing else",
+        "options": {}
+      },
+      "id": "226baa28-c4f6-4234-9a7f-19359a92c78b",
+      "name": "slug",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        64,
+        32
+      ],
+      "typeVersion": 1.9
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a8a698ac-11ee-4623-8cce-8a9900d2ba08",
+              "name": "name",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ef1da26e-c24f-49d4-9830-59ae670b4f7d",
+      "name": "Edit Fields4",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -640,
+        384
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "# Send data",
+        "height": 280,
+        "width": 460,
+        "color": 3
+      },
+      "id": "78d78e42-a700-4776-856b-be602693d477",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -2224,
+        272
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# Article factory",
+        "height": 1280,
+        "width": 600
+      },
+      "id": "53f78991-f438-4902-8937-271ee20c71de",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -32,
+        -96
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# Enhancer",
+        "height": 440,
+        "width": 780
+      },
+      "id": "808120c8-ade9-4cd2-9193-4bec0112bf05",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1072,
+        272
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# Data cleaner",
+        "height": 280,
+        "width": 400,
+        "color": 3
+      },
+      "id": "84a34ec2-ea90-4355-962e-c2d3f14baef2",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1744,
+        272
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1pUeUR9kkW1aAHKa1BSJYNs735fnh-kfLjERkRoDTGB8",
+          "mode": "list",
+          "cachedResultName": "VOC to blog",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pUeUR9kkW1aAHKa1BSJYNs735fnh-kfLjERkRoDTGB8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": " Queries",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pUeUR9kkW1aAHKa1BSJYNs735fnh-kfLjERkRoDTGB8/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Query": "={{ $json.selftext }}",
+            "Title": "={{ $json.title }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Query",
+              "displayName": "Query",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Title",
+              "displayName": "Title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "ec652814-21b7-420f-8c5a-d7f21e7341ce",
+      "name": "Append row in sheet1",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -1472,
+        352
+      ],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1fIk66lycsodCwVWY_3Jz8ReQBeo0_nOHaFuv427pzKQ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fIk66lycsodCwVWY_3Jz8ReQBeo0_nOHaFuv427pzKQ/edit?usp=drivesdk",
+          "cachedResultName": "VOC to blog"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 1732850028,
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fIk66lycsodCwVWY_3Jz8ReQBeo0_nOHaFuv427pzKQ/edit#gid=1732850028",
+          "cachedResultName": "Blog"
+        },
+        "columns": {
+          "value": {
+            "name": "={{ $json.name }}"
+          },
+          "schema": [
+            {
+              "id": "name",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "slug",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "slug",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Intro",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Intro",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Steps",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Steps",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Conclusion",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Conclusion",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "name"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "cad3252d-5370-4fe4-8907-de71a700b002",
+      "name": "Append or update row in sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -384,
+        384
+      ],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "H3cbxdGjv6qzZVhw",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1fIk66lycsodCwVWY_3Jz8ReQBeo0_nOHaFuv427pzKQ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fIk66lycsodCwVWY_3Jz8ReQBeo0_nOHaFuv427pzKQ/edit?usp=drivesdk",
+          "cachedResultName": "VOC to blog"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": 1732850028,
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1fIk66lycsodCwVWY_3Jz8ReQBeo0_nOHaFuv427pzKQ/edit#gid=1732850028",
+          "cachedResultName": "Blog"
+        },
+        "columns": {
+          "value": {
+            "name": "={{ $json.name }}"
+          },
+          "schema": [
+            {
+              "id": "name",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "name",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "slug",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "slug",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Intro",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Intro",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Steps",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Steps",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Conclusion",
+              "type": "string",
+              "display": true,
+              "required": false,
+              "displayName": "Conclusion",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "defineBelow",
+          "matchingColumns": [
+            "name"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "d75e9a57-259b-4889-948b-8e1f8e44184e",
+      "name": "Append or update row in sheet1",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        -384,
+        560
+      ],
+      "typeVersion": 4.5,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Reddit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reddit": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "slug",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "slug",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Intro",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory2": {
+      "ai_memory": [
+        [
+          {
+            "node": "Intro",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Steps",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory3": {
+      "ai_memory": [
+        [
+          {
+            "node": "Steps",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Conclusion",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory4": {
+      "ai_memory": [
+        [
+          {
+            "node": "Conclusion",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Intro": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Steps": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Conclusion": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "slug": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Intro",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Steps",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Conclusion",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "slug",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "73e728c9-ab03-41ff-9a36-5c5ee80b2ee4",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-23T08:32:06.171Z",
+      "createdAt": "2025-09-23T08:32:06.171Z",
+      "role": "workflow:owner",
+      "workflowId": "YCE4zyZRT42f2Ixw",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
