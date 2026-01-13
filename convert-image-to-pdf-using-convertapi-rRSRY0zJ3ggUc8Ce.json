@@ -1,0 +1,173 @@
+{
+  "updatedAt": "2025-09-27T10:41:49.000Z",
+  "createdAt": "2025-08-19T16:15:18.081Z",
+  "id": "rRSRY0zJ3ggUc8Ce",
+  "name": "Convert image to PDF using ConvertAPI",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "7f4ecd85-1f6e-418e-a224-1a690741192b",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        368,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "write",
+        "fileName": "document.pdf",
+        "dataPropertyName": "=data",
+        "options": {}
+      },
+      "id": "43a0e1f6-f9d1-4be2-8e84-8cf8be4add8e",
+      "name": "Write Result File to Disk",
+      "type": "n8n-nodes-base.readWriteFile",
+      "position": [
+        1200,
+        240
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Authentication\nConversion requests must be authenticated. Please create \n[ConvertAPI account to get authentication secret](https://www.convertapi.com/a/signin)",
+        "height": 132,
+        "width": 218
+      },
+      "id": "1094bca9-c48c-45bf-8cd4-17f074cd269a",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        720,
+        112
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "https://cdn.convertapi.com/public/files/demo.jpg",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "3e168f2e-f811-489a-b1ad-4973a86a2a6a",
+      "name": "Download Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        576,
+        240
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://v2.convertapi.com/convert/jpg/to/pdf",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpQueryAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/octet-stream"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "multipart-form-data",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "parameterType": "formBinaryData",
+              "name": "file",
+              "inputDataFieldName": "=data"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "c43b179c-5538-424c-90df-51699a5e6b87",
+      "name": "File conversion to PDF",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        768,
+        240
+      ],
+      "notesInFlow": true,
+      "typeVersion": 4.2
+    }
+  ],
+  "connections": {
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "File conversion to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "File conversion to PDF": {
+      "main": [
+        [
+          {
+            "node": "Write Result File to Disk",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateId": "2316"
+  },
+  "pinData": {},
+  "versionId": "8a162c8f-0561-47e8-865a-baffa64ca6b8",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-08-19T16:15:18.094Z",
+      "createdAt": "2025-08-19T16:15:18.094Z",
+      "role": "workflow:owner",
+      "workflowId": "rRSRY0zJ3ggUc8Ce",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
