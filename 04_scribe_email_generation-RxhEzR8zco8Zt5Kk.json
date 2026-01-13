@@ -1,0 +1,458 @@
+{
+  "updatedAt": "2025-12-25T09:44:06.922Z",
+  "createdAt": "2025-12-25T01:53:50.274Z",
+  "id": "RxhEzR8zco8Zt5Kk",
+  "name": "04_SCRIBE_Email_Generation",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 2
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2176,
+        -16
+      ],
+      "id": "cfb376f9-d93c-4d10-9cbf-d999a0f6cb63",
+      "name": "Every 2 Minutes"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "leads",
+        "limit": 3,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "keyValue": "scored"
+            },
+            {
+              "keyName": "fit_score",
+              "condition": "gte",
+              "keyValue": "70"
+            },
+            {
+              "keyName": "email_subject",
+              "condition": "isNull"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1984,
+        -16
+      ],
+      "id": "87509be9-4ff7-4e34-8940-bcc7537700e0",
+      "name": "Query Qualified Leads",
+      "credentials": {
+        "supabaseApi": {
+          "id": "B3fV167ZWXhpJPxi",
+          "name": "IMAD LEAD GEN AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-leads-exist",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1776,
+        -16
+      ],
+      "id": "f2333ed5-1d23-430e-98e1-67b11f671d22",
+      "name": "Leads Exist?"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get lead data\nconst lead = $input.first().json;\n\n// Extract and parse analysis data\nlet analysisData = {};\ntry {\n  if (typeof lead.analysis_data === 'string') {\n    analysisData = JSON.parse(lead.analysis_data);\n  } else if (typeof lead.analysis_data === 'object' && lead.analysis_data !== null) {\n    analysisData = lead.analysis_data;\n  }\n} catch (e) {\n  console.warn('Could not parse analysis_data:', e.message);\n  analysisData = {};\n}\n\n// Build comprehensive context for email generation\nconst context = {\n  // Core Lead Info\n  lead_id: lead.id,\n  batch_id: lead.batch_id,\n  user_id: lead.user_id,\n  name: lead.name || 'Unknown Business',\n  domain: lead.domain,\n  phone: lead.phone || 'No phone available',\n  email: lead.email,\n  address: lead.address || 'Location not specified',\n  \n  // Quality Metrics\n  fit_score: lead.fit_score || 0,\n  rating: lead.rating || 'Not rated',\n  reviews_count: lead.reviews_count || 0,\n  category: lead.category || 'business',\n  \n  // Analysis Results\n  analysis_summary: (lead.analysis_summary || 'No detailed analysis available').substring(0, 500),\n  legitimacy_score: analysisData.legitimacy_score || 0,\n  quality_score: analysisData.quality_score || 0,\n  relevance_score: analysisData.relevance_score || 0,\n  contact_score: analysisData.contact_score || 0,\n  \n  // Insights for Personalization\n  pros: Array.isArray(analysisData.pros) \n    ? analysisData.pros.slice(0, 3) \n    : ['Professional online presence'],\n  cons: Array.isArray(analysisData.cons) \n    ? analysisData.cons.slice(0, 2) \n    : [],\n  recommended_action: analysisData.recommended_action || 'contact',\n  \n  // Context (will be used if available)\n  search_context: {\n    term: 'businesses', // Could be enriched from batch data\n    location: 'your area'\n  }\n};\n\n// Create formatted pros/cons strings for the prompt\nconst prosText = context.pros.map((p, i) => `${i + 1}. ${p}`).join('\\n');\nconst consText = context.cons.length > 0 \n  ? context.cons.map((c, i) => `${i + 1}. ${c}`).join('\\n')\n  : 'None identified';\n\nconsole.log(`Preparing email generation for: ${context.name}`);\nconsole.log(`Fit Score: ${context.fit_score}/100`);\nconsole.log(`Pros: ${context.pros.length}, Cons: ${context.cons.length}`);\n\nreturn [{\n  json: {\n    ...context,\n    pros_formatted: prosText,\n    cons_formatted: consText\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1584,
+        -112
+      ],
+      "id": "0e6b6b24-fd4e-438f-9b8d-48607a0bf6a7",
+      "name": "Extract Lead Context"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-3-5-sonnet-20241022\",\n  \"max_tokens\": 2048,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"You are an expert sales copywriter specializing in personalized B2B cold emails. Write a highly personalized cold email to this business.\\n\\n**TARGET BUSINESS:**\\n- Name: {{ $json.name }}\\n- Domain: {{ $json.domain }}\\n- Location: {{ $json.address }}\\n- Google Rating: {{ $json.rating }}/5 ({{ $json.reviews_count }} reviews)\\n- Fit Score: {{ $json.fit_score }}/100\\n- Category: {{ $json.category }}\\n\\n**ANALYSIS INSIGHTS:**\\nSummary: {{ $json.analysis_summary }}\\n\\nKey Strengths:\\n{{ $json.pros_formatted }}\\n\\nPotential Opportunities:\\n{{ $json.cons_formatted }}\\n\\n**EMAIL REQUIREMENTS:**\\n\\n1. **Subject Line** (40-60 characters):\\n   - Personalized and attention-grabbing\\n   - Reference something specific (rating, location, or business aspect)\\n   - Avoid spam triggers (no !!!!, FREE, LIMITED TIME)\\n   - Natural and conversational\\n\\n2. **Email Body** (150-200 words):\\n   \\n   **Opening (2-3 sentences):**\\n   - Start with a genuine compliment or observation\\n   - Reference their high rating if 4.5+\\n   - Mention something specific from their online presence\\n   \\n   **Value Proposition (2-3 sentences):**\\n   - Clearly state how you can help\\n   - Connect to their strengths or opportunities identified\\n   - Be specific, not generic\\n   \\n   **Social Proof (1 sentence):**\\n   - Brief mention of similar results\\n   - Keep it humble and credible\\n   \\n   **Call-to-Action (2 sentences):**\\n   - Low-pressure, consultative approach\\n   - Specific time commitment (10-15 min)\\n   - Easy to say yes to\\n\\n3. **Tone Guidelines:**\\n   - Professional but warm and conversational\\n   - Confident without being pushy\\n   - Respectful of their time\\n   - No obvious AI language patterns\\n   - Avoid: 'Hope this email finds you well', 'Reaching out', 'I wanted to'\\n\\n4. **Personalization Rules:**\\n   - Use business name naturally (1-2 times max)\\n   - Reference specific strengths from analysis\\n   - If cons exist, subtly address them as opportunities\\n   - Match sophistication level to their fit score\\n\\n**Response Format (JSON only, no markdown):**\\n{\\n  \\\"subject\\\": \\\"<subject line>\\\",\\n  \\\"body\\\": \\\"<complete email body>\\\",\\n  \\\"personalization_notes\\\": \\\"<brief explanation of what makes this specific to them>\\\",\\n  \\\"follow_up_strategy\\\": \\\"<when and how to follow up if no response>\\\"\\n}\\n\\n**CRITICAL:** Respond ONLY with valid JSON. No markdown code blocks, no explanatory text before or after.\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -1376,
+        -112
+      ],
+      "id": "029777b6-3cfc-4e2a-a7f8-6b3bb5ee5672",
+      "name": "Generate Email (Claude)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get LLM response and lead context\nconst llmResponse = $input.first().json;\nconst leadContext = $('Extract Lead Context').item.json;\n\n// Extract content from Claude response\nlet emailText = '';\nif (llmResponse.content && Array.isArray(llmResponse.content)) {\n  emailText = llmResponse.content\n    .filter(block => block.type === 'text')\n    .map(block => block.text)\n    .join('\\n');\n} else if (llmResponse.choices && llmResponse.choices[0]) {\n  // OpenAI format fallback\n  emailText = llmResponse.choices[0].message.content;\n} else if (typeof llmResponse === 'string') {\n  emailText = llmResponse;\n}\n\nconsole.log('Raw LLM response (first 200 chars):', emailText.substring(0, 200));\n\n// Parse JSON from response\nlet emailDraft;\ntry {\n  // Remove markdown code blocks if present\n  let cleanedText = emailText\n    .replace(/```json\\s*/g, '')\n    .replace(/```\\s*/g, '')\n    .trim();\n  \n  // Find JSON object\n  const jsonMatch = cleanedText.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    emailDraft = JSON.parse(jsonMatch[0]);\n    console.log('✅ Successfully parsed JSON email draft');\n  } else {\n    throw new Error('No JSON object found in response');\n  }\n} catch (e) {\n  console.error('❌ Failed to parse email draft:', e.message);\n  console.log('Attempting fallback extraction...');\n  \n  // Fallback: manual extraction\n  const subjectMatch = emailText.match(/subject[:\\s]*[\"']([^\"']+)[\"']/i);\n  const bodyMatch = emailText.match(/body[:\\s]*[\"']([\\s\\S]+?)[\"']\\s*[,}]/i);\n  \n  emailDraft = {\n    subject: subjectMatch \n      ? subjectMatch[1].trim()\n      : `Quick question about ${leadContext.name}`,\n    body: bodyMatch \n      ? bodyMatch[1].trim()\n      : `Hi,\\n\\nI came across ${leadContext.name} and was impressed by your ${leadContext.rating}/5 rating. I'd love to chat about how we might be able to help grow your business.\\n\\nWould a quick 15-minute call work for you next week?\\n\\nBest regards`,\n    personalization_notes: 'Fallback extraction - manual review recommended',\n    follow_up_strategy: 'Follow up in 3 business days if no response'\n  };\n  \n  console.warn('⚠️ Using fallback email template');\n}\n\n// Validate and clean fields\nconst cleanSubject = (emailDraft.subject || `Partnering with ${leadContext.name}`)\n  .substring(0, 200)\n  .trim()\n  .replace(/\"/g, '')\n  .replace(/\\n/g, ' ');\n\nconst cleanBody = (emailDraft.body || 'Email generation failed')\n  .substring(0, 5000)\n  .trim();\n\n// Basic quality checks\nconst qualityChecks = {\n  has_subject: cleanSubject.length > 10,\n  subject_not_too_long: cleanSubject.length <= 100,\n  has_body: cleanBody.length > 50,\n  body_reasonable_length: cleanBody.length >= 400 && cleanBody.length <= 2000,\n  has_line_breaks: cleanBody.includes('\\n'),\n  mentions_business: cleanBody.toLowerCase().includes(leadContext.name.toLowerCase().split(' ')[0])\n};\n\nconst qualityIssues = Object.entries(qualityChecks)\n  .filter(([key, value]) => !value)\n  .map(([key]) => key);\n\nif (qualityIssues.length > 0) {\n  console.warn('⚠️ Quality issues detected:', qualityIssues.join(', '));\n}\n\nconsole.log(`✅ Email generated for ${leadContext.name}`);\nconsole.log(`   Subject: \"${cleanSubject}\"`);\nconsole.log(`   Body length: ${cleanBody.length} chars`);\nconsole.log(`   Quality score: ${Object.values(qualityChecks).filter(Boolean).length}/${Object.keys(qualityChecks).length}`);\n\nreturn [{\n  json: {\n    // Lead identifiers\n    lead_id: leadContext.lead_id,\n    batch_id: leadContext.batch_id,\n    user_id: leadContext.user_id,\n    lead_name: leadContext.name,\n    lead_domain: leadContext.domain,\n    \n    // Email content\n    email_subject: cleanSubject,\n    email_body: cleanBody,\n    \n    // Metadata\n    personalization_notes: emailDraft.personalization_notes || 'AI-generated personalized email',\n    follow_up_strategy: emailDraft.follow_up_strategy || 'Standard 3-day follow-up sequence',\n    \n    // Quality metrics\n    quality_checks: qualityChecks,\n    quality_issues: qualityIssues,\n    \n    // Full draft data\n    email_draft_data: emailDraft,\n    \n    // Generation metadata\n    drafted_at: new Date().toISOString(),\n    llm_model: llmResponse.model || 'claude-3-5-sonnet',\n    \n    // Original lead data\n    fit_score: leadContext.fit_score,\n    rating: leadContext.rating\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1184,
+        -112
+      ],
+      "id": "ab805c52-5f8e-4400-9a52-e920f7ff50b4",
+      "name": "Parse & Validate Email"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "leads"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -976,
+        -112
+      ],
+      "id": "abbc28a8-1f76-48c7-85e1-281ddb462cb4",
+      "name": "Update Lead (Email Ready)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "BHmRvBY35o1BUBtE",
+          "name": "last one"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "insert"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -784,
+        -112
+      ],
+      "id": "9a5cfe43-ef48-4a78-b4b9-9f3f9bfa1722",
+      "name": "Log Success",
+      "credentials": {
+        "supabaseApi": {
+          "id": "BHmRvBY35o1BUBtE",
+          "name": "last one"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Check if batch is complete\nconst batchId = $json.batch_id;\n\nif (!batchId) {\n  console.log('No batch_id found, skipping batch completion check');\n  return [];\n}\n\nconsole.log(`Checking email completion status for batch: ${batchId}`);\n\nreturn [{\n  json: {\n    batch_id: batchId\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -576,
+        -112
+      ],
+      "id": "098bbbd5-7abc-4d8c-90f3-390a5674e09c",
+      "name": "Check Batch Completion"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "leads",
+        "returnAll": true,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "batch_id",
+              "keyValue": "={{ $json.batch_id }}"
+            },
+            {
+              "keyName": "fit_score",
+              "condition": "gte",
+              "keyValue": "70"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -112
+      ],
+      "id": "7559d60a-f6fb-4bcc-b585-58ddde91e6f9",
+      "name": "Query Batch Email Status",
+      "credentials": {
+        "supabaseApi": {
+          "id": "BHmRvBY35o1BUBtE",
+          "name": "last one"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Calculate email completion status\nconst allLeads = $input.all().map(item => item.json);\nconst batchId = $('Check Batch Completion').item.json.batch_id;\n\nif (allLeads.length === 0) {\n  console.log('No qualified leads found in batch');\n  return [{ json: { complete: false, skip: true } }];\n}\n\n// Count leads by email status\nconst totalQualified = allLeads.length;\nconst withEmails = allLeads.filter(l => \n  l.email_subject && \n  l.email_subject.length > 0 && \n  l.status === 'email_ready'\n).length;\nconst emailsPending = totalQualified - withEmails;\n\n// All emails ready when all qualified leads have email_subject\nconst allEmailsReady = emailsPending === 0;\n\n// Calculate average fit score for context\nconst avgFitScore = Math.round(\n  allLeads.reduce((sum, l) => sum + (l.fit_score || 0), 0) / totalQualified\n);\n\n// Get top 3 subject lines for notification\nconst topSubjects = allLeads\n  .filter(l => l.email_subject)\n  .sort((a, b) => (b.fit_score || 0) - (a.fit_score || 0))\n  .slice(0, 3)\n  .map(l => `\"${l.email_subject}\" (${l.name})`);\n\nconsole.log(`📊 Batch ${batchId} email generation status:`);\nconsole.log(`   Total qualified leads: ${totalQualified}`);\nconsole.log(`   Emails drafted: ${withEmails}`);\nconsole.log(`   Emails pending: ${emailsPending}`);\nconsole.log(`   Completion: ${Math.round((withEmails / totalQualified) * 100)}%`);\nconsole.log(`   All ready: ${allEmailsReady ? '✅ YES' : '❌ NO'}`);\n\nreturn [{\n  json: {\n    batch_id: batchId,\n    complete: allEmailsReady,\n    total_qualified: totalQualified,\n    emails_drafted: withEmails,\n    emails_pending: emailsPending,\n    completion_rate: Math.round((withEmails / totalQualified) * 100),\n    avg_fit_score: avgFitScore,\n    top_subjects: topSubjects\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -176,
+        -112
+      ],
+      "id": "5d615958-09aa-45c6-a783-e3a2edb40df9",
+      "name": "Calculate Email Completion"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "all-emails-ready",
+              "leftValue": "={{ $json.complete }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "equals",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        32,
+        -112
+      ],
+      "id": "2eb03cec-be60-46fe-9f79-4c3bf7b4cc04",
+      "name": "All Emails Complete?"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Prepare notification message\nconst data = $input.first().json;\n\nconst message = `✅ *Batch Email Generation Complete!*\\n\\n` +\n  `📊 *Summary:*\\n` +\n  `• Qualified Leads: ${data.total_qualified}\\n` +\n  `• Emails Drafted: ${data.emails_drafted}\\n` +\n  `• Average Fit Score: ${data.avg_fit_score}/100\\n` +\n  `• Completion: ${data.completion_rate}%\\n\\n` +\n  `🎯 *Top Email Subjects:*\\n` +\n  data.top_subjects.slice(0, 3).map((s, i) => `${i + 1}. ${s}`).join('\\n') +\n  `\\n\\n✉️ All personalized emails are ready for review!`;\n\nreturn [{\n  json: {\n    batch_id: data.batch_id,\n    message: message,\n    parse_mode: 'Markdown'\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        256,
+        -192
+      ],
+      "id": "15e3d07b-ea0a-472b-a4c9-468dcb47c138",
+      "name": "Prepare Notification"
+    }
+  ],
+  "connections": {
+    "Every 2 Minutes": {
+      "main": [
+        [
+          {
+            "node": "Query Qualified Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Qualified Leads": {
+      "main": [
+        [
+          {
+            "node": "Leads Exist?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leads Exist?": {
+      "main": [
+        [
+          {
+            "node": "Extract Lead Context",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Lead Context": {
+      "main": [
+        [
+          {
+            "node": "Generate Email (Claude)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Email (Claude)": {
+      "main": [
+        [
+          {
+            "node": "Parse & Validate Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse & Validate Email": {
+      "main": [
+        [
+          {
+            "node": "Update Lead (Email Ready)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lead (Email Ready)": {
+      "main": [
+        [
+          {
+            "node": "Log Success",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Success": {
+      "main": [
+        [
+          {
+            "node": "Check Batch Completion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Batch Completion": {
+      "main": [
+        [
+          {
+            "node": "Query Batch Email Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Batch Email Status": {
+      "main": [
+        [
+          {
+            "node": "Calculate Email Completion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Email Completion": {
+      "main": [
+        [
+          {
+            "node": "All Emails Complete?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "All Emails Complete?": {
+      "main": [
+        [
+          {
+            "node": "Prepare Notification",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "b8d0272c-74ae-4cbc-b605-38d3498035c2",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-25T01:53:50.296Z",
+      "createdAt": "2025-12-25T01:53:50.296Z",
+      "role": "workflow:owner",
+      "workflowId": "RxhEzR8zco8Zt5Kk",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
