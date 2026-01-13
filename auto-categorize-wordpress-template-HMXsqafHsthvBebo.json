@@ -1,0 +1,209 @@
+{
+  "updatedAt": "2025-11-01T16:34:22.000Z",
+  "createdAt": "2025-10-17T10:27:24.081Z",
+  "id": "HMXsqafHsthvBebo",
+  "name": "Auto categorize wordpress template",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "94f0c183-fe4a-441f-aee6-45adfc01c5fe",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -128,
+        336
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "postId": "={{ $('Get All Wordpress Posts').item.json.id }}",
+        "updateFields": {
+          "categories": "={{ $json.output }}"
+        }
+      },
+      "id": "3f6922bc-18ef-4ec5-8561-566d51aed0b2",
+      "name": "Wordpress",
+      "type": "n8n-nodes-base.wordpress",
+      "position": [
+        688,
+        336
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## How to Auto-Categorize 82 Blog Posts in 2 Minutes using A.I. (No Coding Required)\n\n💡 Read the [case study here](https://rumjahn.com/how-to-use-a-i-to-categorize-wordpress-posts-and-streamline-your-content-organization-process/).\n\n📺 Watch the [youtube tutorial here](https://www.youtube.com/watch?v=IvQioioVqhw)\n\n",
+        "width": 504.88636363636317
+      },
+      "id": "566c9391-4485-45dc-ae55-e57e70d9f71e",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -192,
+        -96
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Get wordpress posts\n\nTurn off return all if you're running into issues.\n",
+        "height": 327.3400673400663,
+        "width": 188.14814814814804,
+        "color": 3
+      },
+      "id": "bb0ef6a8-558d-4f03-95b1-f50d4e1ec618",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        48,
+        192
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### A.I. Categorization\n\n1. you need to set up the categories first in wordpress\n\n2. Edit the message prompt and change the categories and category numbers",
+        "height": 416.90235690235625,
+        "width": 315.1464152082392,
+        "color": 4
+      },
+      "id": "d3740e75-d701-48c1-8001-43ee0f7b55fc",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        272,
+        96
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Update category",
+        "height": 269.59595959595947,
+        "width": 171.64983164983155,
+        "color": 5
+      },
+      "id": "1e30f14f-b232-4ce3-af8d-4d6c3ba37ae0",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        672,
+        256
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {}
+      },
+      "id": "a0586bad-6f8d-4c58-9213-313d1bba711e",
+      "name": "Get All Wordpress Posts",
+      "type": "n8n-nodes-base.wordpress",
+      "position": [
+        96,
+        336
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "42b3c44b-bef7-4454-9ea6-00cc24c86b82",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        272,
+        544
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert content strategist and taxonomy specialist with extensive experience in blog categorization and content organization.\n\nI will provide you with a blog post's title. Your task is to assign ONE primary category ID from this fixed list:\n\n13 = Content Creation\n14 = Digital Marketing\n15 = AI Tools\n17 = Automation & Integration\n18 = Productivity Tools\n19 = Analytics & Strategy\n\nAnalyze the title and return only the single most relevant category ID number that best represents the main focus of the post. While a post might touch on multiple topics, select the dominant theme that would be most useful for navigation purposes.\n\n{{ $json.title.rendered }}\n\nOutput only the category number",
+        "options": {}
+      },
+      "id": "8d3e61ee-d824-42cb-a5a3-e22c47884be6",
+      "name": "AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        288,
+        336
+      ],
+      "typeVersion": 1.7
+    }
+  ],
+  "connections": {
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Wordpress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get All Wordpress Posts": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get All Wordpress Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "8598c74f-7d3f-4b97-9aa3-f9fad54aa833",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-17T10:27:24.093Z",
+      "createdAt": "2025-10-17T10:27:24.093Z",
+      "role": "workflow:owner",
+      "workflowId": "HMXsqafHsthvBebo",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
