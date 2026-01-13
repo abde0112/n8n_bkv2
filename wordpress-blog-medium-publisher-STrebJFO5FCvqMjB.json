@@ -1,0 +1,314 @@
+{
+  "updatedAt": "2025-11-01T16:34:22.000Z",
+  "createdAt": "2025-10-17T10:30:48.153Z",
+  "id": "STrebJFO5FCvqMjB",
+  "name": "WordPress blog-medium-publisher",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "Title",
+              "cssSelector": "h2.single-post-title"
+            },
+            {
+              "key": "Introduction",
+              "cssSelector": ".kiwi-highlighter-content-area > p:nth-child(1)"
+            },
+            {
+              "key": "Header",
+              "cssSelector": "div.kiwi-highlighter-content-area",
+              "returnValue": "html"
+            },
+            {
+              "key": "={{ $json.data }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "5a3a81dc-63be-4d39-989c-b766c494f897",
+      "name": "HTML",
+      "type": "n8n-nodes-base.html",
+      "position": [
+        864,
+        176
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "https://mailsafi.com/blog/",
+        "options": {}
+      },
+      "id": "6ee7cd53-79e6-4ff9-b4a5-e10bd1bc9053",
+      "name": "HTTP Request",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        0,
+        336
+      ],
+      "typeVersion": 4.1,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "post",
+              "cssSelector": ".entry-title > a",
+              "returnArray": true
+            },
+            {
+              "key": "Link",
+              "cssSelector": " .lae-read-more > a",
+              "returnValue": "attribute",
+              "attribute": "href",
+              "returnArray": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "08b89808-fc1a-43cc-a930-53c9a08fdfd9",
+      "name": "HTML1",
+      "type": "n8n-nodes-base.html",
+      "position": [
+        176,
+        336
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "post , Link",
+        "options": {}
+      },
+      "id": "45d90f5f-028a-4a09-a982-de111598eec0",
+      "name": "Item Lists",
+      "type": "n8n-nodes-base.itemLists",
+      "position": [
+        336,
+        336
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {
+        "title": "={{ $json.Title }}",
+        "contentFormat": "html",
+        "content": "={{ $json.Header }}",
+        "additionalFields": {
+          "notifyFollowers": false,
+          "publishStatus": "public",
+          "tags": "Email Hosting, Email, Email Marketing"
+        }
+      },
+      "id": "24bfa378-5887-4081-818e-a1bc1f1191a5",
+      "name": "Medium",
+      "type": "n8n-nodes-base.medium",
+      "position": [
+        912,
+        400
+      ],
+      "typeVersion": 1,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.Link }}",
+        "options": {}
+      },
+      "id": "563c2cb5-77df-45ad-98e5-21c5896a5ab1",
+      "name": "HTTP Request1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        704,
+        176
+      ],
+      "typeVersion": 4.1,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "a97393c3-e908-4ae9-9942-2d5bb794f94a",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        640,
+        336
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "operation": "limit",
+        "maxItems": 5
+      },
+      "id": "b773d288-a39c-4ff4-b3e6-32fc2ac7b835",
+      "name": "Item Lists1",
+      "type": "n8n-nodes-base.itemLists",
+      "position": [
+        480,
+        336
+      ],
+      "typeVersion": 3.1
+    },
+    {
+      "parameters": {},
+      "id": "924650fa-7ad6-4df3-bf6d-865781179e87",
+      "name": "When clicking \"Execute Workflow\"",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -208,
+        336
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Usage \n**How to use me** This workflow gets all the posts from your WordPress site and sorts them into a clear format before publishing them to medium.\n\nStep 1. Set up the HTTP node and set the URL of the source destination. This will be the URL of the blog you want to use. We shall be using https://mailsafi.com/blog for this.\n\nStep 2. Extract the URLs of all the blogs on the page\nThis gets all the blog titles and their URLs. Its an easy way to sort ou which blogs to share and which not to share.\n\nStep 3. Split the entries for easy sorting or a cleaner view.\n\nStep 4. Set a new https node with all the blog URLs that we got from the previous steps. \n\nStep 5. Extract the contents of the blog\n\nStep 6. Add the medium node and then set the contents that you want to be shared out.\n\nExecute your work flow and you are good to go\n\n\n",
+        "height": 522.559880239521,
+        "width": 688.6526946107781
+      },
+      "id": "f69a3cfd-2879-4e16-885c-af1ba9a6ac5a",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -288,
+        -112
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "Medium",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML1": {
+      "main": [
+        [
+          {
+            "node": "Item Lists",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Medium": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Item Lists": {
+      "main": [
+        [
+          {
+            "node": "Item Lists1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Item Lists1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "HTML1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking \"Execute Workflow\"": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "83ae7c50-265d-48a6-894a-887e7a07c4ce",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-17T10:30:48.170Z",
+      "createdAt": "2025-10-17T10:30:48.170Z",
+      "role": "workflow:owner",
+      "workflowId": "STrebJFO5FCvqMjB",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
