@@ -1,0 +1,589 @@
+{
+  "updatedAt": "2025-09-24T10:10:21.000Z",
+  "createdAt": "2025-09-23T11:39:00.473Z",
+  "id": "KV2FsyionHNWZq2U",
+  "name": "Stock Inventory Sync",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://fakestoreapi.com/products",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "7e4aacaf-59d6-4314-8f2d-72c5f6f49478",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a9f58283-c41c-44cc-af77-d212ef96e488",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1zyTCYRFdoUHWhQ_W_DIOH5Ai2gG9VTark0PFpplmk8s",
+          "mode": "list",
+          "cachedResultName": "Warehouse Inventory",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zyTCYRFdoUHWhQ_W_DIOH5Ai2gG9VTark0PFpplmk8s/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zyTCYRFdoUHWhQ_W_DIOH5Ai2gG9VTark0PFpplmk8s/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "productId",
+              "lookupValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        656,
+        16
+      ],
+      "id": "6ba537a9-857d-4102-91d3-e701e7ef1b19",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "9b688ed3-8a7c-4a73-a30f-342d694efc57",
+              "leftValue": "={{ $json.stockLevel }}",
+              "rightValue": "={{ $('HTTP Request').item.json.rating.count }}",
+              "operator": {
+                "type": "number",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        864,
+        16
+      ],
+      "id": "492bd6ad-2ce2-4875-881b-4692ddf1dd2c",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1zyTCYRFdoUHWhQ_W_DIOH5Ai2gG9VTark0PFpplmk8s",
+          "mode": "list",
+          "cachedResultName": "Warehouse Inventory",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zyTCYRFdoUHWhQ_W_DIOH5Ai2gG9VTark0PFpplmk8s/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zyTCYRFdoUHWhQ_W_DIOH5Ai2gG9VTark0PFpplmk8s/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "productId": "={{ $json.productId }}",
+            "stockLevel": "={{ $('HTTP Request').item.json.rating.count }}"
+          },
+          "matchingColumns": [
+            "productId"
+          ],
+          "schema": [
+            {
+              "id": "productId",
+              "displayName": "productId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "stockLevel",
+              "displayName": "stockLevel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1120,
+        0
+      ],
+      "id": "a391da61-e7f1-4f85-9130-126b01ed40be",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1zyTCYRFdoUHWhQ_W_DIOH5Ai2gG9VTark0PFpplmk8s",
+          "mode": "list",
+          "cachedResultName": "Warehouse Inventory",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zyTCYRFdoUHWhQ_W_DIOH5Ai2gG9VTark0PFpplmk8s/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1zyTCYRFdoUHWhQ_W_DIOH5Ai2gG9VTark0PFpplmk8s/edit#gid=0"
+        },
+        "event": "rowUpdate",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        416
+      ],
+      "id": "9b469a1e-0b5f-4ada-b793-e888ca4e6f0c",
+      "name": "Warehouse Inventory",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "TkDPqn2l1NnPZ0mh",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        16,
+        0
+      ],
+      "id": "58d071b6-61c4-4aae-b353-7b2f867cd2b9",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "content": "Part 1 (mini project)\n",
+        "height": 432,
+        "width": 1376
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -16,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "3c50062f-85f6-41b0-88fc-c728620266f4",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "height": 416,
+        "width": 1376,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -16,
+        288
+      ],
+      "typeVersion": 1,
+      "id": "b75ec951-a042-4d0d-ba3f-06e84bdd1263",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "url": "=https://fakestoreapi.com/products/{{ $json.productId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        416
+      ],
+      "id": "742f6165-fc07-4cb9-a9e3-c584fcfca67e",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "32c18d5c-d36a-417e-99f3-da55d97f8a03",
+              "leftValue": "={{ $('Warehouse Inventory').item.json.stockLevel }}",
+              "rightValue": "={{ $json.rating.count }}",
+              "operator": {
+                "type": "number",
+                "operation": "notEquals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        416
+      ],
+      "id": "57e1dd62-0514-4dff-a9e0-2b12b64d5c14",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "method": "PATCH",
+        "url": "https://api.jsonsilo.com/api/v1/manage/7f9deab0-d5d6-493c-9e25-e0045c34dae0",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-MAN-API",
+              "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyX3V1aWQiOiJvY0xvdlVybHprYUtUTGhwOU9sSkw2eFN6N0kyIiwiaXNzIjoiaHR0cHM6Ly9qc29uc2lsby5jb20iLCJleHAiOjE3NjEyMzIyMzh9.Fm8TXKWXCmFIDlqSrnVm_1Cmx-tL_O_dgQ0k6AsBPWA"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"file_name\": \"<string>\",\n  \"file_data\": [\n    \"hi\"\n  ],\n  \"region_name\": \"api\",\n  \"is_public\": false\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        976,
+        288
+      ],
+      "id": "8c05f518-e406-476d-b0a6-18e5cfc00fea",
+      "name": "HTTP Request2"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "96a48bbb-f056-4a22-b418-8c52486eb0a6",
+              "name": "productId",
+              "value": "={{ $json.productId }}",
+              "type": "number"
+            },
+            {
+              "id": "a63e35dc-fe93-4699-9c8e-e4e38f2e2e00",
+              "name": "New-stockLevel",
+              "value": "={{ $json.stockLevel }}",
+              "type": "number"
+            },
+            {
+              "id": "21efd82c-ebc8-4fb9-9437-a5d1afd73f05",
+              "name": "Old-stockLevel",
+              "value": "={{ $('Get row(s) in sheet').item.json.stockLevel }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        656,
+        -144
+      ],
+      "id": "06d9b864-cbfd-41d1-8746-0a985d2afa48",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "content": "First, the agent checks the website stock every minute and compares it to the warehouse sheet.\nIf it finds a difference, it automatically updates the shee",
+        "height": 144,
+        "width": 416
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -480,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "50c087ec-fd87-4c82-be3c-7d9a71aedd0f",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "\"Let me show you the workflow in action.\"\n(Switch to your n8n screen)\n\nStart with the Cron node – triggers the workflow every minute.\n\nShow the HTTP Request node fetching data from the website.\n\nShow the Split In Batches node – this allows the agent to process one product at a time.\n\nShow the Google Sheets Get node – this is the agent’s memory.\n\nShow the If node – this is the agent reasoning: comparing website stock vs sheet stock.\n\nFinally, show the Google Sheets Update node – this is the agent acting to fix mismatches.\n\n\"As you can see, if I manually change a stock number in the sheet, the agent will automatically correct it in the next run.\"\n",
+        "height": 464,
+        "width": 464
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1408,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "0a839c20-abe7-45f7-87d2-86c2209ad5b3",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "method": "PUT",
+        "url": "=https://fakestoreapi.com/products/{{ $json.id }}",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "price",
+              "value": "={{ $json.price }}"
+            },
+            {
+              "name": "description",
+              "value": "={{ $json.description }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        864,
+        400
+      ],
+      "id": "fe67ece5-cd9e-4af8-a093-29aa5d61d399",
+      "name": "HTTP Request3"
+    }
+  ],
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Warehouse Inventory": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "48671a8e-62da-42fa-9b6f-ce145193217d",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-23T11:39:00.499Z",
+      "createdAt": "2025-09-23T11:39:00.499Z",
+      "role": "workflow:owner",
+      "workflowId": "KV2FsyionHNWZq2U",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
