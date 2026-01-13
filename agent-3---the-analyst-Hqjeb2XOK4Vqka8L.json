@@ -1,0 +1,734 @@
+{
+  "updatedAt": "2025-12-25T01:37:37.725Z",
+  "createdAt": "2025-12-25T01:02:23.691Z",
+  "id": "Hqjeb2XOK4Vqka8L",
+  "name": "Agent 3 - The Analyst",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -208,
+        -368
+      ],
+      "id": "a3006467-8ac0-4523-9de1-32c51992a348",
+      "name": "Every 1 Minute"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "leads",
+        "limit": 5,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "raw"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        16,
+        -368
+      ],
+      "id": "139c86b0-c1cf-462c-9312-e37046cfc31d",
+      "name": "Query Raw Leads",
+      "credentials": {
+        "supabaseApi": {
+          "id": "B3fV167ZWXhpJPxi",
+          "name": "IMAD LEAD GEN AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.website_url || 'https://' + $json.domain }}",
+        "options": {
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        480,
+        -352
+      ],
+      "id": "ed932258-d95c-4b6e-a4a3-0c4483eb35ed",
+      "name": "Fetch Website",
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Analyze the following website content for the business: {{ $node[\"Query Raw Leads\"].json.business_name }} (Industry: {{ $node[\"Query Raw Leads\"].json.industry || \"General\" }}).\n\nWEBSITE CONTENT:\n{{ $json.data.substring(0, 5000) }}\n\nTASK:\nEvaluate if this business is a high-quality lead. Provide a fit score (0-100) based on:\n1. Legitimacy: Does the site look professional and active?\n2. Service Alignment: Does it actually provide services related to the industry?\n3. Contactability: Are there clear phone numbers, emails, or forms?\n\nOUTPUT INSTRUCTIONS:\nReturn ONLY a raw JSON object. Do not include markdown formatting, backticks, or introductory text.\n\nJSON SCHEMA:\n{\n  \"fit_score\": number,\n  \"summary\": \"string (max 2 sentences)\",\n  \"industry_match\": boolean,\n  \"is_high_ticket\": boolean\n}"
+            }
+          ]
+        },
+        "options": {
+          "temperature": 0.2
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        704,
+        -352
+      ],
+      "id": "b7db33ad-1360-421f-847d-0427c5aa4afd",
+      "name": "Gemini Analysis",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "X9nsYy4x7QN9Tk9w",
+          "name": "New API Cha.Abde"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "leads",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $node[\"Query Raw Leads\"].json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "={{ $json.status }}"
+            },
+            {
+              "fieldId": "enrichment_score",
+              "fieldValue": "={{ $json.fit_score }}"
+            },
+            {
+              "fieldId": "score_reasoning",
+              "fieldValue": "={{ $json.summary }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1312,
+        -352
+      ],
+      "id": "f93b66ed-cb83-48ff-ae6e-b0f58eb9a2fb",
+      "name": "Update Lead",
+      "credentials": {
+        "supabaseApi": {
+          "id": "B3fV167ZWXhpJPxi",
+          "name": "IMAD LEAD GEN AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get all analyzed items from the Gemini output\nconst items = $input.all();\n\n// 2. Get all original lead data from the query node using the new syntax\n// Ensure the name inside $(\"...\") matches your first Supabase node exactly\nconst allLeads = $(\"Query Raw Leads\").all();\n\nreturn items.map((item, index) => {\n  // 3. Access the text deep inside the Gemini response structure\n  let rawText = item.json.content.parts[0].text;\n  \n  // 4. Remove Markdown backticks (```json or ```) if they exist\n  let cleanedText = rawText.replace(/```json/g, '').replace(/```/g, '').trim();\n  \n  // 5. Get the matching original lead from the query node by index\n  const originalLead = allLeads[index].json;\n  \n  try {\n    const analysis = JSON.parse(cleanedText);\n    \n    return {\n      json: {\n        id: originalLead.id, // Links back to the correct Supabase row\n        fit_score: analysis.fit_score,\n        summary: analysis.summary,\n        industry_match: analysis.industry_match,\n        is_high_ticket: analysis.is_high_ticket,\n        status: 'analyzed'\n      }\n    };\n  } catch (e) {\n    // Return a structured error so the Supabase update doesn't crash the loop\n    return {\n      json: {\n        id: originalLead.id,\n        fit_score: 0,\n        summary: \"Analysis parsing failed\",\n        status: 'error'\n      }\n    };\n  }\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1040,
+        -352
+      ],
+      "id": "5a9e40fe-bb85-4eb1-a212-e016ee608eb8",
+      "name": "Clean AI Output"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "part",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -80,
+        -736
+      ],
+      "id": "aaf4ec32-7191-4fc9-b34b-1d3783b10f9e",
+      "name": "Webhook",
+      "webhookId": "5817fe00-eacb-4bd5-bf86-4f5d3cf52399"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the data from the Webhook 'body'\nconst input = $input.first().json.body || $input.first().json;\n\n// 2. Check for required technical IDs\nif (!input.user_id || !input.batch_id) {\n  throw new Error('Missing required fields: user_id and batch_id');\n}\n\n// 3. Extract industry and location from the new input structure\n// Industry replaces 'term' in your new schema\nlet industry = input.industry || \"\"; \nlet location = input.location || \"\";\n\n// 4. Return the formatted data for the next nodes\nreturn [{\n  json: {\n    term: industry,\n    location: location,\n    // Creates the string for Google Maps search, e.g., \"Restaurants Casablanca\"\n    search_query: `${industry} ${location}`.trim(), \n    batch_id: input.batch_id,\n    user_id: input.user_id,\n    started_at: new Date().toISOString(),\n    status: 'raw' // Helpful for your Airtable status column\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        352,
+        -736
+      ],
+      "id": "e35fffd0-b4b8-4005-9f44-f8e23c6f1524",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/nwua9Gu5YrADL7ZDj/runs",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"searchStringsArray\": [\n    \"{{ $json.search_query }}\"\n  ],\n  \"maxCrawledPlacesPerSearch\": 100,\n  \"includeWebsites\": true,\n  \"language\": \"en\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        560,
+        -736
+      ],
+      "id": "ac0e5198-6a8b-4380-b986-0df3b2b51046",
+      "name": "Start Apify Run"
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the runId from the Apify \"Start Run\" node output\nconst inputJson = $input.first().json;\nconst runId = inputJson.data ? inputJson.data.id : inputJson.id;\n\n// 2. FIXED: Reference your actual validation node name: \"Code in JavaScript\"\nlet originalInput;\ntry {\n  // We use the node that contains your batch_id and user_id\n  originalInput = $node[\"Code in JavaScript\"].json;\n} catch (e) {\n  // Fallback for manual testing\n  originalInput = { message: \"Metadata not found\" };\n}\n\nconst apifyToken = 'REDACTED_BY_REGEX'; \nconst maxRetries = 60; // Increased for \"All\" results\nconst pollInterval = 5000; \n\nfor (let i = 0; i < maxRetries; i++) {\n  const response = await this.helpers.httpRequest({\n    method: 'GET',\n    url: `https://api.apify.com/v2/actor-runs/${runId}?token=${apifyToken}`\n  });\n\n  const status = response.data.status;\n\n  if (status === 'SUCCEEDED') {\n    return [{\n      json: {\n        run_id: runId,\n        dataset_id: response.data.defaultDatasetId,\n        status: 'completed',\n        ...originalInput // Now correctly spreads batch_id, user_id, etc.\n      }\n    }];\n  }\n\n  if (status === 'FAILED' || status === 'ABORTED' || status === 'TIMED-OUT') {\n    throw new Error(`Apify Run failed with status: ${status}`);\n  }\n\n  await new Promise(resolve => setTimeout(resolve, pollInterval));\n}\n\nthrow new Error('Apify timed out.');"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        800,
+        -736
+      ],
+      "id": "7054d41c-4731-46a1-8b28-01f90801163c",
+      "name": "Poll Status"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.apify.com/v2/datasets/{{ $json.dataset_id }}/items",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "REDACTED_HEADER_VALUE"
+            },
+            {
+              "name": "clean",
+              "value": "true"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        992,
+        -736
+      ],
+      "id": "7a5655be-7962-416c-8878-ac362a0deda7",
+      "name": "Fetch Results"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bb37c2f9-6c87-471e-871c-c1c7a0f24b2c",
+              "name": "batch_id",
+              "value": "={{ $json.body.batch_id }}",
+              "type": "string"
+            },
+            {
+              "id": "1fce52f9-5a3b-41f1-a4b8-388e97f8c331",
+              "name": "user_id",
+              "value": "={{ $json.body.user_id }}",
+              "type": "string"
+            },
+            {
+              "id": "cfd877ea-34fe-43a4-9cd2-e79ca2ea7b85",
+              "name": "industry",
+              "value": "={{ $json.body.industry }}",
+              "type": "string"
+            },
+            {
+              "id": "ff9f7a37-3078-4d81-839d-0b8cd15f01b9",
+              "name": "location",
+              "value": "={{ $json.body.location }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        144,
+        -736
+      ],
+      "id": "2ed0f8f4-ec08-47c5-81cf-e6b6452ee0a8",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "tableId": "leads",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "batch_id",
+              "fieldValue": "={{ $node[\"Poll Status\"].json.batch_id }}"
+            },
+            {
+              "fieldId": "user_id",
+              "fieldValue": "={{ $node[\"Poll Status\"].json.user_id }}"
+            },
+            {
+              "fieldId": "business_name",
+              "fieldValue": "={{ $json.title }}"
+            },
+            {
+              "fieldId": "website_url",
+              "fieldValue": "={{ $json.website }}"
+            },
+            {
+              "fieldId": "address",
+              "fieldValue": "={{ $json.address }}"
+            },
+            {
+              "fieldId": "phone_number",
+              "fieldValue": "={{ $json.phone }}"
+            },
+            {
+              "fieldId": "status",
+              "fieldValue": "=raw"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1408,
+        -720
+      ],
+      "id": "688d376d-d841-482b-8c8b-548901dc2687",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "B3fV167ZWXhpJPxi",
+          "name": "IMAD LEAD GEN AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        1200,
+        -736
+      ],
+      "id": "433de8bb-938b-47d0-9487-84f86c7f84a3",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"batch_id\": \"a9f9e451-edeb-4d3e-9f5b-4d8535a8bf76\",\n  \"user_id\": \"f1229eb0-7283-4f13-a917-fe1d41e516fd\",\n  \"industry\": \"hotel\",\n  \"location\": \"Casablanca\",\n  \"status\": \"raw\",\n  \"started_at\": \"{{ new Date().toISOString() }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        144,
+        -976
+      ],
+      "id": "9d28cf1d-dad8-4d71-9245-154963539c08",
+      "name": "TEST JSON"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -976
+      ],
+      "id": "f28138d9-330f-4917-a0a5-0d725c67c718",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "batchSize": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        224,
+        -368
+      ],
+      "id": "c1254137-25a4-4878-a996-c8c3a8e99f19",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1568,
+        -352
+      ],
+      "id": "d25ea0e4-2d27-4cfe-9822-9b388cf474e7",
+      "name": "Wait",
+      "webhookId": "0980666e-ea4a-41bf-be19-2dc5753bdad1"
+    }
+  ],
+  "connections": {
+    "Every 1 Minute": {
+      "main": [
+        [
+          {
+            "node": "Query Raw Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Raw Leads": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Website": {
+      "main": [
+        [
+          {
+            "node": "Gemini Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini Analysis": {
+      "main": [
+        [
+          {
+            "node": "Clean AI Output",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean AI Output": {
+      "main": [
+        [
+          {
+            "node": "Update Lead",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Start Apify Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Apify Run": {
+      "main": [
+        [
+          {
+            "node": "Poll Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Poll Status": {
+      "main": [
+        [
+          {
+            "node": "Fetch Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Results": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a row": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "TEST JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TEST JSON": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lead": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Fetch Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Gemini Analysis": [
+      {
+        "json": {
+          "content": {
+            "parts": [
+              {
+                "text": "```json\n{\n  \"fit_score\": 88,\n  \"summary\": \"The website content reveals a highly legitimate and professionally managed café-restaurant, clearly defining its Mediterranean cuisine and prime location in Casablanca Marina. While direct contact details are not present in this metadata snippet, the comprehensive SEO and social media setup strongly imply a full, contactable online presence.\",\n  \"industry_match\": true,\n  \"is_high_ticket\": false\n}\n```"
+              }
+            ],
+            "role": "model"
+          },
+          "finishReason": "STOP",
+          "index": 0
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "content": {
+            "parts": [
+              {
+                "text": "```json\n{\n  \"fit_score\": 60,\n  \"summary\": \"La Sqala - Casablanca appears to be a legitimate and professionally managed website, likely for a restaurant or cultural venue. While its industry alignment is strong, direct contact information is not available in the provided website header content.\",\n  \"industry_match\": true,\n  \"is_high_ticket\": false\n}\n```"
+              }
+            ],
+            "role": "model"
+          },
+          "finishReason": "STOP",
+          "index": 0
+        },
+        "pairedItem": {
+          "item": 1
+        }
+      },
+      {
+        "json": {
+          "content": {
+            "parts": [
+              {
+                "text": "{\n  \"fit_score\": 75,\n  \"summary\": \"This is a legitimate Moroccan restaurant in Casablanca with a professional online presence, clearly detailing its authentic cuisine and warm ambiance. While the provided metadata confirms its services, direct contact information is not present in this snippet.\",\n  \"industry_match\": true,\n  \"is_high_ticket\": false\n}"
+              }
+            ],
+            "role": "model"
+          },
+          "finishReason": "STOP",
+          "index": 0
+        },
+        "pairedItem": {
+          "item": 2
+        }
+      },
+      {
+        "json": {
+          "content": {
+            "parts": [
+              {
+                "text": "{\n  \"fit_score\": 88,\n  \"summary\": \"Le Cabestan appears to be a legitimate hospitality or tourism business, likely a restaurant or hotel, capitalizing on an \\\"OCEAN VIEW\\\" location. The website is technically sound, built on WordPress, and actively encourages customer contact via a WhatsApp chat plugin.\",\n  \"industry_match\": true,\n  \"is_high_ticket\": true\n}"
+              }
+            ],
+            "role": "model"
+          },
+          "finishReason": "STOP",
+          "index": 0
+        },
+        "pairedItem": {
+          "item": 3
+        }
+      },
+      {
+        "json": {
+          "content": {
+            "parts": [
+              {
+                "text": "```json\n{\n  \"fit_score\": 60,\n  \"summary\": \"The website content clearly identifies Holy Brunch as a legitimate restaurant in Casablanca specializing in brunch, aligning well with the general industry. However, the provided head section lacks any contact information, which significantly impacts its quality as a lead.\",\n  \"industry_match\": true,\n  \"is_high_ticket\": false\n}\n```"
+              }
+            ],
+            "role": "model"
+          },
+          "finishReason": "STOP",
+          "index": 0
+        },
+        "pairedItem": {
+          "item": 4
+        }
+      }
+    ]
+  },
+  "versionId": "8b357a68-f144-40e1-8470-81a6a9a3a885",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-25T01:02:23.705Z",
+      "createdAt": "2025-12-25T01:02:23.705Z",
+      "role": "workflow:owner",
+      "workflowId": "Hqjeb2XOK4Vqka8L",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
