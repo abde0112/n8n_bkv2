@@ -1,0 +1,312 @@
+{
+  "updatedAt": "2025-11-01T16:34:22.000Z",
+  "createdAt": "2025-10-17T10:28:42.479Z",
+  "id": "vyPzpFa8nP9YXSMS",
+  "name": "WordPress text-to-speech",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "83c08ff8-7cba-4940-a81c-350414211884",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -368,
+        336
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "postId": "1032",
+        "options": {}
+      },
+      "id": "f313d239-4b2b-45b2-a3a0-676a0fc86ad1",
+      "name": "Retrieve WordPress Article",
+      "type": "n8n-nodes-base.wordpress",
+      "position": [
+        80,
+        336
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.content }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "Summarize or transcribe this article, depending on the workflow setting."
+            }
+          ]
+        }
+      },
+      "id": "98482493-da39-4cd6-aea0-a8b4ea8e01fd",
+      "name": "Generate Summary or Transcription",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        320,
+        336
+      ],
+      "typeVersion": 1.5
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.elevenlabs.io/v1/text-to-speech/voice_id",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpCustomAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "text",
+              "value": "={{ $json.text }}"
+            },
+            {
+              "name": "model_id",
+              "value": "eleven_multilingual_v2"
+            },
+            {
+              "name": "output_format",
+              "value": "mp3_44100_128"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "3ddae7f9-824d-4cc5-9fd6-b54bafa8d4d7",
+      "name": "Generate Speech",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        752,
+        336
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $('settings').item.json['site_url'] }}wp-json/wp/v2/media",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "wordpressApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Disposition",
+              "value": "=attachment; filename=\"{{ $('Retrieve WordPress Article').item.json.slug }}.mp3\""
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "id": "eef8001e-445a-4a81-9e53-4bb089ed7404",
+      "name": "Upload MP3",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1696,
+        336
+      ],
+      "retryOnFail": true,
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "postId": "={{ $('Retrieve WordPress Article').item.json.id }}",
+        "updateFields": {
+          "content": "=<!-- wp:audio {\"id\":{{ $json.id }}} -->\n<figure class=\"wp-block-audio\"><audio controls src=\"{{ $json.guid.rendered }}\"></audio><figcaption class=\"wp-element-caption\">🗣️ Listen to the summary or transcription. 👆</figcaption></figure>\n<!-- /wp:audio --><br>{{ $('Retrieve WordPress Article').item.json.content.rendered }}"
+        }
+      },
+      "id": "1cb0e887-8918-46d2-a5fb-3a98d925d2ae",
+      "name": "Update WordPress Post",
+      "type": "n8n-nodes-base.wordpress",
+      "position": [
+        1936,
+        336
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 🎙️ Generate Text-to-Speech Using Eleven Labs via API\n\nSince there is no predefined node for Eleven Labs in n8n, we will use the **HTTP Request** module.\n\n### 🛠️ Prerequisites:\n1. **Get an API Key**: Visit [Eleven Labs](https://try.elevenlabs.io/text-audio) to obtain your API key.\n2. **Choose a Suitable Voice**: Test different voices on [this demo page](https://try.elevenlabs.io/text-audio) to find the best fit for your use case.\n3. **Select the Right Model**: For multilingual usage, use:  \n   ~~~json\n   \"model_id\": \"eleven_multilingual_v2\"\n   ~~~\n4. **Set Output Format**: You can adjust the quality by modifying `output_format`, for example:  \n   ~~~json\n   \"output_format\": \"mp3_44100_128\"\n   ~~~\n\n📖 Refer to the full API documentation: [API Reference - Eleven Labs](https://try.elevenlabs.io/api-reference-text-to-speech)\n\n---\n## 🚀 Step 1: Configure API Credentials in n8n\n\nAdd a custom authentication entry in n8n with the following structure: \n\n(Replace `\"your-elevenlabs-api-key\"` with your **actual API key**)\n\n~~~json\n{\n  \"headers\": {\n    \"xi-api-key\": \"your-elevenlabs-api-key\"\n  }\n}\n~~~\n---\n\n## 📩 Step 2: Send a POST Request to the API\n\nMake an HTTP POST request to the **webhook** of your workflow with the following parameters:\n\n- **`voice_id`**: The ID of the selected voice.\n- **`text`**: The text to convert into speech.\n\n---",
+        "height": 1000,
+        "width": 660,
+        "color": 6
+      },
+      "id": "ce3e158d-fce9-4443-b661-2b0839dc0dd2",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        960,
+        -16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# Modify This Prompt\n\nHere you can modify this prompt. It is interesting because the neutral node might return HTML, and using a ChatGPT node allows you to clean or customize the output before sending it to text-to-speech.\n\nIn the example provided, I requested a summary. However, you could ask for the benefits or product advantages when using it for e-commerce or affiliate marketing. You could also request the full transcription of the article.",
+        "height": 280,
+        "width": 460
+      },
+      "id": "dfc97da9-0325-4d39-9d0f-630db33e174b",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        272,
+        -16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "4b68312e-f675-4c31-9bf2-bceb7b731191",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        272,
+        544
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "10c07d50-1310-4dd7-a143-b0c0e5cf1b70",
+              "name": "site_url",
+              "type": "string",
+              "value": "https://mydomain.com/"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "191c07b8-056f-423f-8bf9-32322b95f3e6",
+      "name": "settings",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -144,
+        336
+      ],
+      "typeVersion": 3.4
+    }
+  ],
+  "connections": {
+    "settings": {
+      "main": [
+        [
+          {
+            "node": "Retrieve WordPress Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload MP3": {
+      "main": [
+        [
+          {
+            "node": "Update WordPress Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Speech": {
+      "main": [
+        [
+          {
+            "node": "Upload MP3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Summary or Transcription",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Retrieve WordPress Article": {
+      "main": [
+        [
+          {
+            "node": "Generate Summary or Transcription",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Summary or Transcription": {
+      "main": [
+        [
+          {
+            "node": "Generate Speech",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "settings",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "2625098c-28fb-4f7d-b8e0-60a471103ecb",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-17T10:28:42.492Z",
+      "createdAt": "2025-10-17T10:28:42.492Z",
+      "role": "workflow:owner",
+      "workflowId": "vyPzpFa8nP9YXSMS",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
