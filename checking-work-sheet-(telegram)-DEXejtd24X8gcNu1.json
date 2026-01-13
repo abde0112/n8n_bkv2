@@ -1,0 +1,1123 @@
+{
+  "updatedAt": "2025-09-27T10:57:31.000Z",
+  "createdAt": "2025-09-09T10:01:08.425Z",
+  "id": "DEXejtd24X8gcNu1",
+  "name": "checking Work  sheet (Telegram)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "chatId": "1534111206",
+        "text": "=⚠️ Contract ending soon:\n\nUser Name : {{ $json[\"User Name\"] }} - End Date: {{ $json[\"End Date Formatted\"] }}\n\ncontact: {{ $json.Contact }}\n",
+        "additionalFields": {
+          "disable_web_page_preview": true
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1792,
+        -96
+      ],
+      "id": "558c9f4d-8b40-4359-9c45-3b3b6d3b3ce2",
+      "name": "Send a text message",
+      "webhookId": "f3453146-bed3-45e6-9b41-e43644c74cfc",
+      "notesInFlow": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "2noq18qiYbMIFWNE",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE",
+          "mode": "list",
+          "cachedResultName": "Mg Work",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 42764982,
+          "mode": "list",
+          "cachedResultName": "EN",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE/edit#gid=42764982"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        976,
+        -112
+      ],
+      "id": "b92a2e41-47e1-4f5a-af92-d65150bc06ce",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        784,
+        -112
+      ],
+      "id": "04307314-7a2e-4d1a-b0ef-7acfbbc7da48",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        2144,
+        -96
+      ],
+      "id": "a6e11db9-52a9-4923-95c0-6c5de2d8e64c",
+      "name": "Wait",
+      "webhookId": "77b988b0-fbab-4093-a039-5051c4f369a8"
+    },
+    {
+      "parameters": {
+        "jsCode": "if (!items || items.length === 0) {\n  return [];\n}\n\nreturn items\n  .filter(item => item.json[\"User Name\"] && item.json[\"User Name\"].toString().trim() !== \"\")\n  .map(item => {\n    return {\n      json: {\n        \"Client Name\": item.json[\"Client Name\"] || \"\",\n        \"User Name\": item.json[\"User Name\"].toString(),\n        \"Contact\": item.json[\"Contact\"] || \"\",\n        \"Started Date\": item.json[\"Started Date\"] || \"\",\n        \"End Date\": item.json[\"End Date\"] || \"\",\n        \"1 MONTH\": Number(item.json[\"1 MONTH\"] || 0),\n        \"3 MONTHS\": Number(item.json[\"3 MONTHS\"] || 0),\n        \"6 MONTHS\": Number(item.json[\"6 MONTHS\"] || 0),\n        \"1 YEAR\": Number(item.json[\"1 YEAR\"] || 0),\n        \"2 YEARS\": Number(item.json[\"2 YEARS\"] || 0),\n        \"Total\": Number(item.json[\"Total\"] || 0),\n        \"Notification\": item.json[\"Notification\"] || \"\",\n        \"Credit\": Number((item.json[\"Credit\"] || \"0\").toString().replace(\",\", \".\"))\n      }\n    };\n  });\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1168,
+        -112
+      ],
+      "id": "78b0e21a-9b27-4818-ae3b-3b93ce506a35",
+      "name": "Normalize Data & Skip Empty User Name"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "1a13ab05-b238-4929-952f-80e32deaeb41",
+              "leftValue": "={{ $json.Notification }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1600,
+        240
+      ],
+      "id": "012ea526-20d5-4876-8126-3a834b0d1963",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE",
+          "mode": "list",
+          "cachedResultName": "Mg Work",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 42764982,
+          "mode": "list",
+          "cachedResultName": "EN",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE/edit#gid=42764982"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Notification": "Notified",
+            "User Name": "={{ $('If').item.json['User Name'] }}"
+          },
+          "matchingColumns": [
+            "User Name"
+          ],
+          "schema": [
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "User Name",
+              "displayName": "User Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Contact",
+              "displayName": "Contact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Started Date",
+              "displayName": "Started Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "End Date",
+              "displayName": "End Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "1 MONTH​",
+              "displayName": "1 MONTH​",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "3 MONTHS ",
+              "displayName": "3 MONTHS ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "6 MONTHS ",
+              "displayName": "6 MONTHS ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "1 YEAR",
+              "displayName": "1 YEAR",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "2 YEARS",
+              "displayName": "2 YEARS",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Credit",
+              "displayName": "Credit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Notification",
+              "displayName": "Notification",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1968,
+        -96
+      ],
+      "id": "f009b842-180a-4bb4-8d3d-4b273e76e268",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "amount": 10
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        3232,
+        144
+      ],
+      "id": "8485a9fa-f5a5-4a6b-b63c-e19a5cb63e64",
+      "name": "Wait1",
+      "webhookId": "77b988b0-fbab-4093-a039-5051c4f369a8"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE",
+          "mode": "list",
+          "cachedResultName": "Mg Work",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 42764982,
+          "mode": "list",
+          "cachedResultName": "EN",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE/edit#gid=42764982"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Notification",
+              "lookupValue": "Notified last time"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3424,
+        144
+      ],
+      "id": "19c50a9f-33bc-4f09-9d05-fadd1f5a229b",
+      "name": "Get row(s) in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "1534111206",
+        "text": "=⚠️ Contract ending soon:\n\nUser Name : {{ $json[\"User Name\"] }} - End Date: {{ $json['End Date'] }}\n\ncontact: {{ $json.Contact }}\n",
+        "additionalFields": {
+          "disable_web_page_preview": true
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2800,
+        144
+      ],
+      "id": "477540f4-8dd6-4d3b-9801-3db1ab8d7a39",
+      "name": "Send a text message1",
+      "webhookId": "f3453146-bed3-45e6-9b41-e43644c74cfc",
+      "notesInFlow": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "2noq18qiYbMIFWNE",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE",
+          "mode": "list",
+          "cachedResultName": "Mg Work",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 42764982,
+          "mode": "list",
+          "cachedResultName": "EN",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE/edit#gid=42764982"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Notification": "Notified last time",
+            "User Name": "={{ $('If').item.json['User Name'] }}"
+          },
+          "matchingColumns": [
+            "User Name"
+          ],
+          "schema": [
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "User Name",
+              "displayName": "User Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Contact",
+              "displayName": "Contact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Started Date",
+              "displayName": "Started Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "End Date",
+              "displayName": "End Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "1 MONTH​",
+              "displayName": "1 MONTH​",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "3 MONTHS ",
+              "displayName": "3 MONTHS ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "6 MONTHS ",
+              "displayName": "6 MONTHS ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "1 YEAR",
+              "displayName": "1 YEAR",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "2 YEARS",
+              "displayName": "2 YEARS",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Credit",
+              "displayName": "Credit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Notification",
+              "displayName": "Notification",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3024,
+        144
+      ],
+      "id": "1ce92e6d-8280-4b42-bb1b-c0552fa9912f",
+      "name": "Append or update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "1534111206",
+        "text": "=❌ Contract Expired:\n\nUser Name : {{ $json[\"User Name\"] }} - Expired Date: {{ $json['End Date'] }}\n\ncontact: {{ $json.Contact }}\n",
+        "additionalFields": {
+          "disable_web_page_preview": true
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3856,
+        144
+      ],
+      "id": "4eae29ff-7d4d-4c2f-87aa-cdfc3c3e3b4b",
+      "name": "Send a text message2",
+      "webhookId": "f3453146-bed3-45e6-9b41-e43644c74cfc",
+      "notesInFlow": true,
+      "credentials": {
+        "telegramApi": {
+          "id": "2noq18qiYbMIFWNE",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE",
+          "mode": "list",
+          "cachedResultName": "Mg Work",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 42764982,
+          "mode": "list",
+          "cachedResultName": "EN",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE/edit#gid=42764982"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Notification": "Expired",
+            "User Name": "={{ $('If').item.json['User Name'] }}"
+          },
+          "matchingColumns": [
+            "User Name"
+          ],
+          "schema": [
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "User Name",
+              "displayName": "User Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Contact",
+              "displayName": "Contact",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Started Date",
+              "displayName": "Started Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "End Date",
+              "displayName": "End Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "1 MONTH​",
+              "displayName": "1 MONTH​",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "3 MONTHS ",
+              "displayName": "3 MONTHS ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "6 MONTHS ",
+              "displayName": "6 MONTHS ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "1 YEAR",
+              "displayName": "1 YEAR",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "2 YEARS",
+              "displayName": "2 YEARS",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Total",
+              "displayName": "Total",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Credit",
+              "displayName": "Credit",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Note",
+              "displayName": "Note",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Notification",
+              "displayName": "Notification",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        4080,
+        144
+      ],
+      "id": "19b5a2af-fb60-4b91-9727-cf79ad081ad0",
+      "name": "Append or update row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE",
+          "mode": "list",
+          "cachedResultName": "Mg Work",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 42764982,
+          "mode": "list",
+          "cachedResultName": "EN",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE/edit#gid=42764982"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "User Name",
+              "lookupValue": "={{ $json['User Name'] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2336,
+        -96
+      ],
+      "id": "7f4135a5-e233-4355-95fb-cee95e29f0f9",
+      "name": "Get row(s) in sheet3",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const today = new Date();\n\nconst filtered = items\n  .filter(item => {\n    const endDateStr = item.json[\"End Date\"];\n    if (!endDateStr || !item.json[\"User Name\"]) return false;\n\n    const endDate = new Date(endDateStr);\n    const diffTime = endDate - today;\n    const diffDays = diffTime / (1000*60*60*24);\n\n    return diffDays >= -7 && diffDays <= 7;\n  })\n  .map(item => ({\n    json: {\n      ...item.json,\n      \"End Date Formatted\": new Date(item.json[\"End Date\"]).toLocaleDateString()\n    }\n  }));\n\nreturn filtered;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2592,
+        144
+      ],
+      "id": "008424de-b8ef-4b4a-8a7d-78c62d88105f",
+      "name": "Filter End Dates Within ±7 Days2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const today = new Date();\n\nconst filtered = items\n  .filter(item => {\n    const endDateStr = item.json[\"End Date\"];\n    if (!endDateStr || !item.json[\"User Name\"]) return false;\n\n    const endDate = new Date(endDateStr);\n    const diffTime = endDate - today;\n    const diffDays = diffTime / (1000*60*60*24);\n\n    return diffDays >= -7 && diffDays <= 7;\n  })\n  .map(item => ({\n    json: {\n      ...item.json,\n      \"End Date Formatted\": new Date(item.json[\"End Date\"]).toLocaleDateString()\n    }\n  }));\n\nreturn filtered;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1424,
+        240
+      ],
+      "id": "a3f45c4c-3471-4dce-95b8-17f1982d8873",
+      "name": "Filter End Dates Within ±7 Days",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "jsCode": "const today = new Date();\n\nconst filtered = items\n  .filter(item => {\n    const endDateStr = item.json[\"End Date\"];\n    if (!endDateStr || !item.json[\"User Name\"]) return false;\n\n    const endDate = new Date(endDateStr);\n    const diffTime = endDate - today;\n    const diffDays = diffTime / (1000*60*60*24);\n\n    return diffDays >= -7 && diffDays <= 7;\n  })\n  .map(item => ({\n    json: {\n      ...item.json,\n      \"End Date Formatted\": new Date(item.json[\"End Date\"]).toLocaleDateString()\n    }\n  }));\n\nreturn filtered;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        3632,
+        144
+      ],
+      "id": "66b10a6e-f6d4-4eaf-a697-1f3c79885470",
+      "name": "Filter End Dates Within ±7 Days3",
+      "alwaysOutputData": true
+    }
+  ],
+  "connections": {
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Normalize Data & Skip Empty User Name",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Data & Skip Empty User Name": {
+      "main": [
+        [
+          {
+            "node": "Filter End Dates Within ±7 Days",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait1": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet2": {
+      "main": [
+        [
+          {
+            "node": "Filter End Dates Within ±7 Days3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message1": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Wait1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message2": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet3": {
+      "main": [
+        [
+          {
+            "node": "Filter End Dates Within ±7 Days2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter End Dates Within ±7 Days2": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter End Dates Within ±7 Days": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter End Dates Within ±7 Days3": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    },
+    "node:Google Sheets Trigger": {
+      "documentId": "1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE",
+      "sheetId": 42764982,
+      "lastRevision": 285,
+      "lastRevisionLink": "https://docs.google.com/spreadsheets/export?id=1mXmGWWV1kdpkVBB7k2cH4gn7qiBLN6xOGsHzf7XEidE&revision=285&exportFormat=xlsx"
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Schedule Trigger": [
+      {
+        "json": {
+          "timestamp": "2025-09-13T22:58:50.700-04:00",
+          "Readable date": "September 13th 2025, 10:58:50 pm",
+          "Readable time": "10:58:50 pm",
+          "Day of week": "Saturday",
+          "Year": "2025",
+          "Month": "September",
+          "Day of month": "13",
+          "Hour": "22",
+          "Minute": "58",
+          "Second": "50",
+          "Timezone": "America/New_York (UTC-04:00)"
+        }
+      }
+    ]
+  },
+  "versionId": "e4f79c3d-98ad-4cc3-9efe-7243bdd6e6e9",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-09-09T10:01:08.437Z",
+      "createdAt": "2025-09-09T10:01:08.437Z",
+      "role": "workflow:owner",
+      "workflowId": "DEXejtd24X8gcNu1",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
