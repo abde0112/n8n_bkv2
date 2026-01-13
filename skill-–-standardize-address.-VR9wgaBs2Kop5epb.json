@@ -1,0 +1,32 @@
+{
+  "updatedAt": "2025-09-25T15:01:06.000Z",
+  "createdAt": "2025-09-24T22:39:58.781Z",
+  "id": "VR9wgaBs2Kop5epb",
+  "name": "SKILL – Standardize Address.",
+  "active": false,
+  "isArchived": true,
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "9cab7700-d54b-4f79-ab98-3c9a32082ffb",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-24T22:39:58.792Z",
+      "createdAt": "2025-09-24T22:39:58.792Z",
+      "role": "workflow:owner",
+      "workflowId": "VR9wgaBs2Kop5epb",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
