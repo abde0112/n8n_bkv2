@@ -1,0 +1,416 @@
+{
+  "updatedAt": "2025-09-27T10:42:55.000Z",
+  "createdAt": "2025-09-10T14:04:23.664Z",
+  "id": "BJPymHfJX1S1tudg",
+  "name": "The Product Description Auditor copy copy",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -240,
+        80
+      ],
+      "id": "865bbfde-2544-416f-bb75-a8f69f95e75f",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://fakestoreapi.com/products",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        288,
+        0
+      ],
+      "id": "9fd04369-59c6-46be-8092-7e92d27378e0",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=🚩 Needs Review: Product \"{{ $('productList').item.json.productName }}\" contains flagged language.  \nDescription:  {{ $('productList').item.json.description }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        -96
+      ],
+      "id": "bd74adcc-e341-4c2f-a557-b20bce46c297",
+      "name": "Discord",
+      "webhookId": "a2bdb35f-0a77-4909-86f2-1a70aa477950",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "skGsil2IBOoEYiyT",
+          "name": "Discord Webhook account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1ILRtK5tI4Oj55cjEs56ZDwZrA5iEu_KYKFGByRCRLrc",
+          "mode": "list",
+          "cachedResultName": "The Product Description Auditor",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ILRtK5tI4Oj55cjEs56ZDwZrA5iEu_KYKFGByRCRLrc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1ILRtK5tI4Oj55cjEs56ZDwZrA5iEu_KYKFGByRCRLrc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "productName": "={{ $json.productName }}",
+            "price": "={{ $json.price }}",
+            "imageUrl": "={{ $json.imageUrl }}",
+            "rawCategory": "={{ $json.rawCategory }}",
+            "description": "={{ $json.description }}"
+          },
+          "matchingColumns": [
+            "productName"
+          ],
+          "schema": [
+            {
+              "id": "productName",
+              "displayName": "productName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "imageUrl",
+              "displayName": "imageUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "rawCategory",
+              "displayName": "rawCategory",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1328,
+        176
+      ],
+      "id": "fb69e3a5-7a50-48c6-abc3-f8a15f2b3f12",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "22f72be0-7338-47ca-af96-11973e8689d0",
+              "leftValue": "={{ $('defineRedFlags').first().json.redFlags.some(flag => $json.description?.toLowerCase().includes(flag.toLowerCase())) }}",
+              "rightValue": "={{ $('defineRedFlags').item.json.redFlags }}",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {
+          "ignoreCase": false
+        }
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        112
+      ],
+      "id": "da0081a2-1a81-4354-9d3c-89126f6753d9",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c24f22a1-410c-4fa1-9140-984e8441a63c",
+              "name": "redFlags",
+              "value": "master",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        240,
+        256
+      ],
+      "id": "a91da0a8-338f-4f9a-8d18-3fc2479ba68d",
+      "name": "defineRedFlags"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b8529de8-690c-4dd5-9b4f-812057485cfe",
+              "name": "productName",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "b6aa0277-e528-4ad0-85c1-8dcf59dd9820",
+              "name": "price",
+              "value": "={{ $json.price }}",
+              "type": "string"
+            },
+            {
+              "id": "8a2f10f0-7ea0-45df-b4bd-a2fcbdea0598",
+              "name": "description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "7f8e8456-551e-4efe-a464-6de14dabc039",
+              "name": "imageUrl",
+              "value": "={{ $json.image }}",
+              "type": "string"
+            },
+            {
+              "id": "063d8ad6-9b10-443c-b1c2-4bf8c2e7b892",
+              "name": "rawCategory",
+              "value": "={{ $json.category }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        496,
+        16
+      ],
+      "id": "612a0fda-90b6-4318-aa99-378e8a1451e5",
+      "name": "productList"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        704,
+        112
+      ],
+      "id": "3f499a63-4b95-4582-86aa-85b92c00a2bd",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c24f22a1-410c-4fa1-9140-984e8441a63c",
+              "name": "redFlags",
+              "value": "\n[\"master\", \"slave\", \"blacklist\", \"whitelist\", \"oushen\"]",
+              "type": "array"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        80,
+        -16
+      ],
+      "id": "63df9e16-d778-43a9-a629-b30a7aa6d862",
+      "name": "defineRedFlags2"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "defineRedFlags",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "defineRedFlags2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "productList",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "defineRedFlags": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "productList": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "defineRedFlags2": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "f90c93c5-7a9d-4bf6-9201-364baef17617",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-10T14:04:23.689Z",
+      "createdAt": "2025-09-10T14:04:23.689Z",
+      "role": "workflow:owner",
+      "workflowId": "BJPymHfJX1S1tudg",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
