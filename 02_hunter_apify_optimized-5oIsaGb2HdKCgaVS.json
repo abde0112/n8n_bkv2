@@ -1,0 +1,420 @@
+{
+  "updatedAt": "2025-12-24T12:02:18.986Z",
+  "createdAt": "2025-12-23T14:24:15.398Z",
+  "id": "5oIsaGb2HdKCgaVS",
+  "name": "02_HUNTER_Apify_OPTIMIZED",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        -176
+      ],
+      "id": "88ad7333-4f2c-4b87-b526-ae837d53b546",
+      "name": "Manual Trigger",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input validation\nconst input = $input.first().json;\n\nif (!input.term || !input.location) {\n  throw new Error('Missing required fields: term and location');\n}\n\nif (!input.user_id || !input.batch_id) {\n  throw new Error('Missing required fields: user_id and batch_id');\n}\n\n// Sanitize inputs\nconst cleanTerm = input.term.trim();\nconst cleanLocation = input.location.trim();\n\n// Create search query\nconst searchQuery = `${cleanTerm} ${cleanLocation}`;\n\nconsole.log(`Starting search: ${searchQuery}`);\n\nreturn [{\n  json: {\n    term: cleanTerm,\n    location: cleanLocation,\n    search_query: searchQuery,\n    job_id: input.job_id || null,\n    batch_id: input.batch_id,\n    user_id: input.user_id,\n    started_at: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        192,
+        -176
+      ],
+      "id": "8c62e4e1-55f8-4fd0-935e-fe6610f5ec19",
+      "name": "Input Validation"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/webhooks",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"searchStringsArray\": [\n    \"Dentists in Miami\"\n  ],\n  \"maxCrawledPlacesPerSearch\": 10,\n  \"language\": \"en\",\n  \"countryCode\": \"US\",\n  \"includeWebsites\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        400,
+        -176
+      ],
+      "id": "309e629a-cfac-43fc-871b-cdf56c992e57",
+      "name": "Start Apify Run"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Smart polling for Apify run completion\nconst runId = $input.first().json.data.id;\nconst originalInput = $('Input Validation').item.json;\n\nconst maxRetries = 12; // 60 seconds max (12 * 5s)\nconst pollInterval = 5000; // 5 seconds\n\nfor (let i = 0; i < maxRetries; i++) {\n  console.log(`Polling attempt ${i + 1}/${maxRetries}`);\n  \n  // Check run status\n  const statusResponse = await this.helpers.httpRequest({\n    method: 'GET',\n    url: `https://api.apify.com/v2/actor-runs/${runId}`,\n    headers: {\n      'Authorization': 'Bearer ' + $credentials.apifyApiToken\n    }\n  });\n  \n  const status = statusResponse.data.status;\n  console.log(`Current status: ${status}`);\n  \n  if (status === 'SUCCEEDED') {\n    console.log('Run completed successfully!');\n    return [{\n      json: {\n        run_id: runId,\n        status: 'completed',\n        attempts: i + 1,\n        ...originalInput\n      }\n    }];\n  }\n  \n  if (status === 'FAILED' || status === 'ABORTED') {\n    throw new Error(`Apify run ${status.toLowerCase()}: ${statusResponse.data.statusMessage || 'Unknown error'}`);\n  }\n  \n  // Still running, wait before next poll\n  if (i < maxRetries - 1) {\n    await new Promise(resolve => setTimeout(resolve, pollInterval));\n  }\n}\n\nthrow new Error('Apify run timed out after 60 seconds');"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        592,
+        -176
+      ],
+      "id": "01cea48f-ca3a-4c8c-a642-b73aa8a2123e",
+      "name": "Poll for Completion"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.apify.com/v2/actor-runs/{{ $json.run_id }}/dataset/items",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        800,
+        -176
+      ],
+      "id": "8412afcc-839b-4e84-8829-2492f9a8bbb4",
+      "name": "Fetch Results",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "bSnWVxyMXdX77WNB",
+          "name": "apify"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Transform Apify results into leads\nconst apifyResults = $input.first().json;\nconst originalInput = $('Input Validation').item.json;\n\nconst leads = [];\nconst skipped = { no_website: 0, invalid_domain: 0 };\n\n// Handle both array and single object responses\nconst places = Array.isArray(apifyResults) ? apifyResults : [apifyResults];\n\nfor (const place of places) {\n  // Skip if no website\n  if (!place.website) {\n    skipped.no_website++;\n    continue;\n  }\n  \n  // Clean and validate domain\n  let domain = place.website;\n  try {\n    const url = new URL(domain.startsWith('http') ? domain : 'https://' + domain);\n    domain = url.hostname.replace(/^www\\./, '');\n  } catch (e) {\n    console.warn(`Invalid domain: ${domain}`);\n    skipped.invalid_domain++;\n    continue;\n  }\n  \n  // Clean phone number\n  let cleanPhone = place.phone || place.phoneNumber || null;\n  if (cleanPhone) {\n    cleanPhone = cleanPhone.replace(/[^\\d+]/g, '');\n    if (cleanPhone && !cleanPhone.startsWith('+')) {\n      cleanPhone = '+1' + cleanPhone;\n    }\n  }\n  \n  // Build full address\n  const addressParts = [\n    place.street,\n    place.city,\n    place.state,\n    place.zip || place.postcode\n  ].filter(Boolean);\n  const fullAddress = addressParts.join(', ');\n  \n  // Create lead object\n  leads.push({\n    // Core identifiers\n    user_id: originalInput.user_id,\n    batch_id: originalInput.batch_id,\n    job_id: originalInput.job_id,\n    \n    // Lead data\n    domain: domain,\n    name: place.title || place.name || 'Unknown',\n    phone: cleanPhone,\n    email: place.email || null,\n    address: fullAddress || null,\n    rating: place.totalScore || place.rating || null,\n    reviews_count: place.reviewsCount || 0,\n    \n    // Metadata\n    source: 'apify_google_maps',\n    status: 'raw',\n    raw_data: place,\n    \n    // Optional enrichment data\n    category: place.categoryName || null,\n    place_id: place.placeId || null,\n    latitude: place.location?.lat || null,\n    longitude: place.location?.lng || null,\n    \n    // Timestamps\n    created_at: new Date().toISOString()\n  });\n}\n\nconsole.log(`Transformation complete:`);\nconsole.log(`  - Total places: ${places.length}`);\nconsole.log(`  - Valid leads: ${leads.length}`);\nconsole.log(`  - Skipped (no website): ${skipped.no_website}`);\nconsole.log(`  - Skipped (invalid domain): ${skipped.invalid_domain}`);\n\nif (leads.length === 0) {\n  throw new Error('No valid leads found with websites');\n}\n\nreturn leads.map(lead => ({ json: lead }));"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        -176
+      ],
+      "id": "226d9e9a-c675-4c6b-a381-812b0dd6754c",
+      "name": "Transform & Validate Leads"
+    },
+    {
+      "parameters": {
+        "operation": "insert"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1200,
+        -176
+      ],
+      "id": "c898d0a8-ce76-4bad-b517-0a0fd672fb1b",
+      "name": "Insert Leads (Batch)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "rCmp9ACsEE5Z3jVz",
+          "name": "Final project LEAD GEN AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Create summary for batch update\nconst insertedLeads = $input.all();\nconst originalInput = $('Input Validation').item.json;\n\nconst summary = {\n  batch_id: originalInput.batch_id,\n  total_leads: insertedLeads.length,\n  started_at: originalInput.started_at,\n  completed_at: new Date().toISOString(),\n  search_query: originalInput.search_query\n};\n\nconsole.log('Summary:', JSON.stringify(summary, null, 2));\n\nreturn [{ json: summary }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        -176
+      ],
+      "id": "e481e8ba-04fe-457d-a4ea-3265617b4ac9",
+      "name": "Create Summary"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "batches"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1600,
+        -176
+      ],
+      "id": "2f5ac6d8-4483-4980-9fac-afbce6c1a2ec",
+      "name": "Update Batch Status",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2OCQVeKtbdcL29b2",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Final success message\nconst summary = $input.first().json;\n\nconst duration = new Date(summary.completed_at) - new Date(summary.started_at);\nconst durationSeconds = Math.round(duration / 1000);\n\nreturn [{\n  json: {\n    workflow: '02_HUNTER',\n    status: 'success',\n    batch_id: summary.batch_id,\n    total_leads: summary.total_leads,\n    search_query: summary.search_query,\n    duration_seconds: durationSeconds,\n    message: `Successfully found ${summary.total_leads} leads in ${durationSeconds} seconds`\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1792,
+        -176
+      ],
+      "id": "36f741ef-8901-40d4-ae53-f389e0b2c6b9",
+      "name": "Success Message"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -192,
+        112
+      ],
+      "id": "cb472e4e-d7e2-414e-a8bb-d4d14f496568",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Handle errors\nconst error = $input.first().json.error || {};\nconst errorNode = error.node || 'unknown';\nconst errorMessage = error.message || 'Unknown error';\n\n// Try to get batch_id from various sources\nlet batchId = null;\ntry {\n  batchId = $('Input Validation').item.json.batch_id;\n} catch (e) {\n  console.warn('Could not retrieve batch_id');\n}\n\nconsole.error('Workflow error:', {\n  node: errorNode,\n  message: errorMessage,\n  batch_id: batchId\n});\n\nreturn [{\n  json: {\n    workflow: '02_HUNTER',\n    status: 'failed',\n    batch_id: batchId,\n    error_node: errorNode,\n    error_message: errorMessage,\n    error_stack: error.stack,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        0,
+        112
+      ],
+      "id": "9c364bf7-a24f-491a-b57f-fd9c0c2b1ac2",
+      "name": "Log Error"
+    },
+    {
+      "parameters": {
+        "operation": "insert"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        112
+      ],
+      "id": "266c25a0-14ec-4f5e-9cd8-800ae4e5a24e",
+      "name": "Save Error Log",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2OCQVeKtbdcL29b2",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "batches"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        400,
+        112
+      ],
+      "id": "ef4aa5a8-33a4-4a77-bcdf-248b16e0dc36",
+      "name": "Mark Batch Failed",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2OCQVeKtbdcL29b2",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"term\": \"Dentists\",\n  \"location\": \"Miami\",\n  \"job_id\": \"11111111-1111-1111-1111-111111111111\",\n  \"batch_id\": \"22222222-2222-2222-2222-222222222222\",\n  \"user_id\": \"33333333-3333-3333-3333-333333333333\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -16,
+        -176
+      ],
+      "id": "12503933-0d47-4ff0-b01d-31fe6ed84c82",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Input Validation": {
+      "main": [
+        [
+          {
+            "node": "Start Apify Run",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Start Apify Run": {
+      "main": [
+        [
+          {
+            "node": "Poll for Completion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Poll for Completion": {
+      "main": [
+        [
+          {
+            "node": "Fetch Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Results": {
+      "main": [
+        [
+          {
+            "node": "Transform & Validate Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transform & Validate Leads": {
+      "main": [
+        [
+          {
+            "node": "Insert Leads (Batch)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Insert Leads (Batch)": {
+      "main": [
+        [
+          {
+            "node": "Create Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Summary": {
+      "main": [
+        [
+          {
+            "node": "Update Batch Status",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Batch Status": {
+      "main": [
+        [
+          {
+            "node": "Success Message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Error": {
+      "main": [
+        [
+          {
+            "node": "Save Error Log",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Error Log": {
+      "main": [
+        [
+          {
+            "node": "Mark Batch Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Input Validation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "9efa4e19-4e6a-40b9-ae97-59a6b92bab5a",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-23T14:24:15.411Z",
+      "createdAt": "2025-12-23T14:24:15.411Z",
+      "role": "workflow:owner",
+      "workflowId": "5oIsaGb2HdKCgaVS",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
