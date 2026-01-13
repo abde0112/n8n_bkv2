@@ -1,0 +1,107 @@
+{
+  "updatedAt": "2025-09-25T14:34:13.000Z",
+  "createdAt": "2025-09-25T10:38:21.575Z",
+  "id": "rng1zM2rPFrwLzf3",
+  "name": "Skill: Clean Address",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1008,
+        -144
+      ],
+      "id": "564b6a5d-98d6-41c6-a11b-8836e63f3c41",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json[\"raw_address\"] || \"\";\n\nif (!raw) {\n  return [{ json: { street: \"\", city: \"\", postal_code: \"\", country: \"\" } }];\n}\n\nconst parts = raw.split(\",\").map(p => p.trim());\nconst capitalize = str => str.replace(/\\b\\w/g, c => c.toUpperCase());\n\nreturn [\n  {\n    json: {\n      street: parts[0] ? capitalize(parts[0]) : \"\",\n      city: parts[1] ? capitalize(parts[1]) : \"\",\n      postal_code: parts[2] || \"\",\n      country: parts[3] ? capitalize(parts[3]) : \"\",\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -784,
+        -144
+      ],
+      "id": "b0fe15ce-6661-4768-bbd5-762e0ab239ad",
+      "name": "Clean Address"
+    },
+    {
+      "parameters": {
+        "content": "1-Trigger Node – When Executed by Another Workflow\n“This workflow is designed to be reusable. It receives a raw_address from any parent workflow and returns a standardized address.”\n\n2-Function Node – Clean Address\n“Cleans and formats the raw address. Capitalizes street, city, and country. Handles missing parts safely.”\n\n3-Optional Google Sheet Node\n“Append cleaned addresses here for auditing. This step is optional but recommended for tracking results.”\n\n",
+        "height": 336,
+        "width": 448
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1520,
+        -240
+      ],
+      "typeVersion": 1,
+      "id": "56a5dda6-e0f0-4a45-aa09-f3bdb2d99f23",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "\n“Skill workflow is modular: can be called by multiple parent workflows. Never hard-code input — always accept JSON from the parent.”",
+        "height": 112,
+        "width": 448,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1520,
+        -368
+      ],
+      "typeVersion": 1,
+      "id": "ff037413-b59e-4be2-8434-eaaabc3bc162",
+      "name": "Sticky Note1"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Clean Address",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Address": {
+      "main": [
+        []
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "325503b1-6095-43c0-988b-e0bb5eb6d714",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-25T10:38:21.595Z",
+      "createdAt": "2025-09-25T10:38:21.595Z",
+      "role": "workflow:owner",
+      "workflowId": "rng1zM2rPFrwLzf3",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
