@@ -1,0 +1,269 @@
+{
+  "updatedAt": "2025-12-24T11:48:21.583Z",
+  "createdAt": "2025-12-23T14:24:48.012Z",
+  "id": "hZFgAjBCwdgfy6Np",
+  "name": "My workflow 23",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "707d7c4b-3d12-4b89-ba1b-6c6c1cb9375a",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"search\": \"{{$json.term}} in {{$json.location}}\",\n  \"job_id\": \"{{$json.job_id}}\",\n  \"batch_id\": \"{{$json.batch_id}}\",\n  \"user_id\": \"{{$json.user_id}}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "158ce300-004a-4f67-8780-8245523902cc",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://api.apify.com/v2/acts/apify~google-maps-scraper/runs?token=REDACTED_BY_REGEX",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"searchStringsArray\":\"{{ $json.term }}\",\n  \"maxCrawledPlacesPerSearch\": 10,\n  \"language\": \"en\",\n  \"countryCode\": \"US\",\n  \"includeWebsites\": true\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        624,
+        0
+      ],
+      "id": "c5571b05-1abf-4731-91ed-468240b4ffb3",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "amount": 30
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        832,
+        0
+      ],
+      "id": "4bc946b8-2906-43b2-b1a1-017e510b60db",
+      "name": "Wait",
+      "webhookId": "9657c941-be0b-48a3-9862-ad8f6c1398fb"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.apify.com/v2/actor-runs/{{ $json.data.id }}/dataset/items?token=REDACTED_BY_REGEX",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "6ccf7a0d-b363-440f-843c-797b9f974baf",
+      "name": "HTTP Request1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const leads = [];\n\nfor (const place of items[0].json) {\n  if (!place.website) continue;\n\n  leads.push({\n    user_id: $json.user_id,\n    batch_id: $json.batch_id,\n    job_id: $json.job_id,\n\n    domain: place.website,\n    source: \"apify_google_maps\",\n\n    status: \"raw\"\n  });\n}\n\nreturn leads.map(l => ({ json: l }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "bb286709-6264-40a9-a4d6-883967ebf71c",
+      "name": "FIELD FILTERING"
+    },
+    {
+      "parameters": {
+        "tableId": "leads",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "id"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1456,
+        0
+      ],
+      "id": "e790bbec-a9e6-492d-a45b-e96c4e501373",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "rCmp9ACsEE5Z3jVz",
+          "name": "Final project LEAD GEN AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"term\": \"Dentists\",\n  \"location\": \"Miami\",\n  \"job_id\": \"11111111-1111-1111-1111-111111111111\",\n  \"batch_id\": \"22222222-2222-2222-2222-222222222222\",\n  \"user_id\": \"33333333-3333-3333-3333-333333333333\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "5b09eca0-2b09-4db7-99cc-202df2047be5",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.apify.com/v2/acts/apify/google-maps-scraper/runs",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "token",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"searchStringsArray\": [\n    \"Dentists Miami\"\n  ],\n  \"maxCrawledPlacesPerSearch\": 5,\n  \"includeWebsites\": true\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        640,
+        320
+      ],
+      "id": "f1a986a1-c327-4dfa-8555-91974ffc35bd",
+      "name": "HTTP Request2"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request1": {
+      "main": [
+        [
+          {
+            "node": "FIELD FILTERING",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FIELD FILTERING": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HTTP Request2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "a484f818-286b-4151-afd9-85dab0874b8e",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-23T14:24:48.022Z",
+      "createdAt": "2025-12-23T14:24:48.022Z",
+      "role": "workflow:owner",
+      "workflowId": "hZFgAjBCwdgfy6Np",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
