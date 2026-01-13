@@ -1,0 +1,240 @@
+{
+  "updatedAt": "2025-10-11T16:52:01.000Z",
+  "createdAt": "2025-10-11T16:08:41.522Z",
+  "id": "YAkV3HBbT9NDoN2n",
+  "name": "19. Al Agent: Restaurant review sentiment → Excel export (Self-Hosted)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Review",
+        "formDescription": "This form for providing your review",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Your Name",
+              "placeholder": "EX: Abdellah abde",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Your review",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        -16,
+        80
+      ],
+      "id": "bcd351b0-27c7-47b6-bc9c-f69f4ffcac54",
+      "name": "On form submission",
+      "webhookId": "c0c88e56-769c-402b-97b4-43bdb9676b9d"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=This is the customer review: {{ $json['Your review'] }}\nYou are an expert in sentiment analysis. When I give you a\ncustomer review, classify its overall sentiment and reply with\nexactly one word: \"Positive\", \"Negative\", or \"Neutral\". Do\nnot add any extra text or explanation-just the single label. ",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        80
+      ],
+      "id": "26f54fa1-42f4-4411-b383-e494a9f01a20",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        192,
+        304
+      ],
+      "id": "3e53e766-bdae-4123-bb6a-23282dfef073",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "113uKOJEvJgoC9k3nLM89s-qcaUopsR0tS4BTSxr2-ng",
+          "mode": "list",
+          "cachedResultName": "Udemy",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/113uKOJEvJgoC9k3nLM89s-qcaUopsR0tS4BTSxr2-ng/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "19- Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/113uKOJEvJgoC9k3nLM89s-qcaUopsR0tS4BTSxr2-ng/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json['Your Name'] }}",
+            "Review": "={{ $json.output }}"
+          },
+          "matchingColumns": [
+            "Name"
+          ],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Review",
+              "displayName": "Review",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        80
+      ],
+      "id": "daa020f7-655f-497f-9710-922f3d7f06c7",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combineBy": "combineByPosition",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        544,
+        80
+      ],
+      "id": "c9e3d4ed-64b4-4cba-9afc-ed6047dde343",
+      "name": "Merge"
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "On form submission": [
+      {
+        "json": {
+          "Your Name": "Abdellah",
+          "Your review": "This product is Mess",
+          "submittedAt": "2025-10-11T12:15:40.717-04:00",
+          "formMode": "test"
+        }
+      }
+    ]
+  },
+  "versionId": "58d88c5f-3dde-42ed-bf33-68b9a2ed54b6",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-11T16:08:41.542Z",
+      "createdAt": "2025-10-11T16:08:41.542Z",
+      "role": "workflow:owner",
+      "workflowId": "YAkV3HBbT9NDoN2n",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
