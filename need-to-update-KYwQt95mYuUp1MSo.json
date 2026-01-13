@@ -1,0 +1,2942 @@
+{
+  "updatedAt": "2025-11-13T10:26:05.000Z",
+  "createdAt": "2025-10-06T23:08:55.802Z",
+  "id": "KYwQt95mYuUp1MSo",
+  "name": "need to update",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger1').item.json.message.text }}",
+        "options": {
+          "systemMessage": "=time now is : {{ $now }}\n# Overview\nYou are a calendar assistant. Your responsibilities include:\n- Creating, getting, updating, and deleting events in the user's calendar.\n- Finding or suggesting appropriate titles for meetings or events.\n- Identifying available time slots by analyzing existing events.\n\nYou can reason over event data that has already been provided to you.  \nYou should **never say you cannot fulfill a request** if you have enough data to calculate or suggest something.\n\n---\n\n## Calendar Management Tools\n\n- **Create Event with Attendee** → Use this when an event includes one or more participants.  \n- **Create Event** → Use this for solo events.  \n- **Get Events** → Fetch calendar schedules when requested, or when you need event data to reason about.  \n- **Update Event** → To update an event, you must first use **Get Events** to obtain its ID.  \n- **Delete Event** → To delete an event, you must first use **Get Events** to obtain its ID.  \n\nIf a duration for an event isn’t specified, assume it will be **one hour**.\n\n---\n\n## Availability Reasoning\nIf you receive a list of events (with start and end times):\n- Sort them chronologically.\n- Determine the gaps between them.\n- Each gap represents a **free slot**.\n- Return your answer in **valid JSON** format.\n\nIf no events are provided, use the **Get Events** tool to fetch them first.  \nIf no free slots exist, return an empty list of available slots.\n\n---\n\n## Special Instruction\n**When the user asks only for a summary or description of an event**, do **not** return the full JSON.  \nInstead, return **only the message string** in plain text.  \nFor all other cases (like creating, updating, or suggesting slots), return the structured JSON as defined below.\n\n---\n```json\n{\n  \"status\": \"success\",\n  \"available_slots\": [\n    { \"start\": \"2025-10-02T09:00\", \"end\": \"2025-10-02T10:30\" },\n    { \"start\": \"2025-10-02T12:00\", \"end\": \"2025-10-02T14:00\" }\n  ]\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        672,
+        768
+      ],
+      "id": "b3c4c3b2-a980-423c-9f88-58e2dac4e674",
+      "name": "AI Agent1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        1216
+      ],
+      "id": "ffef4a21-90e6-4c63-bedd-a8fd190ddb30",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1696,
+        784
+      ],
+      "id": "1f5183cb-4467-451d-a7a4-66a88ecc320e",
+      "name": "Send a text message1",
+      "webhookId": "314267a8-a52d-431c-a4b2-31bca163d7cc",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1424,
+        1168
+      ],
+      "id": "040884fe-6167-444f-b6c4-bc5aa076abe5",
+      "name": "Create an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "useDefaultReminders": "={{ true }}",
+        "updateFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1552,
+        1168
+      ],
+      "id": "48310d9a-4c6a-412d-b4cf-3ea3be213441",
+      "name": "Update an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "options": {
+          "sendUpdates": "all"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1856,
+        1120
+      ],
+      "id": "1c4eebd4-1956-43b2-9d5e-81d58715bf5a",
+      "name": "Delete an event in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1696,
+        1104
+      ],
+      "id": "371b8612-5d7a-4983-a3dd-86139c77b393",
+      "name": "Get many events in Google Calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -416,
+        768
+      ],
+      "id": "d540945c-7756-4b5c-858b-64e1c8bd0bac",
+      "name": "Telegram Trigger1",
+      "webhookId": "eb504b6f-0bca-4371-a429-2ed2b7adae6a",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "KYwQt95mYuUp1MSo",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1520,
+        1584
+      ],
+      "id": "c6e0e861-dae1-4c76-8167-a277215875e8",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "24d52ab2-7ab8-4831-b982-c5f3d279dba6",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Order Status",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Schedule Call",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ce6ba518-7e1d-49cc-be8e-16d8f83313a8"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "13114a69-3e3f-4fae-9456-f969ba4ef99d",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Other",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        208,
+        752
+      ],
+      "id": "7681219f-a81a-4c7a-ab28-7535c84a3dde",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an intelligent workflow router.\nAnalyze the following Telegram message and output one of these intents:\n\n\"Order Status\"\n\n\"Schedule Call\"\n\n\"Other\"\n\nMessage: {{ $('Telegram Trigger1').item.json.message.text }}\n\nIf the message contains words like event, create, delete, update, get (especially in the context of meetings or scheduling), always choose \"Schedule Call\".\n\nIf you do not understand the message or are unsure of the user's intent, first consult Simple Memory to see what subject or context is most relevant before making your decision.\n\nOutput ONLY the intent name.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -144,
+        768
+      ],
+      "id": "8d67e72f-3959-40ab-92f7-23ba75f81c24",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.from.id }}",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        784,
+        1808
+      ],
+      "id": "b33115cd-ce83-475a-97da-8ba50f0f40ba",
+      "name": "Send a text message in Telegram",
+      "webhookId": "2231d695-c22d-4fbd-a7e7-b347beecfb45",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "Abdellahkrimo13@gmail.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        1840
+      ],
+      "id": "90d1b842-b6d2-4520-bb27-c1b23b6d9b39",
+      "name": "Send a message in Gmail",
+      "webhookId": "3e3ef89b-8581-41a9-b33b-2cc3c59f3d79",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "abdellahkr13"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        96,
+        1808
+      ],
+      "id": "a125fe2c-e5d0-4513-ad83-9b45391c6937",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Process the user's request and communicate results appropriately.\n\nMANDATORY ACTIONS:\n\n1. ALWAYS send a Telegram message to the user:\n   - If successful: Send your helpful response\n   - If ANY error/problem: Send \"I'm experiencing technical difficulties right now. Please try again later.\"\n\n2. ONLY if there's an error: Send a Gmail message to the administrator with:\n   Subject: \"⚠️ AI Agent Error: [Error Type]\"\n   Body:\n   🚨 AI AGENT ERROR REPORT\n   ━━━━━━━━━━━━━━━━━━━━━━━━━━\n   \n   ⚠️ ERROR TYPE: [Category of error]\n   \n   📅 TIMESTAMP: [Current date/time]\n   \n   👤 USER REQUEST:\n   [What the user asked for]\n   \n   🔍 TECHNICAL DETAILS:\n   [Complete explanation of what went wrong]\n   \n   📊 CONTEXT:\n   [Any relevant context or patterns]\n   \n   🔴 SEVERITY: [Low/Medium/High/Critical]\n   \n   💡 SUGGESTED ACTIONS:\n   [Specific steps to resolve the issue]\n   \n   ━━━━━━━━━━━━━━━━━━━━━━━━━━\n   Automated alert from n8n AI Agent\n\nRULES:\n- NEVER send error details to the user via Telegram\n- ALWAYS use the Telegram tool to respond to the user\n- ONLY use the Gmail tool when there's an error\n- Be specific and detailed in Gmail reports\n- Keep Telegram messages simple and friendly",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a helpful assistant with access to Gmail and Telegram tools.\n\nCRITICAL: You must ALWAYS send a message to the user via Telegram, regardless of success or error.\n\nWhen processing requests:\n1. If successful: Send your helpful response to the user via Telegram\n\n2. If ANY error occurs (API failure, limitations, cannot help, missing information):\n   - Send to Telegram: \"I'm experiencing technical difficulties right now. Please try again later.\"\n   - Send to Gmail: A detailed error report to the administrator\n\nYou have direct access to both tools - use them appropriately based on the situation."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        1520
+      ],
+      "id": "93f7ad65-e473-4adc-9d7f-bd3b1ccb360d",
+      "name": "Errore"
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "agent-front-door",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -320,
+        -256
+      ],
+      "id": "3ce42b4e-b89f-44b5-8766-a746e1be4644",
+      "name": "Webhook",
+      "webhookId": "97c82870-a329-40ed-a2c0-ae0867bd038b"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        64,
+        368
+      ],
+      "id": "d3410666-7cdf-4bc7-b408-a35dcbea781a",
+      "name": "Google Gemini Chat Model",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3955ae88-37fe-4094-bc93-3ee449fe757e",
+              "name": "responseMessage",
+              "value": "Your order #12345 is currently out for delivery and should arrive today",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        848,
+        -512
+      ],
+      "id": "bba3ac7d-75ef-4410-8a05-ee7f073742ad",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "jsCode": "// This code finds the next 3 available 30-minute slots.\n\n// --- You can change these settings ---\nconst businessHoursStart = 9; // 9 AM\nconst businessHoursEnd = 17; // 5 PM\nconst numberOfSlotsToFind = 3;\n// ------------------------------------\n\nconst availableSlots = [];\nconst busyEvents = $input.all(); // Gets \"busy\" times from the Google node\n\n// Go through today and tomorrow\nfor (let i = 0; i < 2; i++) {\n  let currentDate = new Date();\n  currentDate.setDate(currentDate.getDate() + i);\n\n  // Create all possible 30-min slots inside business hours\n  for (let hour = businessHoursStart; hour < businessHoursEnd; hour++) {\n    for (let minute = 0; minute < 60; minute += 30) {\n      if (availableSlots.length >= numberOfSlotsToFind) break; // Stop if we have enough\n\n      let potentialSlotStart = new Date(currentDate);\n      potentialSlotStart.setHours(hour, minute, 0, 0);\n\n      // Skip times in the past\n      if (potentialSlotStart < new Date()) continue;\n\n      let isOverlapping = false;\n      // Check if this possible slot clashes with a busy event\n      for (const event of busyEvents) {\n        const eventStart = new Date(event.json.start);\n        const eventEnd = new Date(event.json.end);\n        if (potentialSlotStart < eventEnd && new Date(potentialSlotStart.getTime() + 30*60000) > eventStart) {\n          isOverlapping = true;\n          break;\n        }\n      }\n\n      // If it's not overlapping, it's a free slot!\n      if (!isOverlapping) {\n        availableSlots.push({\n          time: potentialSlotStart.toLocaleString('en-US', { weekday: 'long', hour: 'numeric', minute: 'numeric', hour12: true })\n        });\n      }\n    }\n  }\n}\n\nreturn availableSlots;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        -304
+      ],
+      "id": "c3872fcb-9cfe-4810-adda-7d3714fbeb0b",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "20fa623a-a511-4529-8425-b7ef3aa58b7b",
+              "name": "message",
+              "value": "={{ $json.body.message }}",
+              "type": "string"
+            },
+            {
+              "id": "2ceb9895-3fee-48af-a88d-9b94bfd4d344",
+              "name": "userId ",
+              "value": "={{ $json.body.userId }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -64,
+        -256
+      ],
+      "id": "1c337389-4158-4898-8624-b14cb22b14c8",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "content": " \n#### START: User Entry Point\n",
+        "height": 1456
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -416,
+        -816
+      ],
+      "typeVersion": 1,
+      "id": "339bdd54-d51b-4972-8275-726f9b393adb",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": " \n#### THE BRAIN (AI Intent Classifier)\n",
+        "height": 1456,
+        "width": 480,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -144,
+        -816
+      ],
+      "typeVersion": 1,
+      "id": "e7a0081f-1300-4277-a0b7-7faed50de5eb",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "#### THE TRAFFIC COP",
+        "height": 1456,
+        "width": 1616,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        352,
+        -816
+      ],
+      "typeVersion": 1,
+      "id": "e934ef87-69da-4a04-b1c9-2cfcf8ea946b",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": " \n#### INTENT: Order Status\n",
+        "height": 240,
+        "width": 1296
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        -592
+      ],
+      "typeVersion": 1,
+      "id": "60947865-8499-4ce3-9af8-e8a612fca590",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": " \n#### INTENT: Schedule Call Inquiry\n\n",
+        "height": 416,
+        "width": 1296,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        -336
+      ],
+      "typeVersion": 1,
+      "id": "9f9fc292-32d5-4e2c-b382-0efa70b81865",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.responseMessage }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1360,
+        -512
+      ],
+      "id": "bce41e28-675a-46be-83a4-524c7b86483d",
+      "name": "END: Send Response Back"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=Here are the next available times:\n{{ $('Edit Fields1').item.json.offeredTimes.replaceAll(', ', '\\n ') }}\n\nTo confirm, simply reply with the time you'd like to book. For example: \"Friday 9:00 AM sounds great!\"",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1728,
+        -304
+      ],
+      "id": "381f1e47-8632-4ca7-87f5-57a61da8a4c3",
+      "name": "END: Send Response Back1",
+      "notes": "$items(): This grabs the full list of all 3 items that are coming from your Function node.\n.map(item => ...): This correctly loops through each item in that list.\nitem.json.time: For each item in the loop, it looks inside its json data to get the value of the time property (e.g., \"Friday 9:00 AM\")."
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "14bImIanFhTKCZ_ttrNtFKAhPQNDRW-TLn6UvmFgkG64",
+          "mode": "list",
+          "cachedResultName": "Scheduler Conversation Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14bImIanFhTKCZ_ttrNtFKAhPQNDRW-TLn6UvmFgkG64/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/16b1DbAkCtmlGtAfs2snE7P5TPkkcgieK3smnaieOv0U/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "userId": "={{ $('Webhook').first().json.body.userId }}",
+            "offeredTimes": "={{ $items().map(item => item.json.time).join(', ') }}",
+            "lastUpdate": "={{ $now }}",
+            "interactionId": "={{ $execution.id }}",
+            "status": "offered"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "interactionId",
+              "displayName": "interactionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "userId",
+              "displayName": "userId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "offeredTimes",
+              "displayName": "offeredTimes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "confirmedTime",
+              "displayName": "confirmedTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "eventUrl",
+              "displayName": "eventUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "lastUpdate",
+              "displayName": "lastUpdate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1504,
+        -304
+      ],
+      "id": "b0104046-9cad-4f60-92c7-e4f579bf755a",
+      "name": "Append row in sheet",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f3e8c382-3daf-4cef-b8fe-58f09758c9e4",
+              "name": "interactionId",
+              "value": "={{ $execution.id }}",
+              "type": "string"
+            },
+            {
+              "id": "dc18031e-65af-48e0-b8cd-f648dec370b4",
+              "name": "userId",
+              "value": "={{ $('Webhook').first().json.body.userId }}",
+              "type": "string"
+            },
+            {
+              "id": "a2081e86-2937-4171-b1da-b4907fa006bc",
+              "name": "offeredTimes",
+              "value": "={{ $items().map(item => item.json.time).join(', ') }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1312,
+        -304
+      ],
+      "id": "0c58fabe-0d67-4bd6-b8b0-8e8aa9edd910",
+      "name": "Edit Fields1",
+      "executeOnce": true
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "14bImIanFhTKCZ_ttrNtFKAhPQNDRW-TLn6UvmFgkG64",
+          "mode": "list",
+          "cachedResultName": "Scheduler Conversation Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14bImIanFhTKCZ_ttrNtFKAhPQNDRW-TLn6UvmFgkG64/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14bImIanFhTKCZ_ttrNtFKAhPQNDRW-TLn6UvmFgkG64/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "userId",
+              "lookupValue": "={{ $('Webhook').item.json.body.userId }}"
+            },
+            {
+              "lookupColumn": "status",
+              "lookupValue": "confirmed"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        752,
+        192
+      ],
+      "id": "d433a51a-3af2-4528-9b50-1bab27933c8e",
+      "name": "Get row(s) in sheet",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a precise scheduling and data-logging assistant for an n8n workflow. You must follow these instructions exactly.\nStep 1: Construct the Correct Start Time.\nThis is the most critical step. You must create the event's start time by following this sequence:\nGet the current date of the workflow's execution. Today is October 8, 2025.\nTake the raw output from the previous AI step: {{ $('AI Agent2').item.json.output }}.\nFrom that output, extract only the time part (hours, minutes, and seconds). Ignore the date part (year, month, and day) entirely.\nCombine the current date from step 1 with the extracted time from step 3.\nSet the timezone for this combined date and time to 'Africa/Casablanca'. This is your final startTime.\nStep 2: Book the Meeting.\nUse the Google Calendar tool to create a 30-minute event using the startTime you just constructed.\nTitle: Support Call with {{ $('Webhook').first().json.body.userId }}\nStart Time: Use the final startTime from Step 1.\nStep 3: Log the Confirmation.\nAfter the event is created, use the Google Sheets tool to update the user's row.\nFind the Row: Locate the row where the userId column matches {{ $('Webhook').first().json.body.userId }}.\nUpdate Columns:\nSet the status column to \"confirmed\".\nSet the confirmedTime column to the startTime you created in Step 1.\nSet the eventUrl column to the htmlLink from the calendar tool's output.\nStep 4: Respond to the User.\nFinally, respond with a friendly confirmation message confirming the meeting has been booked for today at the specified time. I f there is an error or some issues on tools or data provides , send a response based on modd of user defined by  node output :   \n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1488,
+        256
+      ],
+      "id": "422cdfe8-8a6c-4d45-9325-7a1a64ffd5ac",
+      "name": "booking Ai"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "14bImIanFhTKCZ_ttrNtFKAhPQNDRW-TLn6UvmFgkG64",
+          "mode": "list",
+          "cachedResultName": "Scheduler Conversation Log",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14bImIanFhTKCZ_ttrNtFKAhPQNDRW-TLn6UvmFgkG64/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14bImIanFhTKCZ_ttrNtFKAhPQNDRW-TLn6UvmFgkG64/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "userId": "={{ $fromAI('userId', ``, 'string') }}",
+            "offeredTimes": "={{ $fromAI('offeredTimes', ``, 'string') }}",
+            "confirmedTime": "={{ $fromAI('confirmedTime', ``, 'string') }}",
+            "eventUrl": "={{ $fromAI('eventUrl', ``, 'string') }}",
+            "lastUpdate": "={{ $now }}",
+            "status": "={{ $fromAI('status', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "userId"
+          ],
+          "schema": [
+            {
+              "id": "interactionId",
+              "displayName": "interactionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "userId",
+              "displayName": "userId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "offeredTimes",
+              "displayName": "offeredTimes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "confirmedTime",
+              "displayName": "confirmedTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "eventUrl",
+              "displayName": "eventUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lastUpdate",
+              "displayName": "lastUpdate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        1696,
+        464
+      ],
+      "id": "cfd3ccfc-e655-421e-9b57-7c6f333c8836",
+      "name": "Update row in sheet in Google Sheets",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.output }} \n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1776,
+        256
+      ],
+      "id": "76f293de-b760-4d83-b8ac-5b51d25c41eb",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "content": " \n#### INTENT: Schedule Call Confirmation\n\n\n",
+        "height": 512,
+        "width": 1296,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        672,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "73881861-0755-4d33-b3db-ae1fef853498",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "confirmed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b2e1a086-af59-41a9-a3b9-e9b0b1422a94"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d0804796-839a-485c-ae3e-ea742b92c5bb",
+                    "leftValue": "={{ $('Edit Fields2').item.json['userId '] }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        928,
+        192
+      ],
+      "id": "9910de85-3474-46e6-b72e-04cc50c6b7bf",
+      "name": "Switch1"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "fatima.ouali2002@gmail.com",
+          "mode": "list",
+          "cachedResultName": "fatima.ouali2002@gmail.com"
+        },
+        "timeMax": "={{ $now.plus({ days: 2 }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        752,
+        -96
+      ],
+      "id": "463c5e4a-d26a-4091-b24b-def31827026c",
+      "name": "Get many events",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      },
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": " Angry",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "3a210bcf-270e-46c8-a0a3-9afeaa4e2121"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "de2af719-2dd8-41d2-84d0-d4c159d9974f",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Calm",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1472,
+        -80
+      ],
+      "id": "afca475c-545c-49b1-ac52-d1f8cda4ec15",
+      "name": "Switch2",
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "I am incredibly sorry. It is completely unacceptable that our scheduling system has failed when you needed it, and I understand how frustrating this must be. This is a failure on our part, and I take full responsibility.\nTo make this right immediately, I would like to connect you directly with a human support agent who can book this for you manually and address your concerns.\nPlease email our priority support team at priority-support@example.com, and they will assist you right away.\nAgain, I sincerely apologize for this frustrating experience.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1728,
+        -160
+      ],
+      "id": "c76409ca-9ced-44d1-85d7-65940326d56f",
+      "name": "Anger case"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "I am so sorry, but it seems I'm having trouble connecting to our scheduling system at the moment to find available times. This is an issue on our end, and I've already notified our technical team.\nPlease feel free to try asking again in a few minutes. If it's urgent, you can also contact our support team directly at support@example.com.\nWe sincerely apologize for the inconvenience.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1728,
+        -32
+      ],
+      "id": "916a80a3-2c59-48ea-b615-c3fa39ea5df9",
+      "name": "Calm case"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "You already have a confirmed booking.",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1328,
+        144
+      ],
+      "id": "e4224661-e174-4c46-aebb-75a5f909b90f",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "64d41d8f-209e-451f-830f-bdd9f8d41e6d",
+              "leftValue": "={{ $json.error }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notExists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        976,
+        -96
+      ],
+      "id": "8b3664e5-15a2-41cc-9d7b-23d1a78b5fa9",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Order Status",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "85b17acf-6d59-4a57-83e2-42670d489dae"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b492ff03-a662-4ba5-9479-3c2fb2bf70ae",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Schedule Call Inquiry",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2ce882c0-3e02-43a8-9894-5ef179aa42da",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Schedule Call Confirmation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        496,
+        -272
+      ],
+      "id": "3edfd376-9a99-44dc-91d2-1b643a948ed8",
+      "name": "Switch3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a sophisticated intent and data extractor for a scheduling system. Analyze the user's message and determine its intent.\n\nThe possible intents are:\n1. 'Order Status': For any questions about package tracking or delivery.\n2. 'Schedule Call Inquiry': If the user wants to talk to a person for the FIRST time. (e.g., \"I need to speak to an agent\", \"Can I schedule a call?\")\n3. 'Schedule Call Confirmation': If the user is REPLYING to an offer of times and wants to book a specific one. (e.g., \"book Friday at 9:00 AM\", \"The first one sounds good\")\n\nIf the intent is 'Schedule Call Confirmation', you MUST also extract the specific time the user wants to book.\n\nRespond in a JSON format with two keys: \"intent\" and, if applicable, \"bookingTime\".\n\nUser message: \"{{ $json.message }}\"",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        -256
+      ],
+      "id": "e8e8ddf2-f3f5-4910-9acb-088e089402b2",
+      "name": "AI Agent2"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "fatima.ouali2002@gmail.com",
+          "mode": "list",
+          "cachedResultName": "fatima.ouali2002@gmail.com"
+        },
+        "start": "={{ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ $fromAI('End', ``, 'string') }}",
+        "useDefaultReminders": "={{ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        1472,
+        448
+      ],
+      "id": "32af9df8-68e0-4152-ab52-488d3cc15cd0",
+      "name": "Create an event in Google Calendar1",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a sentiment analysis expert. Your job is to read the user's message and classify their emotion.\n\nThe user has encountered a system error, so they might be frustrated.\n\nClassify the sentiment as either \"Calm\" or \"Angry\". Respond with ONLY one of those two words.\n\nUser's original message: \"{{ $('Edit Fields2').item.json.message }}\"",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1200,
+        -80
+      ],
+      "id": "5baef0ac-bbb5-4b94-9a43-ae4e4ce2be1f",
+      "name": "AI Agent3"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3955ae88-37fe-4094-bc93-3ee449fe757e",
+              "name": "responseMessage",
+              "value": "Your order #12345 is currently out for delivery and should arrive today",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        800,
+        624
+      ],
+      "id": "504ce066-0078-4c69-b621-bb130a0c424f",
+      "name": "Edit Fields3"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1056,
+        624
+      ],
+      "id": "e9f53b41-4ddc-46ef-ac48-ade29aab9d43",
+      "name": "Send a text message",
+      "webhookId": "314267a8-a52d-431c-a4b2-31bca163d7cc",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger').item.json.message.text }}",
+        "options": {
+          "systemMessage": "=time now is : {{ $now }}\n# Overview\nYou are a calendar assistant. Your responsibilities include:\n- Creating, getting, updating, and deleting events in the user's calendar.\n- Finding or suggesting appropriate titles for meetings or events.\n- Identifying available time slots by analyzing existing events.\n\nYou can reason over event data that has already been provided to you.  \nYou should **never say you cannot fulfill a request** if you have enough data to calculate or suggest something.\n\n---\n\n## Calendar Management Tools\n\n- **Create Event with Attendee** → Use this when an event includes one or more participants.  \n- **Create Event** → Use this for solo events.  \n- **Get Events** → Fetch calendar schedules when requested, or when you need event data to reason about.  \n- **Update Event** → To update an event, you must first use **Get Events** to obtain its ID.  \n- **Delete Event** → To delete an event, you must first use **Get Events** to obtain its ID.  \n\nIf a duration for an event isn’t specified, assume it will be **one hour**.\n\n---\n## After the event is created, use the Google Sheets tool to update the user's row.\nFind the Row: Locate the row where the userId column matches {{ $('Telegram Trigger').item.json.message.from.id }}.\n\n\n\nUpdate Columns:\nSet the status column to \"confirmed\".\nSet the confirmedTime column to the startTime you created in Step 1.\nSet the eventUrl column to the htmlLink from the calendar tool's output.\nStep 4: Respond to the User.\nFinally, respond with a friendly confirmation message confirming the meeting has been booked for today at the specified time. I f there is an error or some issues on tools or data provides , send a response based on modd of user defined by  node output :   \n\n## Availability Reasoning\nIf you receive a list of events (with start and end times):\n- Sort them chronologically.\n- Determine the gaps between them.\n- Each gap represents a **free slot**.\n- Return your answer in **valid JSON** format.\n\nIf no events are provided, use the **Get Events** tool to fetch them first.  \nIf no free slots exist, return an empty list of available slots.\n\n---\n\n## Special Instruction\n**When the user asks only for a summary or description of an event**, do **not** return the full JSON.  \nInstead, return **only the message string** in plain text.  \nFor all other cases (like creating, updating, or suggesting slots), return the structured JSON as defined below.\n\n---\n```json\n{\n  \"status\": \"success\",\n  \"available_slots\": [\n    { \"start\": \"2025-10-02T09:00\", \"end\": \"2025-10-02T10:30\" },\n    { \"start\": \"2025-10-02T12:00\", \"end\": \"2025-10-02T14:00\" }\n  ]\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        4480,
+        -448
+      ],
+      "id": "e54b0617-1353-417d-9317-d481b0937247",
+      "name": "AI Agent4"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2544,
+        -16
+      ],
+      "id": "e5850994-f229-4b21-926a-4e1154a83a70",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        5184,
+        -464
+      ],
+      "id": "0dd32401-7ad1-4d30-9ceb-4b3e6b7a14d7",
+      "name": "Send a text message2",
+      "webhookId": "314267a8-a52d-431c-a4b2-31bca163d7cc",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "useDefaultReminders": "={{ true }}",
+        "updateFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        4992,
+        -80
+      ],
+      "id": "928225eb-3cf2-475e-bbbd-8ae3e871f755",
+      "name": "Update an event in Google Calendar1",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        2080,
+        -464
+      ],
+      "id": "d8989be8-f8fe-4316-a14d-5546ad571687",
+      "name": "Telegram Trigger",
+      "webhookId": "eb504b6f-0bca-4371-a429-2ed2b7adae6a",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "KYwQt95mYuUp1MSo",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        4352,
+        352
+      ],
+      "id": "01607a36-7691-438f-9221-ae80b4e2d920",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "24d52ab2-7ab8-4831-b982-c5f3d279dba6",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Order Status",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Schedule Call",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ce6ba518-7e1d-49cc-be8e-16d8f83313a8"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "13114a69-3e3f-4fae-9456-f969ba4ef99d",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Other",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        2832,
+        -480
+      ],
+      "id": "0ff473b5-6027-4045-8123-cc5bb80f72fa",
+      "name": "Switch4"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an intelligent workflow router.\nAnalyze the following Telegram message and output one of these intents:\n\n\"Order Status\"\n\n\"Schedule Call\"\n\n\"Other\"\n\nMessage: \n{{ $('Telegram Trigger').item.json.message.text }}\nIf the message contains words like event, create, delete, update, get (especially in the context of meetings or scheduling), always choose \"Schedule Call\".\n\nIf you do not understand the message or are unsure of the user's intent, first consult Simple Memory to see what subject or context is most relevant before making your decision.\n\nOutput ONLY the intent name.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        2480,
+        -464
+      ],
+      "id": "90ea30ae-94e2-4f31-b981-12c43551b4b6",
+      "name": "AI Agent5"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Text', ``, 'string') }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegramTool",
+      "typeVersion": 1.2,
+      "position": [
+        3792,
+        352
+      ],
+      "id": "c187c433-ed20-45f2-839b-ceee0ff82651",
+      "name": "Send a text message in Telegram1",
+      "webhookId": "2231d695-c22d-4fbd-a7e7-b347beecfb45",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "Abdellahkrimo13@gmail.com",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        3552,
+        384
+      ],
+      "id": "64a32646-666b-4bb5-94b7-486168deefb6",
+      "name": "Send a message in Gmail1",
+      "webhookId": "3e3ef89b-8581-41a9-b33b-2cc3c59f3d79",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "abdellahkr13"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2896,
+        352
+      ],
+      "id": "9e828a96-9a6e-4518-9413-19bb0fc08670",
+      "name": "Google Gemini Chat Model4",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Process the user's request and communicate results appropriately.\n\nMANDATORY ACTIONS:\n\n1. ALWAYS send a Telegram message to the user:\n   - If successful: Send your helpful response\n   - If ANY error/problem: Send \"I'm experiencing technical difficulties right now. Please try again later.\"\n\n2. ONLY if there's an error: Send a Gmail message to the administrator with:\n   Subject: \"⚠️ AI Agent Error: [Error Type]\"\n   Body:\n   🚨 AI AGENT ERROR REPORT\n   ━━━━━━━━━━━━━━━━━━━━━━━━━━\n   \n   ⚠️ ERROR TYPE: [Category of error]\n   \n   📅 TIMESTAMP: [Current date/time]\n   \n   👤 USER REQUEST:\n   [What the user asked for]\n   \n   🔍 TECHNICAL DETAILS:\n   [Complete explanation of what went wrong]\n   \n   📊 CONTEXT:\n   [Any relevant context or patterns]\n   \n   🔴 SEVERITY: [Low/Medium/High/Critical]\n   \n   💡 SUGGESTED ACTIONS:\n   [Specific steps to resolve the issue]\n   \n   ━━━━━━━━━━━━━━━━━━━━━━━━━━\n   Automated alert from n8n AI Agent\n\nRULES:\n- NEVER send error details to the user via Telegram\n- ALWAYS use the Telegram tool to respond to the user\n- ONLY use the Gmail tool when there's an error\n- Be specific and detailed in Gmail reports\n- Keep Telegram messages simple and friendly",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are a helpful assistant with access to Gmail and Telegram tools.\n\nCRITICAL: You must ALWAYS send a message to the user via Telegram, regardless of success or error.\n\nWhen processing requests:\n1. If successful: Send your helpful response to the user via Telegram\n\n2. If ANY error occurs (API failure, limitations, cannot help, missing information):\n   - Send to Telegram: \"I'm experiencing technical difficulties right now. Please try again later.\"\n   - Send to Gmail: A detailed error report to the administrator\n\nYou have direct access to both tools - use them appropriately based on the situation."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        3456,
+        64
+      ],
+      "id": "563d9f58-47bc-404e-9279-7a0c7237a3e3",
+      "name": "Errore1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are a scheduling intent classifier.\n\nRead the latest user message **and** a short memory of the last 2-5 conversation turns.\n\nClassify the user intent as ONLY ONE of:\n\n- \"Schedule Call Inquiry\" (user is asking about booking a call or proposing new times)\n- \"Schedule Call Confirmation\" (user is confirming previously proposed time for a call)\n- \"Other\"\n\nRespond with ONE of these three labels only. No extra text.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        3136,
+        -464
+      ],
+      "id": "aa59a8c7-b64d-4fef-840d-02ca50a5cc5c",
+      "name": "AI Agent6"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "2ce882c0-3e02-43a8-9894-5ef179aa42da",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Schedule Call Confirmation",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b492ff03-a662-4ba5-9479-3c2fb2bf70ae",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "Schedule Call Inquiry",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        3536,
+        -464
+      ],
+      "id": "b9025aaa-6df7-4515-8590-0d4e66e3f961",
+      "name": "Switch5"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1f235fmYzkSdqRLqjqvPEa-eMZwPI0LoafD2zzQrpCHE",
+          "mode": "list",
+          "cachedResultName": "ARK-x day 12 mini project",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1f235fmYzkSdqRLqjqvPEa-eMZwPI0LoafD2zzQrpCHE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1f235fmYzkSdqRLqjqvPEa-eMZwPI0LoafD2zzQrpCHE/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "userId",
+              "lookupValue": "={{ $('Edit Fields4').item.json['userId '] }}"
+            },
+            {
+              "lookupColumn": "status",
+              "lookupValue": "confirmed"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        3984,
+        -656
+      ],
+      "id": "daaac431-5a48-41fc-954a-d2681126b57c",
+      "name": "Get row(s) in sheet1",
+      "alwaysOutputData": true,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1f235fmYzkSdqRLqjqvPEa-eMZwPI0LoafD2zzQrpCHE",
+          "mode": "list",
+          "cachedResultName": "ARK-x day 12 mini project",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1f235fmYzkSdqRLqjqvPEa-eMZwPI0LoafD2zzQrpCHE/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14bImIanFhTKCZ_ttrNtFKAhPQNDRW-TLn6UvmFgkG64/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "userId": "={{ $fromAI('userId', ``, 'string') }}",
+            "offeredTimes": "={{ $fromAI('offeredTimes', ``, 'string') }}",
+            "confirmedTime": "={{ $fromAI('confirmedTime', ``, 'string') }}",
+            "eventUrl": "={{ $fromAI('eventUrl', ``, 'string') }}",
+            "lastUpdate": "={{ $now }}",
+            "status": "={{ $fromAI('status', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "userId"
+          ],
+          "schema": [
+            {
+              "id": "interactionId",
+              "displayName": "interactionId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "userId",
+              "displayName": "userId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "offeredTimes",
+              "displayName": "offeredTimes",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "confirmedTime",
+              "displayName": "confirmedTime",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "eventUrl",
+              "displayName": "eventUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "lastUpdate",
+              "displayName": "lastUpdate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "status",
+              "displayName": "status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        4624,
+        -96
+      ],
+      "id": "099cbae9-f776-44fa-8ded-12eec08b5eb6",
+      "name": "Update row in sheet in Google Sheets1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.status }}",
+                    "rightValue": "confirmed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "b2e1a086-af59-41a9-a3b9-e9b0b1422a94"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d0804796-839a-485c-ae3e-ea742b92c5bb",
+                    "leftValue": "={{ $('Edit Fields4').item.json['userId '] }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "notEmpty",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        4192,
+        -656
+      ],
+      "id": "8d4feeb5-59a3-44cc-bf07-dbdef1847b6e",
+      "name": "Switch6"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "=You already have a confirmed booking.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        4544,
+        -912
+      ],
+      "id": "003dcbae-1062-4ef1-b9bb-97350836f43f",
+      "name": "Send a text message3",
+      "webhookId": "314267a8-a52d-431c-a4b2-31bca163d7cc",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "20fa623a-a511-4529-8425-b7ef3aa58b7b",
+              "name": "message",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "2ceb9895-3fee-48af-a88d-9b94bfd4d344",
+              "name": "userId ",
+              "value": "={{ $json.message.from.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2256,
+        -464
+      ],
+      "id": "0964a136-a0c7-4c57-b576-f66d509c7d48",
+      "name": "Edit Fields4"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        5152,
+        -176
+      ],
+      "id": "8faff9a8-4d6e-4987-9fa0-4d1abd7861e4",
+      "name": "Get many events in Google Calendar1",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "options": {
+          "sendUpdates": "all"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        5328,
+        -208
+      ],
+      "id": "63e1b4b4-cfc5-4614-a23d-f43ca79ce287",
+      "name": "Delete an event in Google Calendar1",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "additionalFields": {
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        4832,
+        -128
+      ],
+      "id": "3c9437ee-f0ee-4087-a870-3f1f8b7e55e8",
+      "name": "Create an event in Google Calendar2",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3955ae88-37fe-4094-bc93-3ee449fe757e",
+              "name": "responseMessage",
+              "value": "Your order #12345 is currently out for delivery and should arrive today",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        3120,
+        -736
+      ],
+      "id": "e8e330f5-0f25-450d-acfc-7dfaf94f116a",
+      "name": "Edit Fields5"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        3376,
+        -736
+      ],
+      "id": "4a479a56-db99-48af-8d0b-54b7138422c5",
+      "name": "Send a text message4",
+      "webhookId": "314267a8-a52d-431c-a4b2-31bca163d7cc",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete an event in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger1": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent1",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Errore",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Errore",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message in Telegram": {
+      "ai_tool": [
+        [
+          {
+            "node": "Errore",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "Errore",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Errore",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message1": {
+      "main": [
+        []
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "booking Ai",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent3",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "END: Send Response Back",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "AI Agent2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "END: Send Response Back1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Switch1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "booking Ai": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "booking Ai",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch1": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "booking Ai",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch2": {
+      "main": [
+        [
+          {
+            "node": "Anger case",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Calm case",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch3": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get many events",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent2": {
+      "main": [
+        [
+          {
+            "node": "Switch3",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar1": {
+      "ai_tool": [
+        [
+          {
+            "node": "booking Ai",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent3": {
+      "main": [
+        [
+          {
+            "node": "Switch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields3": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent4": {
+      "main": [
+        [
+          {
+            "node": "Send a text message2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent5",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent6",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update an event in Google Calendar1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "AI Agent5",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Errore1",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "AI Agent6",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch4": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields5",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent6",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Errore1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent5": {
+      "main": [
+        [
+          {
+            "node": "Switch4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a text message in Telegram1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Errore1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message in Gmail1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Errore1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model4": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Errore1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent6": {
+      "main": [
+        [
+          {
+            "node": "Switch5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch5": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Switch6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update row in sheet in Google Sheets1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch6": {
+      "main": [
+        [
+          {
+            "node": "Send a text message3",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields4": {
+      "main": [
+        [
+          {
+            "node": "AI Agent5",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many events in Google Calendar1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete an event in Google Calendar1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event in Google Calendar2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent4",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields5": {
+      "main": [
+        [
+          {
+            "node": "Send a text message4",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Africa/Casablanca",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false,
+    "errorWorkflow": "p8BCnArBm78kQ3JI"
+  },
+  "staticData": {
+    "node:Schedule Trigger": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "81ce4e4c-5378-499f-899c-87b781687178",
+  "activeVersionId": null,
+  "triggerCount": 2,
+  "shared": [
+    {
+      "updatedAt": "2025-10-06T23:08:55.819Z",
+      "createdAt": "2025-10-06T23:08:55.819Z",
+      "role": "workflow:owner",
+      "workflowId": "KYwQt95mYuUp1MSo",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
