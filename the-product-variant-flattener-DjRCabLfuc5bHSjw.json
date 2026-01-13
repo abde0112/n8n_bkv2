@@ -1,0 +1,283 @@
+{
+  "updatedAt": "2025-09-27T10:44:04.000Z",
+  "createdAt": "2025-09-12T21:27:41.348Z",
+  "id": "DjRCabLfuc5bHSjw",
+  "name": "The Product Variant Flattener",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        48,
+        64
+      ],
+      "id": "eec21785-03c3-43c6-8b0d-515db48f516b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"productName\": \"T-Shirt\",\n  \"variants\": [\n    {\"size\": \"M\", \"color\": \"Black\"},\n    {\"size\": \"L\", \"color\": \"Blue\"}\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        256,
+        64
+      ],
+      "id": "8c57adb6-cb33-4978-837b-a14645c552eb",
+      "name": "productdetails"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: a single product with nested variants\n// Output: flattened list of variant-level products\n\nconst product = items[0].json;  // only one product\nconst { productId, productName, description, price, variants } = product;\n\nconst results = [];\n\nif (variants && Array.isArray(variants)) {\n  for (const variant of variants) {\n    results.push({\n      json: {\n        productId,\n        productName,\n        description,\n        price: Number(price).toFixed(2),\n        size: variant.size,\n        color: variant.color\n      }\n    });\n  }\n} else {\n  // If no variants, still keep the product\n  results.push({\n    json: { productId, productName, description, price }\n  });\n}\n\nreturn results;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        64
+      ],
+      "id": "87c50bfd-2f25-4c58-926f-93c6229768c5",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a98af3b1-c5d1-447d-b50d-cefabf8ef9c6",
+              "name": "lastChecked",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        880,
+        64
+      ],
+      "id": "858ab05f-1b19-4c22-b4f8-f2287dee9a99",
+      "name": "lastChcked"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1b0yAYiQ524t9tG0HD2CwnqH-IPk6haDxZiPxOHTRyRg",
+          "mode": "list",
+          "cachedResultName": "The Product Variant Flattener",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1b0yAYiQ524t9tG0HD2CwnqH-IPk6haDxZiPxOHTRyRg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Cleaned Product Variants",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1b0yAYiQ524t9tG0HD2CwnqH-IPk6haDxZiPxOHTRyRg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "ProductId": "={{ $('Code').item.json.productId }}",
+            "ProductName": "={{ $('Code').item.json.productName }}",
+            "Description": "={{ $('Code').item.json.description }}",
+            "Price": "={{ $('Code').item.json.price }}",
+            "Color": "={{ $('Code').item.json.color }}",
+            "Size": "={{ $('Code').item.json.size }}",
+            "LastChecked": "={{ $now }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "ProductId",
+              "displayName": "ProductId",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ProductName",
+              "displayName": "ProductName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Description",
+              "displayName": "Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Price",
+              "displayName": "Price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Size",
+              "displayName": "Size",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Color",
+              "displayName": "Color",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "LastChecked",
+              "displayName": "LastChecked",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1088,
+        64
+      ],
+      "id": "4afa9c34-f2ac-4943-b0da-5fef61b5a115",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"productId\": \"P-1002\",\n  \"productName\": \"Sneakers\",\n  \"description\": \"Running shoes\",\n  \"price\": 55,\n  \"variants\": [\n    { \"size\": \"42\", \"color\": \"White\" },\n    { \"size\": \"43\", \"color\": \"Black\" }\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        64
+      ],
+      "id": "4e56ad17-0698-43b6-88b2-72ff0e1c84d2",
+      "name": "Product-Details"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "productdetails",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "productdetails": {
+      "main": [
+        [
+          {
+            "node": "Product-Details",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "lastChcked",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "lastChcked": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Product-Details": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "00929c6a-a2f3-412b-9ce4-72b096d0d828",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-12T21:27:41.364Z",
+      "createdAt": "2025-09-12T21:27:41.364Z",
+      "role": "workflow:owner",
+      "workflowId": "DjRCabLfuc5bHSjw",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
