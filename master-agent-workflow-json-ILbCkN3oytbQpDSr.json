@@ -1,0 +1,1277 @@
+{
+  "updatedAt": "2025-12-29T17:12:50.347Z",
+  "createdAt": "2025-12-27T20:18:27.262Z",
+  "id": "ILbCkN3oytbQpDSr",
+  "name": "Master Agent Workflow JSON",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        240,
+        -96
+      ],
+      "id": "0096a9bc-9574-41c7-8fc2-c93a7c625907",
+      "name": "Telegram Input",
+      "webhookId": "telegram-webhook-id",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "path": "lead-agent-webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        240,
+        112
+      ],
+      "id": "c2e5df1e-b927-4f6e-9446-c142d1c95268",
+      "name": "Webhook Input",
+      "webhookId": "webhook-id-here"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        240,
+        304
+      ],
+      "id": "46e7a2e3-cc14-4fef-a448-93ccc908f613",
+      "name": "Chat Input",
+      "webhookId": "chat-webhook-id",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        448,
+        112
+      ],
+      "id": "534207e8-94bf-44a1-bc52-6779fe4fb2e8",
+      "name": "Merge All Inputs"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "user_input",
+              "name": "user_input",
+              "value": "={{ $json.message?.text || $json.body?.query || $json.body?.message || $json.chat_message || $json.chatInput }}",
+              "type": "string"
+            },
+            {
+              "id": "source",
+              "name": "source",
+              "value": "={{ $json.message ? 'telegram' : ($json.chat_message || $json.chatInput ? 'chat' : 'webhook') }}",
+              "type": "string"
+            },
+            {
+              "id": "chat_id",
+              "name": "chat_id",
+              "value": "={{ $json.message?.chat?.id || null }}",
+              "type": "string"
+            },
+            {
+              "id": "timestamp",
+              "name": "timestamp",
+              "value": "={{ $now }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        640,
+        112
+      ],
+      "id": "bf1ffd5d-946a-4f21-8720-046867c0a040",
+      "name": "Normalize Input"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict"
+                },
+                "conditions": [
+                  {
+                    "leftValue": "",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        848,
+        112
+      ],
+      "id": "c8e471de-faf6-443a-acfc-42368b439e82",
+      "name": "Route by Intent"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "intent",
+              "name": "intent",
+              "value": "lead_hunt",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1040,
+        16
+      ],
+      "id": "73b33e50-6b74-473e-a2d3-7dcb8badbe40",
+      "name": "Set Lead Hunt Intent"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "intent",
+              "name": "intent",
+              "value": "status_check",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1040,
+        208
+      ],
+      "id": "1fb6c0aa-ad8f-4cad-a45f-98dd5f5e731f",
+      "name": "Set Status Intent"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "intent",
+              "name": "intent",
+              "value": "general_chat",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1040,
+        416
+      ],
+      "id": "91c8ba7f-9caf-4604-aa17-bf5dca2d200a",
+      "name": "Set General Intent"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        1248,
+        208
+      ],
+      "id": "8722252b-aaeb-4e38-9880-a751c6257015",
+      "name": "Merge Intents"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $json.intent }}",
+              "operation": "equals",
+              "value2": "lead_hunt"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        208
+      ],
+      "id": "84e0a36d-936a-44aa-98ad-6e9a33da6cd0",
+      "name": "Check Intent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Extract the search parameters from this request: \"{{ $json.user_input }}\"\n\nExtract:\n1. Location/city (default: Morocco)\n2. Industry/business type (e.g., restaurants, retail, services)\n3. Number of results wanted (default: 50)\n4. Any specific criteria\n\nReturn as JSON with keys: location, industry, count, criteria",
+        "options": {
+          "systemMessage": "You extract structured search parameters from natural language. Return only valid JSON."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1648,
+        112
+      ],
+      "id": "00fb50eb-f081-48cf-9008-66beb4917e6b",
+      "name": "Extract Search Parameters"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://maps.googleapis.com/maps/api/place/textsearch/json",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "googleMapsApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "query",
+              "value": "={{ $json.industry + ' in ' + $json.location }}"
+            },
+            {
+              "name": "key",
+              "value": "={{ $credentials.apiKey }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2096,
+        96
+      ],
+      "id": "34f0e805-71c9-4165-9626-96522f0549e4",
+      "name": "Google Maps Search"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "results",
+              "name": "results",
+              "value": "={{ $json.results }}",
+              "type": "array"
+            },
+            {
+              "id": "count",
+              "name": "total_found",
+              "value": "={{ $json.results.length }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2304,
+        96
+      ],
+      "id": "82cd66e4-8080-4f41-93bb-8119720b0c51",
+      "name": "Format Results"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": "leads"
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        2496,
+        96
+      ],
+      "id": "2d1412df-042e-4b87-83c9-e72de2e7e750",
+      "name": "Save to Database"
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.aggregate",
+      "typeVersion": 1,
+      "position": [
+        2704,
+        96
+      ],
+      "id": "922e5ece-4620-444d-92f0-86e47ab81f14",
+      "name": "Aggregate Results"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "response",
+              "name": "response",
+              "value": "=✅ Lead Hunt Complete!\n\nFound: {{ $json.total_found }} businesses\nLocation: {{ $('Extract Search Parameters').item.json.location }}\nIndustry: {{ $('Extract Search Parameters').item.json.industry }}\n\nResults saved to database.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2896,
+        96
+      ],
+      "id": "85461832-7e2f-4b37-b350-f63e4040891d",
+      "name": "Format Response"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "=SELECT \n  COUNT(*) as total_leads,\n  COUNT(DISTINCT DATE(created_at)) as batch_count,\n  MAX(created_at) as last_batch,\n  AVG(rating) as avg_rating\nFROM leads\nWHERE created_at >= NOW() - INTERVAL '30 days'",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2.5,
+      "position": [
+        1648,
+        304
+      ],
+      "id": "476d6c51-41bc-4af1-a17b-2987d1285af3",
+      "name": "Query Status"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "response",
+              "name": "response",
+              "value": "=📊 Lead Generation Status\n\nTotal Leads: {{ $json.total_leads }}\nBatches Run: {{ $json.batch_count }}\nLast Batch: {{ $json.last_batch.toLocaleString() }}\nAvg Rating: {{ $json.avg_rating.toFixed(2) }} ⭐\n\nAll systems operational! ✅",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2096,
+        288
+      ],
+      "id": "d581f211-9863-4a3a-88a9-5191b41fd67f",
+      "name": "Format Status Response"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=The user said: \"{{ $json.user_input }}\"\n\nRespond helpfully. Explain that you can:\n1. Find new business leads (say: 'find restaurants in Casablanca')\n2. Check status of lead generation (say: 'show me progress')\n\nBe friendly and concise.",
+        "options": {
+          "systemMessage": "You are a helpful lead generation assistant. Be concise and friendly."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1648,
+        512
+      ],
+      "id": "e9f23cc8-7a9b-4675-a19d-58b3f7683dc5",
+      "name": "General Chat Response"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "response",
+              "name": "response",
+              "value": "={{ $json.output }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2096,
+        496
+      ],
+      "id": "54180204-3928-4c95-8623-35c37b4a040e",
+      "name": "Format Chat Response"
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        2368,
+        368
+      ],
+      "id": "0c6e87b5-da4d-40b9-adb8-6fc416c15215",
+      "name": "Merge All Responses"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $('Normalize Input').item.json.source }}",
+              "operation": "equals",
+              "value2": "telegram"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        2560,
+        368
+      ],
+      "id": "28aeaeb3-0101-471e-b833-49935ebd58f0",
+      "name": "Check Source"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize Input').item.json.chat_id }}",
+        "text": "={{ $json.response }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2768,
+        320
+      ],
+      "id": "f1490da1-4a59-4045-8004-359c56d18a24",
+      "name": "Send to Telegram",
+      "webhookId": "b751b501-f51f-48c1-b7ad-4e5e99f75728",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.respond",
+      "typeVersion": 1.1,
+      "position": [
+        2768,
+        432
+      ],
+      "id": "378d0052-d325-4214-811f-0416d255ed27",
+      "name": "Send to Webhook/Chat"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are the Supervisor of a B2B Lead Gen Agency. Input: \"{{ $json.user_input }}\"\n\n1. For finding new businesses, use 'Lead_Hunter'.\n2. For checking database progress, use 'Status_Checker'.\n3. For general talk, reply directly.",
+        "needsFallback": true,
+        "options": {
+          "systemMessage": "You act as a router. Delegate to specialized tools for data actions."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1424,
+        1008
+      ],
+      "id": "57eb2d10-b0ee-4755-a34d-d50393c91e6b",
+      "name": "Master Supervisor Agent"
+    },
+    {
+      "parameters": {
+        "name": "Lead_Hunter",
+        "description": "Call this when the user wants to search for new business leads or start a scrape.",
+        "workflowId": "LMRVJwzpcZWUwQyw"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1776,
+        1280
+      ],
+      "id": "5644577e-6e47-4cfc-bd82-42118599ed44",
+      "name": "Sub-Agent: Lead Hunt"
+    },
+    {
+      "parameters": {
+        "name": "Status_Checker",
+        "description": "Call this to check how many leads are in the database and their current status.",
+        "workflowId": "YOUR_STATUS_SUB_WORKFLOW_ID"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        1536,
+        1296
+      ],
+      "id": "48096641-210f-4959-a462-17f881c108a2",
+      "name": "Sub-Agent: Status Check"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "string": [
+            {
+              "value1": "={{ $('Normalize Input1').item.json.source }}",
+              "operation": "equals",
+              "value2": "telegram"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1920,
+        1008
+      ],
+      "id": "3191f8fb-13f4-495d-9a05-7a6dc028f44d",
+      "name": "Route Response"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Normalize Input1').item.json.chat_id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        2176,
+        960
+      ],
+      "id": "34da4e42-6c54-4398-bf50-5380c5c4e26e",
+      "name": "Send Telegram",
+      "webhookId": "39cd5e43-69fe-4575-9d58-ff5127b5abac",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        2176,
+        1104
+      ],
+      "id": "910fbe8e-1616-44ae-bf02-837e5553cd91",
+      "name": "Respond to Web/Chat"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        720,
+        848
+      ],
+      "id": "44fbda5c-90cc-49fb-b17b-928ec80d88b0",
+      "name": "Telegram Input1",
+      "webhookId": "e8aa6ed5-3aa9-4010-8f5d-30e0f19bea39",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "path": "lead-agent-webhook",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        720,
+        1056
+      ],
+      "id": "aaed691f-9e12-4d87-99c5-8f4f0e0d7b92",
+      "name": "Webhook Input1",
+      "webhookId": "25e98297-d19e-4722-b665-6f3494ebe54d"
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3,
+      "position": [
+        976,
+        1008
+      ],
+      "id": "bd026e18-5fb1-4c8b-976e-b32988fb36ab",
+      "name": "Merge All Inputs1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "input",
+              "name": "user_input",
+              "value": "={{ $json.message?.text || $json.body?.query || $json.chat_message }}",
+              "type": "string"
+            },
+            {
+              "id": "src",
+              "name": "source",
+              "value": "={{ $json.message ? 'telegram' : ($json.chat_message ? 'chat' : 'webhook') }}",
+              "type": "string"
+            },
+            {
+              "id": "cid",
+              "name": "chat_id",
+              "value": "={{ $json.message?.chat?.id || $json.body?.user_id || 'default' }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1184,
+        1008
+      ],
+      "id": "82239f26-8287-401f-ad58-fa4f06a4d4a6",
+      "name": "Normalize Input1"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1232,
+        1248
+      ],
+      "id": "f7819e13-98ca-4a64-97c8-18fd0ef7025b",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "KgsXR5Ga5dON4Aie",
+          "name": "SEO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1376,
+        1360
+      ],
+      "id": "01f9b961-f824-424a-bed1-87c39f87a220",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "X9nsYy4x7QN9Tk9w",
+          "name": "New API Cha.Abde"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1,
+      "position": [
+        1056,
+        1600
+      ],
+      "id": "72103b02-1b55-43d4-a6f0-49c4705a59b6",
+      "name": "Execute Workflow Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1264,
+        1600
+      ],
+      "id": "723a997b-92f2-41c8-b840-2bffd9f48814",
+      "name": "Query Leads Table",
+      "credentials": {
+        "supabaseApi": {
+          "id": "B3fV167ZWXhpJPxi",
+          "name": "IMAD LEAD GEN AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "resp",
+              "name": "status_report",
+              "value": "=📊 **Lead Generation Report**\n\n- Total Leads Found: {{ $json.total_leads }}\n- 📥 Raw Leads: {{ $json.raw_leads }}\n- 🧠 Analyzed: {{ $json.analyzed_leads }}\n- ✅ Ready for Outreach: {{ $json.ready_leads }}\n\nEverything is looking good! Which batch should I prioritize next?",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1456,
+        1600
+      ],
+      "id": "ce9a1f4a-df23-48fa-ae23-ea5750c7b4a0",
+      "name": "Format Report"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.1,
+      "position": [
+        1664,
+        1600
+      ],
+      "id": "79790344-5fd3-4d54-98f1-87605e4bdc5b",
+      "name": "Return to Master"
+    }
+  ],
+  "connections": {
+    "Telegram Input": {
+      "main": [
+        [
+          {
+            "node": "Merge All Inputs",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Input": {
+      "main": [
+        [
+          {
+            "node": "Merge All Inputs",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Chat Input": {
+      "main": [
+        [
+          {
+            "node": "Merge All Inputs",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge All Inputs": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Input": {
+      "main": [
+        [
+          {
+            "node": "Route by Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route by Intent": {
+      "main": [
+        [
+          {
+            "node": "Set Lead Hunt Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Lead Hunt Intent": {
+      "main": [
+        [
+          {
+            "node": "Merge Intents",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Status Intent": {
+      "main": [
+        [
+          {
+            "node": "Merge Intents",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Set General Intent": {
+      "main": [
+        [
+          {
+            "node": "Merge Intents",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge Intents": {
+      "main": [
+        [
+          {
+            "node": "Check Intent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Intent": {
+      "main": [
+        [
+          {
+            "node": "Extract Search Parameters",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Query Status",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "General Chat Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Search Parameters": {
+      "main": [
+        [
+          {
+            "node": "Google Maps Search",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Maps Search": {
+      "main": [
+        [
+          {
+            "node": "Format Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Results": {
+      "main": [
+        [
+          {
+            "node": "Save to Database",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save to Database": {
+      "main": [
+        [
+          {
+            "node": "Aggregate Results",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Aggregate Results": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Merge All Responses",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Status": {
+      "main": [
+        [
+          {
+            "node": "Format Status Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Status Response": {
+      "main": [
+        [
+          {
+            "node": "Merge All Responses",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "General Chat Response": {
+      "main": [
+        [
+          {
+            "node": "Format Chat Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Chat Response": {
+      "main": [
+        [
+          {
+            "node": "Merge All Responses",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Merge All Responses": {
+      "main": [
+        [
+          {
+            "node": "Check Source",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Source": {
+      "main": [
+        [
+          {
+            "node": "Send to Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sub-Agent: Lead Hunt": {
+      "ai_tool": [
+        [
+          {
+            "node": "Master Supervisor Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sub-Agent: Status Check": {
+      "ai_tool": [
+        [
+          {
+            "node": "Master Supervisor Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Master Supervisor Agent": {
+      "main": [
+        [
+          {
+            "node": "Route Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Route Response": {
+      "main": [
+        [
+          {
+            "node": "Send Telegram",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond to Web/Chat",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Input1": {
+      "main": [
+        [
+          {
+            "node": "Merge All Inputs1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook Input1": {
+      "main": [
+        [
+          {
+            "node": "Merge All Inputs1",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge All Inputs1": {
+      "main": [
+        [
+          {
+            "node": "Normalize Input1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Normalize Input1": {
+      "main": [
+        [
+          {
+            "node": "Master Supervisor Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Master Supervisor Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Master Supervisor Agent",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Execute Workflow Trigger": {
+      "main": [
+        [
+          {
+            "node": "Query Leads Table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Leads Table": {
+      "main": [
+        [
+          {
+            "node": "Format Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Report": {
+      "main": [
+        [
+          {
+            "node": "Return to Master",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "5299e0b6-b735-484a-a873-ce5c06df2acc",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-27T20:18:27.288Z",
+      "createdAt": "2025-12-27T20:18:27.288Z",
+      "role": "workflow:owner",
+      "workflowId": "ILbCkN3oytbQpDSr",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
