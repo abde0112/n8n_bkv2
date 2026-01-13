@@ -1,0 +1,47 @@
+{
+  "updatedAt": "2025-11-25T22:37:35.000Z",
+  "createdAt": "2025-11-25T16:44:28.702Z",
+  "id": "pdN0VsYwrhc221bL",
+  "name": "My workflow 18",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "test",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "c123610e-6932-4815-ba14-d5f2b7422368",
+      "name": "Webhook",
+      "webhookId": "c1df39aa-5d3f-41eb-834e-62219c82779d"
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "0eb9408f-a24f-4a7f-a78c-669bec3852ed",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-11-25T16:44:28.735Z",
+      "createdAt": "2025-11-25T16:44:28.735Z",
+      "role": "workflow:owner",
+      "workflowId": "pdN0VsYwrhc221bL",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
