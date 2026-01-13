@@ -1,0 +1,1505 @@
+{
+  "updatedAt": "2025-10-27T08:55:43.000Z",
+  "createdAt": "2025-10-26T13:02:46.086Z",
+  "id": "qHifliHmLsMDNWee",
+  "name": "Automating Invoice Creation and Payment Reconciliation",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "conversion",
+        "htmlContent": "={{ $('HTML').item.json.html }}",
+        "conversionOptions": {
+          "conversionOutput": "file"
+        }
+      },
+      "type": "@pdfgeneratorapi/n8n-nodes-pdf-generator-api.pdfGeneratorApi",
+      "typeVersion": 1,
+      "position": [
+        848,
+        -208
+      ],
+      "id": "0b954618-72f8-4225-b8f0-4b7647c74fcb",
+      "name": "Convert HTML content to PDF",
+      "alwaysOutputData": true,
+      "credentials": {
+        "pdfGeneratorApi": {
+          "id": "X0couRpwdHL4fXuO",
+          "name": "PDF Generator account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "milestone-completed",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -32,
+        -208
+      ],
+      "webhookId": "invoice-trigger",
+      "name": "Webhook: Milestone Completed",
+      "id": "0759dd16-986e-4e21-a7de-6e92d49d3cb4",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "jsCode": "const today = new Date();\nconst due = new Date();\ndue.setDate(today.getDate() + 7);\n\nreturn $input.all().map(item => ({\n  json: {\n    ...item.json,\n    invoiceNumber: `INV-${Date.now()}`,\n    invoiceDate: today.toISOString().split(\"T\")[0],\n    dueDate: due.toISOString().split(\"T\")[0],\n    status: \"Pending\"\n  }\n}));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "position": [
+        176,
+        -208
+      ],
+      "name": "Process Milestone Data",
+      "id": "47927501-0419-423b-94f3-9a69792403f3",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w",
+          "mode": "list",
+          "cachedResultName": "Ark-x Days",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1466283524,
+          "mode": "list",
+          "cachedResultName": "advance ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit#gid=1466283524"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Project ID": "={{ $json.body.projectId }}",
+            "Project Name": "={{ $json.body.projectName }}",
+            "Client ID": "={{ $json.body.clientId }}",
+            "Client Name": "={{ $json.body.clientName }}",
+            "Client Email": "={{ $json.body.clientEmail }}",
+            "Amount": "={{ $json.body.amount }}",
+            "Currency": "={{ $json.body.currency }}",
+            "Invoice Date": "={{ $json.invoiceDate }}",
+            "Due Date": "={{ $json.dueDate }}",
+            "Status": "={{ $json.status }}",
+            "Milestone": "={{ $json.body.milestoneName }}",
+            "Invoice Number": "={{ $json.invoiceNumber }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Invoice Number",
+              "displayName": "Invoice Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Project ID",
+              "displayName": "Project ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Project Name",
+              "displayName": "Project Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client ID",
+              "displayName": "Client ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Client Email",
+              "displayName": "Client Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Milestone",
+              "displayName": "Milestone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Currency",
+              "displayName": "Currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Date",
+              "displayName": "Invoice Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Due Date",
+              "displayName": "Due Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Paid Date",
+              "displayName": "Paid Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Difference",
+              "displayName": "Difference",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Transaction ID",
+              "displayName": "Transaction ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Payment Method",
+              "displayName": "Payment Method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        368,
+        -208
+      ],
+      "name": "Log Invoice to Google Sheets",
+      "id": "33b506ad-8767-48bc-a219-16327cb62695",
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "=abdellahkrimo13@gmail.com",
+        "subject": "=Invoice {{ $('Log Invoice to Google Sheets').item.json[\"Invoice Number\"] }}-{{ $('Log Invoice to Google Sheets').item.json[\"Project Name\"] }}",
+        "message": "={{ $('HTML1').item.json.html }}",
+        "options": {
+          "appendAttribution": false,
+          "attachmentsUi": {
+            "attachmentsBinary": [
+              {
+                "property": "document.pdf"
+              }
+            ]
+          }
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1040,
+        -208
+      ],
+      "name": "Send Invoice Email",
+      "id": "ceb2f3b5-e02d-49c7-b9ee-8ae8e8ab588e",
+      "typeVersion": 2.1,
+      "webhookId": "a3ea7194-306a-4ba0-b16b-6fec97d0764e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "Gmail account 4"
+        }
+      },
+      "continueOnFail": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "position": [
+        1232,
+        -208
+      ],
+      "name": "Webhook Response",
+      "id": "8ecd1b4b-f0bf-4316-b12c-d9e6379ba642",
+      "typeVersion": 1.4
+    },
+    {
+      "parameters": {
+        "html": "<!DOCTYPE html>\n<html>\n<head>\n  <meta charset=\"UTF-8\">\n  <title>Invoice {{ $json['Invoice Number'] }}</title>\n  <style>\n    body {\n      font-family: 'Arial', sans-serif;\n      margin: 0;\n      padding: 0;\n      background: #f9fafb;\n      color: #111827;\n    }\n    .invoice-box {\n      max-width: 800px;\n      margin: 40px auto;\n      background: white;\n      border: 1px solid #e5e7eb;\n      border-radius: 10px;\n      padding: 40px;\n      box-shadow: 0 2px 8px rgba(0,0,0,0.05);\n    }\n    .header {\n      display: flex;\n      justify-content: space-between;\n      align-items: center;\n      border-bottom: 2px solid #3b82f6;\n      padding-bottom: 20px;\n      margin-bottom: 20px;\n    }\n    .logo {\n      width: 140px;\n    }\n    h1 {\n      font-size: 24px;\n      color: #1f2937;\n    }\n    table {\n      width: 100%;\n      border-collapse: collapse;\n      margin-top: 20px;\n    }\n    table, th, td {\n      border: 1px solid #e5e7eb;\n    }\n    th, td {\n      padding: 12px;\n      text-align: left;\n    }\n    th {\n      background-color: #eff6ff;\n      color: #1d4ed8;\n    }\n    .total {\n      text-align: right;\n      font-weight: bold;\n      color: #111827;\n    }\n    .footer {\n      margin-top: 30px;\n      font-size: 12px;\n      text-align: center;\n      color: #6b7280;\n    }\n    .info {\n      margin-top: 10px;\n      font-size: 14px;\n    }\n  </style>\n</head>\n<body>\n  <div class=\"invoice-box\">\n    <div class=\"header\">\n\n      <img src=\"https://drive.google.com/file/d/12XQNIuxjvO-vAz_yLeAxLtbugkLtMSoZ\" class=\"logo\" alt=\"Company Logo\">\n      <div>\n        <h1>INVOICE</h1>\n        <p><strong>No:</strong> {{ $json['Invoice Number'] }}<br>\n        <strong>Date:</strong> {{ $json['Invoice Date'] }}<br>\n        <strong>Due:</strong> {{ $json['Due Date'] }}</p>\n      </div>\n    </div>\n\n    <div class=\"info\">\n      <p><strong>Billed To:</strong><br>\n      {{ $json['Client Name'] }}<br>\n      {{ $json['Client Email'] }}</p>\n\n      <p><strong>Project:</strong> {{ $json['Project Name'] }}<br>\n      <strong>Milestone:</strong> {{ $json.Milestone }}</p>\n    </div>\n\n    <table>\n      <tr>\n        <th>Description</th>\n        <th>Amount</th>\n        <th>Currency</th>\n      </tr>\n      <tr>\n        <td>{{ $json.Milestone }}</td>\n        <td>{{ $json.Amount }}</td>\n        <td>{{ $json.Currency }}</td>\n      </tr>\n      <tr>\n        <td colspan=\"2\" class=\"total\">Total</td>\n        <td class=\"total\">{{ $json.Amount }} {{ $json.Currency }}</td>\n      </tr>\n    </table>\n\n    <div class=\"info\">\n      <p><strong>Payment Instructions:</strong><br>\n      Bank Transfer to Account: <strong>1234567890</strong><br>\n      Reference: <strong>{{ $json['Invoice Number'] }}</strong></p>\n    </div>\n\n    <div class=\"footer\">\n      <p>This is an automated invoice generated by our system.<br>\n      For any inquiries, contact <strong>accounting@yourcompany.com</strong>.</p>\n    </div>\n  </div>\n</body>\n</html>\n"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        -208
+      ],
+      "id": "a87eb60d-2634-41d0-906a-df8a4067f876",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "html": "<html>\n  <body style=\"font-family: Arial, sans-serif; color: #333;\">\n    <p>Hi {{ $('Log Invoice to Google Sheets').item.json[\"Client Name\"] }},</p>\n    <p>Hope you’re doing well!</p>\n    <p>\n      Please find attached the invoice for your recent project milestone:\n      <strong>{{ $('Log Invoice to Google Sheets').item.json.Milestone }}</strong>.\n    </p>\n\n    <table style=\"border-collapse: collapse; margin-top: 10px;\">\n      <tr>\n        <td style=\"padding: 5px;\">💼 <strong>Project:</strong></td>\n        <td>{{ $('Log Invoice to Google Sheets').item.json[\"Project Name\"] }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 5px;\">📅 <strong>Invoice Date:</strong></td>\n        <td>{{ $('Log Invoice to Google Sheets').item.json[\"Invoice Date\"] }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 5px;\">💰 <strong>Amount:</strong></td>\n        <td>{{ $('Log Invoice to Google Sheets').item.json.Amount }} {{ $('Log Invoice to Google Sheets').item.json.Currency }}</td>\n      </tr>\n      <tr>\n        <td style=\"padding: 5px;\">📄 <strong>Invoice Number:</strong></td>\n        <td>{{ $('Log Invoice to Google Sheets').item.json[\"Invoice Number\"] }}</td>\n      </tr>\n    </table>\n\n    <p>\n      Please review and complete the payment by <strong>{{ $('Log Invoice to Google Sheets').item.json[\"Due Date\"] }}</strong>.\n      Let us know if you need any additional information.\n    </p>\n\n    <p>Thank you for your continued partnership.<br>\n    — <strong>Your Company Name</strong></p>\n  </body>\n</html>\n"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        688,
+        -208
+      ],
+      "id": "4cd07bca-dff6-46d4-b06d-774d5169b5df",
+      "name": "HTML1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -80,
+        112
+      ],
+      "id": "1432e8ab-1a26-411f-b17b-28c3bf308945",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "url",
+          "value": "https://drive.google.com/file/d/1-bHBeGr5SAC-Mbri5Cil9fUzKgxm7vsG/view?usp=drive_link",
+          "__regex": "https:\\/\\/(?:drive|docs)\\.google\\.com(?:\\/.*|)\\/d\\/([0-9a-zA-Z\\-_]+)(?:\\/.*|)"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        144,
+        112
+      ],
+      "id": "0a961b6b-e2b5-4dc1-aa7c-ac27d7d6277e",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "HUgBuWJOD3ngv7CC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api-m.sandbox.paypal.com/v1/payments/payment",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "count",
+              "value": "10"
+            },
+            {
+              "name": "start_index",
+              "value": "0"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {}
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        160,
+        336
+      ],
+      "id": "1413a3c0-175e-4148-87ac-519df02fd938",
+      "name": "Get PayPal Transactions"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api-m.sandbox.paypal.com/v1/oauth2/token",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            },
+            {
+              "name": "Accept-Language",
+              "value": "en_US"
+            },
+            {
+              "name": "authorization",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "grant_type",
+              "value": "client_credentials"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -64,
+        336
+      ],
+      "id": "c46e9fba-5c5b-4573-a462-7302e7450e91",
+      "name": "Paypal"
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        352,
+        112
+      ],
+      "id": "e892e5c6-fb51-4247-9cbe-2ab1f7bcf668",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "jsCode": "const pdfText = $input.item.json.text;\n\n// Extract invoice number\nconst invoiceNumberMatch = pdfText.match(/F-\\d{4}-\\d{7}/);\nconst amountMatch = pdfText.match(/(\\d+)\\s\\d{2}\\/\\d{2}\\/\\d{4}/);\nconst dateMatch = pdfText.match(/\\d{2}\\/\\d{2}\\/\\d{4}/);\n\nreturn [{\n  json: {\n    invoiceNumber: invoiceNumberMatch ? invoiceNumberMatch[0] : null,\n    amount: amountMatch ? Number(amountMatch[1]) : null,\n    paymentDate: dateMatch ? dateMatch[0] : null,\n    rawText: pdfText\n  }\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        560,
+        112
+      ],
+      "id": "7b9e859f-2049-4faa-a612-8918418458ed",
+      "name": "Parse PDF Text"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "leftValue": "={{ $('Convert Amount MAD → USD').item.json.isWithinTolerance }}",
+              "rightValue": "=",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              },
+              "id": "63f4ae73-4cd7-477a-bea3-2404169977d0"
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "position": [
+        1616,
+        112
+      ],
+      "name": "Amount Matches?",
+      "id": "84632898-62f5-4c54-ba43-7d54abd15c02",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w",
+          "mode": "list",
+          "cachedResultName": "Ark-x Days",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1466283524,
+          "mode": "list",
+          "cachedResultName": "advance ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit#gid=1466283524"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Invoice Number",
+              "lookupValue": "={{ $json.invoiceNumber }}"
+            },
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Pending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        768,
+        112
+      ],
+      "id": "838afd03-86c8-4806-a25d-1610da5b8945",
+      "name": "Find Matching Invoice in Google Sheets",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "https://api.apilayer.com/currency_data/convert",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "from",
+              "value": "MAD"
+            },
+            {
+              "name": "to",
+              "value": "USD"
+            },
+            {
+              "name": "amount",
+              "value": "={{ $('Parse PDF Text').item.json.amount }}"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        976,
+        112
+      ],
+      "id": "0abe6e06-5032-4f11-9661-25546d21da77",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "jsCode": "const invoiceAmountUSD = $('Find Matching Invoice in Google Sheets').item.json.Amount;\nconst convertedAmount = $json.result; // result from currency conversion API\n\n// Check if converted amount is within ±2 USD of invoice\nreturn [\n  {\n    json: {\n      isWithinTolerance: convertedAmount >= (invoiceAmountUSD - 2) && convertedAmount <= (invoiceAmountUSD + 2)\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        112
+      ],
+      "id": "e584c21d-4d5e-46cc-ab35-8327a1b90cb3",
+      "name": "Convert Amount MAD → USD"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w",
+          "mode": "list",
+          "cachedResultName": "Ark-x Days",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1466283524,
+          "mode": "list",
+          "cachedResultName": "advance ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit#gid=1466283524"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Invoice Number": "={{ $('Find Matching Invoice in Google Sheets').item.json['Invoice Number'] }}",
+            "Status": "={{ $('Code to Calculate Difference').item.json.Status }}",
+            "Paid Date": "={{ $('Parse PDF Text').item.json.paymentDate }}",
+            "Created At": "={{ $('Parse PDF Text').item.json.paymentDate }}",
+            "Payment Method": "Direct bank"
+          },
+          "matchingColumns": [
+            "Invoice Number"
+          ],
+          "schema": [
+            {
+              "id": "Invoice Number",
+              "displayName": "Invoice Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Project ID",
+              "displayName": "Project ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Project Name",
+              "displayName": "Project Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client ID",
+              "displayName": "Client ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Email",
+              "displayName": "Client Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Milestone",
+              "displayName": "Milestone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Currency",
+              "displayName": "Currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Date",
+              "displayName": "Invoice Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Due Date",
+              "displayName": "Due Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Paid Date",
+              "displayName": "Paid Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Transaction ID",
+              "displayName": "Transaction ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Payment Method",
+              "displayName": "Payment Method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1856,
+        -16
+      ],
+      "name": "Mark Invoice as Paid",
+      "id": "e25c8b93-eb62-4b90-91c7-e9659642cab0",
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Find Matching Invoice in Google Sheets').item.json['Client Email'] }}",
+        "subject": "=Payment Received - Invoice {{ $json['Invoice Number'] }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;\">\n  <div style=\"background: #10b981; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;\">\n    <h1 style=\"margin: 0;\">✓ Payment Received</h1>\n  </div>\n  \n  <div style=\"padding: 30px; background: white; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px;\">\n    <p>Dear {{ $('Find Matching Invoice in Google Sheets').item.json['Client Name'] }},</p>\n    \n    <p>Thank you! We've received your payment for invoice <strong>{{ $json['Invoice Number'] }}</strong>.</p>\n    \n    <div style=\"background: #f0fdf4; padding: 20px; border-radius: 8px; margin: 20px 0;\">\n      <p style=\"margin: 5px 0;\"><strong>Invoice Number:</strong> {{ $json['Invoice Number'] }}</p>\n      <p style=\"margin: 5px 0;\"><strong>Amount Paid:</strong>{{ $('Find Matching Invoice in Google Sheets').item.json.Amount }} {{ $('Find Matching Invoice in Google Sheets').item.json.Currency }}</p>\n      <p style=\"margin: 5px 0;\"><strong>Payment Date:</strong> {{ $json['Paid Date'] }}</p>\n      <p style=\"margin: 5px 0;\"><strong>Transaction ID:</strong> {{ $json['Transaction ID'] }}</p>\n    </div>\n    \n    <p>This invoice has been marked as <strong style=\"color: #10b981;\">PAID</strong> in our system.</p>\n    \n    <p>If you have any questions, please contact us at accounting@yourcompany.com</p>\n    \n    <p>Best regards,<br>\n    <strong>Your Company Accounting Team</strong></p>\n  </div>\n</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        2032,
+        -16
+      ],
+      "name": "Send Payment Confirmation",
+      "id": "7f6ccfee-2b93-4c25-b85a-87f10bd165b7",
+      "typeVersion": 2.1,
+      "webhookId": "b1dcbb5d-0aa7-4c19-89c1-e01c81913b51",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $('Find Matching Invoice in Google Sheets').item.json['Client Email'] }}",
+        "subject": "=Payment Reconciliation Alert - {{ $('Find Matching Invoice in Google Sheets').item.json['Invoice Number'] }}",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;\">\n  <!-- Header -->\n  <div style=\"background: #ffb300; color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center;\">\n    <h1 style=\"margin: 0;\">⚠️ Action Needed</h1>\n  </div>\n\n  <!-- Body -->\n  <div style=\"padding: 30px; background: #fff8e1; border: 1px solid #ffe082; border-radius: 0 0 8px 8px;\">\n    \n    <p>A bank transaction was found with invoice reference, but the amount doesn't match:</p>\n    \n    <!-- Highlighted Info -->\n    <div style=\"background: #fff3cd; padding: 15px; border-left: 4px solid #ff9800; margin: 20px 0; border-radius: 4px;\">\n      <p><strong>Invoice Number:</strong> {{ $('Find Matching Invoice in Google Sheets').item.json['Invoice Number'] }}</p>\n      <p><strong>Expected Amount:</strong> {{ $('Find Matching Invoice in Google Sheets').item.json.Amount }} {{ $('Find Matching Invoice in Google Sheets').item.json.Currency }}</p>\n      <p><strong>Transaction Amount:</strong> {{ $('HTTP Request').item.json.result }} {{ $('HTTP Request').item.json.query.to }}</p>\n      <p><strong>Difference:</strong> {{ $json.Difference }} {{ $('HTTP Request').item.json.query.to }} </p>\n    </div>\n    \n    <!-- Transaction Details -->\n    <p><strong>Transaction Details:</strong></p>\n    <ul>\n      <li>Transaction ID: </li>\n      <li>Date: {{ $('Parse PDF Text').item.json.paymentDate }}</li>\n      <li>Description: {{ $json.Status }}</li>\n    </ul>\n\n    <p>Please review and reconcile manually.</p>\n    \n  </div>\n</div>\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        2064,
+        208
+      ],
+      "name": "Alert: Amount Mismatch2",
+      "id": "92a193c7-0d7f-4524-8035-b8bb92c25b19",
+      "typeVersion": 2.1,
+      "webhookId": "a01ea378-83fa-45c3-a5c7-ab7aab57800b",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w",
+          "mode": "list",
+          "cachedResultName": "Ark-x Days",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1466283524,
+          "mode": "list",
+          "cachedResultName": "advance ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit#gid=1466283524"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Status",
+              "lookupValue": "Pending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        160,
+        560
+      ],
+      "name": "Get Overdue Invoices",
+      "id": "3bb37193-a6b2-4dec-939f-283b18d64e16",
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get today's date\nconst today = new Date();\n\nreturn $input.all().map(item => {\n  const dueDateStr = item.json[\"Due Date\"];\n  const status = item.json[\"Status\"];\n  const expectedAmount = Number(item.json[\"Amount\"] || 0);\n  const paidAmount = Number(item.json[\"PaidAmount\"] || 0);\n\n  if (!dueDateStr) return null;\n\n  const dueDate = new Date(dueDateStr + \"T00:00:00\");\n  const diffTime = today - dueDate;\n  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));\n\n  let difference = 0;\n  let paymentStatus = status;\n  let message = '';\n\n  // Check payment differences\n  if (paidAmount < expectedAmount) {\n    difference = +(expectedAmount - paidAmount).toFixed(2);\n    paymentStatus = paidAmount > 0 ? \"Partially Paid\" : \"Pending\";\n    message = `User needs to pay USD ${difference}`;\n  } else if (paidAmount > expectedAmount) {\n    difference = +(paidAmount - expectedAmount).toFixed(2);\n    paymentStatus = \"Overpaid\";\n    message = `Overpaid by USD ${difference} - please check`;\n  } else if (paidAmount === expectedAmount && paidAmount > 0) {\n    difference = 0;\n    paymentStatus = \"Paid\";\n    message = \"Payment matches expected amount\";\n  }\n\n  // Set daysPastDue only if invoice is overdue\n  item.json.daysPastDue = diffDays > 0 ? diffDays : 0;\n\n  // Only return if invoice is overdue or unpaid\n  if (diffDays <= 0 && paymentStatus === \"Paid\") return null;\n\n  // Add calculated fields\n  item.json.Difference = difference;\n  item.json.Status = paymentStatus;\n  item.json.Message = message;\n\n  return item;\n}).filter(item => item !== null);\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "position": [
+        352,
+        560
+      ],
+      "name": "Filter Overdue",
+      "id": "1967bd44-fc02-468f-9551-4a0a75c1c233",
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "sendTo": "=abdellahkrimo13@gmail.com",
+        "subject": "=Payment Reminder - Invoice {{ $json['Invoice Number'] }} ({{ $json.daysPastDue }} days overdue)",
+        "message": "=<div style=\"font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;\">\n  <div style=\"background: #f59e0b; color: white; padding: 20px; border-radius: 8px 8px 0 0;\">\n    <h2 style=\"margin: 0;\">⏰ Payment Reminder</h2>\n  </div>\n  \n  <div style=\"padding: 30px; background: white; border: 1px solid #e5e7eb; border-radius: 0 0 8px 8px;\">\n    <p>Dear {{ $json['Client Name'] }},</p>\n    \n    <p>This is a friendly reminder that invoice <strong>{{ $json['Invoice Number'] }}</strong> is now <strong style=\"color: #f59e0b;\">{{ $json.daysPastDue }} days overdue</strong>.</p>\n    \n    <div style=\"background: #fffbeb; padding: 20px; border-radius: 8px; margin: 20px 0; border-left: 4px solid #f59e0b;\">\n      <p style=\"margin: 5px 0;\"><strong>Invoice Number:</strong> {{ $json['Invoice Number'] }}</p>\n      <p style=\"margin: 5px 0;\"><strong>Amount Due:</strong> {{ $json['Currency'] }} {{ $json['Amount'] }}</p>\n      <p style=\"margin: 5px 0;\"><strong>Original Due Date:</strong> {{ $json['Due Date'] }}</p>\n      <p style=\"margin: 5px 0;\"><strong>Days Past Due:</strong> {{ $json.daysPastDue }}</p>\n    </div>\n    \n    <p>If you've already made this payment, please disregard this reminder. Otherwise, please arrange payment at your earliest convenience.</p>\n    \n    <p><strong>Payment Instructions:</strong></p>\n    <ul>\n      <li>Bank Transfer to Account: 1234567890</li>\n      <li>Reference: {{ $json['Invoice Number'] }}</li>\n    </ul>\n    \n    <p>If you have any questions or concerns, please contact us immediately.</p>\n    \n    <p>Best regards,<br>\n    <strong>Your Company Accounting Team</strong><br>\n    accounting@yourcompany.com</p>\n  </div>\n</div>",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        544,
+        560
+      ],
+      "name": "Send Overdue Reminder",
+      "id": "b00f9d77-5bef-4357-833e-c9ac89f630a0",
+      "typeVersion": 2.1,
+      "webhookId": "f7ffc68c-73a7-4222-8983-72683cd791cb",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get expected amount (USD) from Google Sheets\nconst expectedAmount = $('Find Matching Invoice in Google Sheets').item.json.Amount;\n\n// Get actual transaction amount (converted to USD) from your HTTP Request node\nconst paidAmount = $('HTTP Request').item.json.result;\n\n// Initialize output\nlet difference = 0;\nlet message = '';\n\n// Check if paid less, equal, or more\nif (paidAmount < expectedAmount) {\n  difference = +(expectedAmount - paidAmount).toFixed(2); // remaining to pay\n  message = `User needs to pay USD ${difference}`;\n} else if (paidAmount > expectedAmount) {\n  difference = +(paidAmount - expectedAmount).toFixed(2);\n  message = `Overpaid by USD ${difference} - please check`;\n} else {\n  message = 'Payment matches expected amount';\n}\nlet status = '';\nif (paidAmount < expectedAmount) {\n    status = 'Partially Paid';\n} else if (paidAmount > expectedAmount) {\n    status = 'Overpaid';\n} else {\n    status = 'Paid';\n}\n// Return output\nreturn [{\n  json: {\n    Difference: difference,\n    Message: message,\n    PaidAmount: paidAmount,\n    ExpectedAmount: expectedAmount,\n    Status: status\n\n  }\n}];\n\n\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1392,
+        112
+      ],
+      "id": "df35f883-04bd-41fe-987c-e9d4f79483f0",
+      "name": "Code to Calculate Difference"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w",
+          "mode": "list",
+          "cachedResultName": "Ark-x Days",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1466283524,
+          "mode": "list",
+          "cachedResultName": "advance ",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit#gid=1466283524"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Invoice Number": "={{ $('Find Matching Invoice in Google Sheets').item.json['Invoice Number'] }}",
+            "Status": "={{ $json.Status }}",
+            "Paid Date": "={{ $('Parse PDF Text').item.json.paymentDate }}",
+            "Created At": "={{ $('Parse PDF Text').item.json.paymentDate }}",
+            "Payment Method": "Direct bank",
+            "Difference": "={{ $json.Difference }}"
+          },
+          "matchingColumns": [
+            "Invoice Number"
+          ],
+          "schema": [
+            {
+              "id": "Invoice Number",
+              "displayName": "Invoice Number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Project ID",
+              "displayName": "Project ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Project Name",
+              "displayName": "Project Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client ID",
+              "displayName": "Client ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Name",
+              "displayName": "Client Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Client Email",
+              "displayName": "Client Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Milestone",
+              "displayName": "Milestone",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Amount",
+              "displayName": "Amount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Currency",
+              "displayName": "Currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Invoice Date",
+              "displayName": "Invoice Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Due Date",
+              "displayName": "Due Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Paid Date",
+              "displayName": "Paid Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Difference",
+              "displayName": "Difference",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Transaction ID",
+              "displayName": "Transaction ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Payment Method",
+              "displayName": "Payment Method",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Created At",
+              "displayName": "Created At",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        1840,
+        208
+      ],
+      "name": "Difference",
+      "id": "c41ef75d-a11b-48d6-ab1c-16f7c888b8cb",
+      "typeVersion": 4.7,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours",
+              "hoursInterval": 6
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -64,
+        560
+      ],
+      "name": "Check Every 6 Hours",
+      "id": "6d2d5c13-5dfb-420c-911a-3ff3758f0dae",
+      "typeVersion": 1.2
+    }
+  ],
+  "connections": {
+    "Webhook: Milestone Completed": {
+      "main": [
+        [
+          {
+            "node": "Process Milestone Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Milestone Data": {
+      "main": [
+        [
+          {
+            "node": "Log Invoice to Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Invoice to Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Invoice Email": {
+      "main": [
+        [
+          {
+            "node": "Webhook Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert HTML content to PDF": {
+      "main": [
+        [
+          {
+            "node": "Send Invoice Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "HTML1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML1": {
+      "main": [
+        [
+          {
+            "node": "Convert HTML content to PDF",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Paypal": {
+      "main": [
+        [
+          {
+            "node": "Get PayPal Transactions",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Parse PDF Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse PDF Text": {
+      "main": [
+        [
+          {
+            "node": "Find Matching Invoice in Google Sheets",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Find Matching Invoice in Google Sheets": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Amount Matches?": {
+      "main": [
+        [
+          {
+            "node": "Mark Invoice as Paid",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Difference",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Convert Amount MAD → USD",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Convert Amount MAD → USD": {
+      "main": [
+        [
+          {
+            "node": "Code to Calculate Difference",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark Invoice as Paid": {
+      "main": [
+        [
+          {
+            "node": "Send Payment Confirmation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Payment Confirmation": {
+      "main": [
+        []
+      ]
+    },
+    "Alert: Amount Mismatch2": {
+      "main": [
+        []
+      ]
+    },
+    "Get Overdue Invoices": {
+      "main": [
+        [
+          {
+            "node": "Filter Overdue",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Overdue": {
+      "main": [
+        [
+          {
+            "node": "Send Overdue Reminder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code to Calculate Difference": {
+      "main": [
+        [
+          {
+            "node": "Amount Matches?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Difference": {
+      "main": [
+        [
+          {
+            "node": "Alert: Amount Mismatch2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Every 6 Hours": {
+      "main": [
+        [
+          {
+            "node": "Get Overdue Invoices",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "41076d9d-05a0-4696-93d1-32858fe8b11e",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-26T13:02:46.105Z",
+      "createdAt": "2025-10-26T13:02:46.105Z",
+      "role": "workflow:owner",
+      "workflowId": "qHifliHmLsMDNWee",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
