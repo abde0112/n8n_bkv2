@@ -1,0 +1,155 @@
+{
+  "updatedAt": "2025-10-11T16:08:32.000Z",
+  "createdAt": "2025-10-05T10:10:06.363Z",
+  "id": "doDQ0cS7TwJeH9w2",
+  "name": "Genius Blacksmith’s Game",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "formTitle": "Reservation",
+        "formDescription": "Please choose your room.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Your Name",
+              "requiredField": true
+            },
+            {
+              "fieldLabel": "Choose your room",
+              "fieldType": "checkbox",
+              "fieldOptions": {
+                "values": [
+                  {
+                    "option": "single room"
+                  },
+                  {
+                    "option": "deluxe room"
+                  },
+                  {
+                    "option": "suite"
+                  }
+                ]
+              },
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "eb04a985-e4ab-47b8-98f4-cefa6a094aa8",
+      "name": "On form submission",
+      "webhookId": "6e9d682c-2312-4cc3-9f53-f8445704836d"
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appe1FmJBGn6KFhRC",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://airtable.com/appe1FmJBGn6KFhRC"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblUZ1QTdNIUGXAXJ",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appe1FmJBGn6KFhRC/tblUZ1QTdNIUGXAXJ"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $json['Your Name'] }}",
+            "Room": "={{ $json['Choose your room'][0] }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Room",
+              "displayName": "Room",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "f584c683-a435-4092-bfdd-b7562fc1202d",
+      "name": "Create a record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "D5OyRen7Y9yEq0t5",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Create a record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "73862cdd-c235-4410-8d5c-4cc8b85636fe",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-05T10:10:06.385Z",
+      "createdAt": "2025-10-05T10:10:06.385Z",
+      "role": "workflow:owner",
+      "workflowId": "doDQ0cS7TwJeH9w2",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
