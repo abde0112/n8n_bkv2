@@ -1,0 +1,747 @@
+{
+  "updatedAt": "2025-11-12T10:37:47.000Z",
+  "createdAt": "2025-10-21T09:23:27.459Z",
+  "id": "aRyeGPMDVIfIPgDb",
+  "name": "Gmail to Vector Embeddings with PGVector and Ollama",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "model": "nomic-embed-text:latest"
+      },
+      "id": "fd4a3ceb-bd43-42ed-af15-95d9ad56eec9",
+      "name": "Embeddings Ollama",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOllama",
+      "position": [
+        1984,
+        448
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsonMode": "expressionData",
+        "jsonData": "={{ $('Extract email fields').item.json.email_text }}",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "emails_metadata.id",
+                "value": "={{ $('Extract email fields').item.json.email_id }}"
+              },
+              {
+                "name": "emails_metadata.thread_id",
+                "value": "={{ $('Extract email fields').item.json.thread_id }}"
+              }
+            ]
+          }
+        }
+      },
+      "id": "43c4b2bc-b17a-4937-ae1e-2eb60d0b9987",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        2112,
+        448
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chunkSize": 2000,
+        "chunkOverlap": 50,
+        "options": {}
+      },
+      "id": "c75e15c1-71ba-47eb-bfe4-9b696968e406",
+      "name": "Recursive Character Text Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "position": [
+        2192,
+        640
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "labelIds": [
+            "INBOX"
+          ]
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "id": "2c32aa6b-3efb-47a4-bc1a-18ed58f7423e",
+      "name": "Gmail Trigger",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "position": [
+        1328,
+        832
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "a7b49f5c-7483-48f5-b93c-2164bb8bd05a",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        912,
+        592
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "weeks",
+        "options": {
+          "destinationFieldName": "after"
+        }
+      },
+      "id": "aa0f50e6-2355-474d-9113-c5bd46a26132",
+      "name": "Split Out",
+      "type": "n8n-nodes-base.splitOut",
+      "position": [
+        704,
+        592
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "3cbc77e7-1796-4e1b-bbff-6391dd131336",
+              "operator": {
+                "type": "boolean",
+                "operation": "false",
+                "singleValue": true
+              },
+              "leftValue": "={{ $('Manual Trigger').isExecuted }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "53baff2f-27c2-4b4c-bc8c-5827cb4aee93",
+      "name": "Was manually triggered?",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        2480,
+        400
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {},
+      "id": "8be5e03c-f07e-4213-b3df-27d3f8284c39",
+      "name": "Manual Trigger",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        64,
+        592
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "96824a34-a192-4601-836b-ec7c95c9c3ea",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        2704,
+        400
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Bulk e-mail import\n\nPress the `Test workflow` button to run this once, and bulk import of all your e-mail\n\n### IMPORTANT\nSpecify your Gmail account creation date by editing the code node",
+        "height": 780,
+        "width": 1440,
+        "color": 6
+      },
+      "id": "e88dc938-292a-49ab-8164-6982854dc4b2",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Edit this ⬇️\nAnd specify your Gmail account creation date",
+        "height": 300,
+        "width": 220
+      },
+      "id": "300e875b-8cfc-46ac-ad65-e512108116e7",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        432,
+        448
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Activate the workflow\nAnd this trigger will check for new mail, every minute",
+        "height": 180,
+        "width": 640,
+        "color": 4
+      },
+      "id": "0548aa92-84ab-4da6-8fb6-d2507603a284",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        800,
+        800
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "48e8d703-e52a-46cc-bd72-9b0d3352091b",
+              "name": "after",
+              "type": "string",
+              "value": "={{ $json.after }}"
+            },
+            {
+              "id": "a515cf56-9bc6-4724-a0ef-01a6159606f7",
+              "name": "before",
+              "type": "string",
+              "value": "={{ DateTime.fromISO($json.after).plus(1, 'week').toISODate() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "1e538159-fd25-4df1-a81f-690f9d91b55e",
+      "name": "Set before and after dates",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1104,
+        224
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "f818bad8-b000-499c-b137-de22dff4a343",
+              "name": "email_text",
+              "type": "string",
+              "value": "={{ $json.text }}"
+            },
+            {
+              "id": "68c16520-4a26-4ea9-95f7-ee89b9f53c4f",
+              "name": "email_from",
+              "type": "string",
+              "value": "={{ $json.from?.text ?? '' }}"
+            },
+            {
+              "id": "981f1f5b-ba2f-4153-966c-45bb6b535794",
+              "name": "email_to",
+              "type": "string",
+              "value": "={{ $json.to?.text ?? '' }}"
+            },
+            {
+              "id": "b528dd23-a743-4a55-98df-e1ae823b29b3",
+              "name": "date",
+              "type": "string",
+              "value": "={{ DateTime.fromISO($json.date).toISO() }}"
+            },
+            {
+              "id": "39081032-e503-470b-8d83-b5064238d037",
+              "name": "email_id",
+              "type": "string",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "id": "146e8e72-3c2c-4320-b93a-b109d2e46139",
+              "name": "thread_id",
+              "type": "string",
+              "value": "={{ $json.threadId }}"
+            },
+            {
+              "id": "a49333a5-c565-4d46-8398-d423072b1e4d",
+              "name": "email_subject",
+              "type": "string",
+              "value": "={{ $json.subject }}"
+            },
+            {
+              "id": "806cf930-450e-4221-8061-a71ec8bf9bbe",
+              "name": "attachments",
+              "type": "array",
+              "value": "={{ Object.keys($binary).map(item => $binary[item].fileName).filter(item => !!item) }}"
+            },
+            {
+              "id": "30a38aaf-04c2-4286-99c9-8bb60ae8b317",
+              "name": "email_cc",
+              "type": "string",
+              "value": "={{ $json.cc?.text ?? ''}}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "20455d00-1fd2-4ed9-99a1-390eb6f4400d",
+      "name": "Extract email fields",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1552,
+        224
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "## Magic here 🪄\n#### (not really, just statistics)\nE-mail is stored in a `emails_metadata` structured table, and also fed to the [`nomic-embed-text`](https://ollama.com/library/nomic-embed-text) model to be stored in a `emails_embeddings` table as [vector embeddings](https://www.pinecone.io/learn/vector-embeddings/) so similarity searches are possible.\n\nThe `email_id` field can be used to make the relation between the structured records and the vector embeddings, as it's stored in their metadata as `emails_metadata.id`.\nThis is also the case for `thread_id`.",
+        "height": 780,
+        "width": 720
+      },
+      "id": "77a0d6ff-782b-4c30-aaed-47ab38788b6e",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1712,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "upsert",
+        "schema": {
+          "__rl": true,
+          "mode": "list",
+          "value": "public"
+        },
+        "table": {
+          "__rl": true,
+          "mode": "name",
+          "value": "emails_metadata"
+        },
+        "columns": {
+          "value": {},
+          "schema": [
+            {
+              "id": "email_id",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": true,
+              "displayName": "email_id",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "thread_id",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "thread_id",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "email_from",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "email_from",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "email_to",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "email_to",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "email_cc",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "email_cc",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "date",
+              "type": "dateTime",
+              "display": true,
+              "removed": false,
+              "required": true,
+              "displayName": "date",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "email_subject",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "email_subject",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "attachments",
+              "type": "array",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "attachments",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            },
+            {
+              "id": "email_text",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "email_text",
+              "defaultMatch": false,
+              "canBeUsedToMatch": false
+            }
+          ],
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [
+            "email_id"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {
+          "outputColumns": [
+            "*"
+          ]
+        }
+      },
+      "id": "9ab246ce-8487-4dd0-bf52-bbaeb3988703",
+      "name": "Store structured",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        1760,
+        224
+      ],
+      "typeVersion": 2.6,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": "emails_embeddings",
+        "options": {}
+      },
+      "id": "c349eebe-08ac-479d-a745-589f85391b54",
+      "name": "Store vectorized",
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePGVector",
+      "position": [
+        2000,
+        224
+      ],
+      "typeVersion": 1.1,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "operation": "executeQuery",
+        "query": "CREATE TABLE IF NOT EXISTS public.emails_metadata (\n    email_id character varying(64) NOT NULL,\n    thread_id character varying(64),\n    email_from text,\n    email_to text,\n    email_cc text,\n    date timestamp with time zone NOT NULL,\n    email_subject text,\n    email_text text,\n    attachments text[]\n);\n",
+        "options": {}
+      },
+      "id": "ba48ff53-2d9d-4108-b9b9-34100ab54434",
+      "name": "Create the table",
+      "type": "n8n-nodes-base.postgres",
+      "position": [
+        272,
+        592
+      ],
+      "typeVersion": 2.6
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// Edit this\nlet whenDidICreateMyGmailAccount = DateTime.fromISO('2013-11-01')\n\n// (don't edit further down)\nwhenDidICreateMyGmailAccount = whenDidICreateMyGmailAccount.set({day: 1})\nlet now = $now.set({day: 1})\nconst weeks = []\nwhile (Math.floor(Interval.fromDateTimes(whenDidICreateMyGmailAccount, now).length('weeks')) > -1) {\n  weeks.push(now.toISODate())\n  now = now.minus({weeks: 1})\n}\n\nreturn {json: { weeks }};"
+      },
+      "id": "541c4478-5ac5-4261-ad0c-f8d2571fdb25",
+      "name": "Explode interval into weeks",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        480,
+        592
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "simple": false,
+        "filters": {
+          "receivedAfter": "={{ $json.after }}",
+          "receivedBefore": "={{ $json.before }}"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "id": "77ee1da6-b8a3-40d1-a07f-c22b3e0d67c5",
+      "name": "Get a batch of messages",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        1328,
+        224
+      ],
+      "webhookId": "bace3678-df5b-4a9c-a1ef-1c219e3fd07b",
+      "typeVersion": 2.1
+    }
+  ],
+  "connections": {
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extract email fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Manual Trigger": {
+      "main": [
+        [
+          {
+            "node": "Create the table",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Set before and after dates",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create the table": {
+      "main": [
+        [
+          {
+            "node": "Explode interval into weeks",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store structured": {
+      "main": [
+        [
+          {
+            "node": "Store vectorized",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Store vectorized": {
+      "main": [
+        [
+          {
+            "node": "Was manually triggered?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Ollama": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Store vectorized",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Store vectorized",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract email fields": {
+      "main": [
+        [
+          {
+            "node": "Store structured",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a batch of messages": {
+      "main": [
+        [
+          {
+            "node": "Extract email fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Was manually triggered?": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set before and after dates": {
+      "main": [
+        [
+          {
+            "node": "Get a batch of messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Explode interval into weeks": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "Manual Trigger": [
+      {
+        "json": {}
+      }
+    ]
+  },
+  "versionId": "ab74db49-df63-40a2-bfab-c37a84e5f22a",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-21T09:23:27.477Z",
+      "createdAt": "2025-10-21T09:23:27.477Z",
+      "role": "workflow:owner",
+      "workflowId": "aRyeGPMDVIfIPgDb",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
