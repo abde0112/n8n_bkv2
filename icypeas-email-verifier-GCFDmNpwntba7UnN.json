@@ -1,0 +1,216 @@
+{
+  "updatedAt": "2025-11-12T10:40:17.000Z",
+  "createdAt": "2025-10-21T09:28:16.187Z",
+  "id": "GCFDmNpwntba7UnN",
+  "name": "icypeas-email-verifier",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "d65a63cb-69b0-4e5b-b3d2-cbd630ae6dfa",
+      "name": "When clicking \"Execute Workflow\"",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        144,
+        304
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Perform Batch Processing of Email verifications with Icypeas \n\n\nThis workflow demonstrates how to perform email verifications (bulk search) using Icypeas. Visit https://icypeas.com to create your account.",
+        "height": 292.0581548177272
+      },
+      "id": "daa3d1eb-7db6-474b-961a-96f9d5e81ef2",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "jsCode": "const API_BASE_URL = \"https://app.icypeas.com/api\";\nconst API_PATH = \"/bulk-search\";\nconst METHOD = \"POST\";\n\n// Change here\nconst API_KEY = \"PUT_API_KEY_HERE\";\nconst API_SECRET = \"PUT_API_SECRET_HERE\";\nconst USER_ID = \"PUT_USER_ID_HERE\";\n////////////////\n\nconst genSignature = (\n    url,\n    method,\n    secret,\n    timestamp = new Date().toISOString()\n) => {\n    const Crypto = require('crypto');\n    const payload = `${method}${url}${timestamp}`.toLowerCase();\n    const sign = Crypto.createHmac(\"sha1\", secret).update(payload).digest(\"hex\");\n\n    return sign;\n};\n\nconst apiUrl = `${API_BASE_URL}${API_PATH}`;\n\nconst data = $input.all().map((x) => [ x.json.email]);\n$input.first().json.data = data;\n$input.first().json.api = {\n  timestamp: new Date().toISOString(),\n  secret: API_SECRET,\n  key: API_KEY,\n  userId: USER_ID,\n  url: apiUrl,\n};\n\n$input.first().json.api.signature = genSignature(apiUrl, METHOD, API_SECRET, $input.first().json.api.timestamp);\nreturn $input.first();"
+      },
+      "id": "7cec26cb-8661-4da7-985e-d617f8ad1fbf",
+      "name": "Authenticates to your Icypeas account",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        640,
+        304
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Read your Google sheet file\n\nThis node reads a Google Sheet. You need to create a sheet with :\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n**The first column** :\nHeader : email\n\n\n\n\nDon't forget to specify the path of your file in the node and your credentials.",
+        "height": 523.2083276562503
+      },
+      "id": "2c4bd7d4-3057-45ba-97fa-814488de0461",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        288,
+        160
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Authenticates to your Icypeas account\n\nThis code node utilizes your API key, API secret, and User ID to establish a connection with your Icypeas account.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\nOpen this node and insert your API Key, API secret, and User ID within the quotation marks. You can locate these credentials on your Icypeas profile at https://app.icypeas.com/bo/profile. Here is the extract of what you have to change :\n\nconst API_KEY = \"**PUT_API_KEY_HERE**\";\nconst API_SECRET = \"**PUT_API_SECRET_HERE**\";\nconst USER_ID = \"**PUT_USER_ID_HERE**\";\n\nDo not change any other line of the code.\n\nIf you are a self-hosted user, follow these steps to activate the crypto module :\n\n1.Access your n8n instance:\nLog in to your n8n instance using your web browser by navigating to the URL of your instance, for example: http://your-n8n-instance.com.\n\n2.Go to Settings:\nIn the top-right corner, click on your username, then select \"Settings.\"\n\n3.Select General Settings:\nIn the left menu, click on \"General.\"\n\n4.Enable the Crypto module:\nScroll down to the \"Additional Node Packages\" section. You will see an option called \"crypto\" with a checkbox next to it. Check this box to enable the Crypto module.\n\n5.Save the changes:\nAt the bottom of the page, click \"Save\" to apply the changes.\n\nOnce you've followed these steps, the Crypto module should be activated for your self-hosted n8n instance. Make sure to save your changes and optionally restart your n8n instance for the changes to take effect.\n\n\n\n\n\n",
+        "height": 1203.3290499048028,
+        "width": 392.0593078758952
+      },
+      "id": "17aad2b1-538d-464b-b6ae-5a7de091881f",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        528,
+        64
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Performs email verifications (bulk).\n\n\nThis node executes an HTTP request (POST) to verify the emails.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n### You need to create credentials in the HTTP Request node :\n\n➔ In the Credential for Header Auth, click on - Create new Credential -.\n➔ In the Name section, write “Authorization”\n➔ In the Value section, select expression (located just above the field on the right when you hover on top of it) and write {{ $json.api.key + ':' + $json.api.signature }} .\n➔ Then click on “Save” to save the changes.\n\n### To retrieve the results :\n\nAfter some time, the results, which are downloadable, will be available in the Icypeas application  in this section : https://app.icypeas.com/bo/bulksearch?task=email-verification, and you will receive the verification results via email from no-reply@icypeas.com, providing you with the results of your email verifications.\n\n\n\n\n",
+        "height": 869.114109302513,
+        "width": 328.8456933308303
+      },
+      "id": "0c7d4776-6095-4f9a-8d50-eabb63ee19af",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        928,
+        64
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        }
+      },
+      "id": "790291db-9d41-469e-b5c4-db89b941ee0e",
+      "name": "Reads lastname,firstname and company from your sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        352,
+        304
+      ],
+      "typeVersion": 4.1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.api.url }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "X-ROCK-TIMESTAMP",
+              "value": "={{ $json.api.timestamp }}"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "task",
+              "value": "=email-verification"
+            },
+            {
+              "name": "name",
+              "value": "dernierTsfg"
+            },
+            {
+              "name": "user",
+              "value": "={{ $json.api.userId }}"
+            },
+            {
+              "name": "data",
+              "value": "={{ $json.data }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "56f5c549-1f6f-4b89-b0c5-00e22d4e759e",
+      "name": "Run bulk search (email-verif)",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        992,
+        304
+      ],
+      "typeVersion": 4.1
+    }
+  ],
+  "connections": {
+    "When clicking \"Execute Workflow\"": {
+      "main": [
+        [
+          {
+            "node": "Reads lastname,firstname and company from your sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authenticates to your Icypeas account": {
+      "main": [
+        [
+          {
+            "node": "Run bulk search (email-verif)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reads lastname,firstname and company from your sheet": {
+      "main": [
+        [
+          {
+            "node": "Authenticates to your Icypeas account",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "03f06295-5fdf-4c1b-bc2b-3481b624f4a4",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-21T09:28:16.203Z",
+      "createdAt": "2025-10-21T09:28:16.203Z",
+      "role": "workflow:owner",
+      "workflowId": "GCFDmNpwntba7UnN",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
