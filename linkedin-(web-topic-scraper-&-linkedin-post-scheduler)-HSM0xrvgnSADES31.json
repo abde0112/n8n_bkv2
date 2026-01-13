@@ -1,0 +1,556 @@
+{
+  "updatedAt": "2025-09-18T08:18:01.000Z",
+  "createdAt": "2025-09-18T08:17:47.906Z",
+  "id": "HSM0xrvgnSADES31",
+  "name": "LinkedIn (Web-Topic Scraper & LinkedIn Post Scheduler)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -1536,
+        192
+      ],
+      "id": "95f71bdd-f697-43ac-8c8d-f6d7529f2267",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss?hl=it&gl=IT&ceid=IT:it",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -1728,
+        192
+      ],
+      "id": "9d6c0386-cc9b-4df5-b622-85ee8ebbb302",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 15
+            }
+          ]
+        }
+      },
+      "id": "c9b01112-5b36-4ca4-abe2-39d8919e2171",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -1888,
+        192
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "person": "_RmSSZc0jB",
+        "text": "={{ $json.descrition }}",
+        "shareMediaCategory": "IMAGE",
+        "binaryPropertyName": "={{ $('Map needed keys').item.json.base64Str }}",
+        "additionalFields": {}
+      },
+      "id": "6516e111-7aad-4351-9c0a-bcefd8ffc5b3",
+      "name": "Post on LinkedIn",
+      "type": "n8n-nodes-base.linkedIn",
+      "position": [
+        192,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "071bb21e-7465-4c46-8cc3-203d2d223e74",
+      "name": "Combine text+image",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -976,
+        176
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Review this post one last time. Make sure that the post respects terms and conditions of linkedin page. if it respects them return only true else return only false {{ $json.message }}",
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        -576,
+        176
+      ],
+      "id": "ec9877eb-105a-43f8-b5c4-a79b1564db8d",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "fa664434-3b67-4e35-9733-d3b71d54ca38",
+              "leftValue": true,
+              "rightValue": "",
+              "operator": {
+                "type": "boolean",
+                "operation": "true",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        -256,
+        176
+      ],
+      "id": "4b5793b0-8f58-4b98-a7ed-0dc3abd33357",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "33267283-3ac8-4d65-9a01-c7f154a7d061",
+              "name": "timestamp",
+              "type": "string",
+              "value": "={{ $('Limit').item.json.isoDate }}"
+            },
+            {
+              "id": "bff8f19a-30d6-4307-87da-9b98b26cee8b",
+              "name": "base64Str",
+              "type": "string",
+              "value": "={{ $json.data }}"
+            },
+            {
+              "id": "562e7acf-3895-4609-95ec-4caa2a263682",
+              "name": "message",
+              "value": "={{ $json.content.parts[0].text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "79564292-4f29-4bdc-90fb-839aeaf76a87",
+      "name": "Map needed keys",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -784,
+        176
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash-exp-image-generation",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.0-flash-exp-image-generation"
+        },
+        "prompt": "=Based on the post content create an image that will be compatible with my content: {{ $json.contentSnippet }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1344,
+        336
+      ],
+      "id": "c0f1be39-d416-4663-bba7-b72b20bed46c",
+      "name": "Generate an image1"
+    },
+    {
+      "parameters": {
+        "resource": "document",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-1.5-flash-8b",
+          "mode": "list",
+          "cachedResultName": "models/gemini-1.5-flash-8b"
+        },
+        "text": "=Thank you kindly for your help, please refer to the following LinkedIn post, and output a reformatted and fact chechked version employing thoroughly thought-out paragraph breaks, and lists if present make sure that you answer has only the updated content in plain text and in english that I will copy paste to my post zithout any\"/n\":\n```{{ $json.contentSnippet }}```",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1328,
+        48
+      ],
+      "id": "c68e475e-3d7a-4d20-a924-6f4b88959775",
+      "name": "Analyze document"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash-8b",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        352
+      ],
+      "id": "409daf44-60f1-4d4c-91fa-550c123936f6",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1mnB6FtZFG574TzdbG0zwGbYCM-Wh-rpoyze0_8gsOfk",
+          "mode": "list",
+          "cachedResultName": "new project 17/09",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mnB6FtZFG574TzdbG0zwGbYCM-Wh-rpoyze0_8gsOfk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1mnB6FtZFG574TzdbG0zwGbYCM-Wh-rpoyze0_8gsOfk/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "date": "={{ $('Limit').item.json.isoDate }}",
+            "descrition": "={{ $('Map needed keys').item.json.message }}"
+          },
+          "matchingColumns": [
+            "descrition"
+          ],
+          "schema": [
+            {
+              "id": "descrition",
+              "displayName": "descrition",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image",
+              "displayName": "image",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f073fcde-1ead-4358-90c6-ac6977f143e4",
+      "name": "Append or update row in sheet1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1rs_8gfKYkTUVb9zY8GgDJtpM095VGQ3PSy288O7KsSQ",
+          "mode": "list",
+          "cachedResultName": "N8N",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rs_8gfKYkTUVb9zY8GgDJtpM095VGQ3PSy288O7KsSQ/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Feuille 1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1rs_8gfKYkTUVb9zY8GgDJtpM095VGQ3PSy288O7KsSQ/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "name": "={{ $('Map needed keys').item.json.message }}",
+            "email": "={{ $('Map needed keys').item.json.timestamp }}",
+            "message": "={{ $('Map needed keys').item.json.message }}"
+          },
+          "matchingColumns": [
+            "name"
+          ],
+          "schema": [
+            {
+              "id": "name",
+              "displayName": "name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "email",
+              "displayName": "email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -16,
+        304
+      ],
+      "id": "020ee97c-534a-4e10-bbb1-d45d7b0dc043",
+      "name": "Append or update row in sheet2"
+    },
+    {
+      "parameters": {
+        "operation": "binaryToPropery",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        -1168,
+        336
+      ],
+      "id": "973cf090-d0d6-4c12-a1b1-f80ae795056b",
+      "name": "Extract from File"
+    }
+  ],
+  "connections": {
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Analyze document",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate an image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine text+image": {
+      "main": [
+        [
+          {
+            "node": "Map needed keys",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map needed keys": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze document": {
+      "main": [
+        [
+          {
+            "node": "Combine text+image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Post on LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Combine text+image",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Generate an image1": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "Basic LLM Chain": [
+      {
+        "json": {
+          "text": "false"
+        }
+      }
+    ]
+  },
+  "versionId": "9b11d345-98ee-487c-9b96-3eb4560f2a90",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-18T08:17:47.923Z",
+      "createdAt": "2025-09-18T08:17:47.923Z",
+      "role": "workflow:owner",
+      "workflowId": "HSM0xrvgnSADES31",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
