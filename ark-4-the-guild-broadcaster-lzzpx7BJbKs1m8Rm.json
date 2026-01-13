@@ -1,0 +1,249 @@
+{
+  "updatedAt": "2025-08-14T19:44:42.000Z",
+  "createdAt": "2025-08-12T12:13:16.169Z",
+  "id": "lzzpx7BJbKs1m8Rm",
+  "name": "Ark 4 The Guild Broadcaster",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -128,
+        0
+      ],
+      "id": "3636b186-1b56-4021-a4c9-530281de48b9",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://dummyjson.com/quotes",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        80,
+        0
+      ],
+      "id": "10b1aa02-4451-4740-b6b8-38488e27d5c0",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "={{ $json.full_broadcast_message }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        640,
+        -96
+      ],
+      "id": "87eb1fb1-2c7f-4559-bceb-3540a16958b4",
+      "name": "Discord",
+      "webhookId": "5bbf3df3-42ae-4d9c-af19-69b83ea3d734",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "WkF81BQ4ghWqwHjW",
+          "name": "Discord Webhook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "32c6ef14-c3bb-45c8-bb07-9f082cdd2a06",
+              "name": "full_broadcast_message",
+              "value": "=\"{{ $json.quotes[0].quote }}\" - {{ $json.quotes[0].author }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        -96
+      ],
+      "id": "41222c17-c170-43e4-bd64-14c956df6b90",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a966ccf8-0487-4fdd-a80c-9a672a16e2c3",
+              "leftValue": "={{ $json.quotes[0].quote }}",
+              "rightValue": "Rumi",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        288,
+        32
+      ],
+      "id": "fc3b8fc5-024b-466d-8149-a3de78d930ee",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "7c20254b-3a47-4fc6-a10c-e97e563aeb97",
+              "name": "message_2",
+              "value": "=\"{{ $json.quotes[1].quote }}\" - {{ $json.quotes[1].author }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        464,
+        192
+      ],
+      "id": "0358df7a-ca85-40e3-9735-258907590a9c",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "={{ $json.message_2 }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        640,
+        192
+      ],
+      "id": "65472423-dfdc-4e77-afc4-c3761b85abef",
+      "name": "Discord1",
+      "webhookId": "5bbf3df3-42ae-4d9c-af19-69b83ea3d734",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "WkF81BQ4ghWqwHjW",
+          "name": "Discord Webhook account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discord": {
+      "main": [
+        []
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Discord1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "0d96f05f-42a7-41bb-973f-551358e081ca",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-08-12T12:13:16.180Z",
+      "createdAt": "2025-08-12T12:13:16.180Z",
+      "role": "workflow:owner",
+      "workflowId": "lzzpx7BJbKs1m8Rm",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
