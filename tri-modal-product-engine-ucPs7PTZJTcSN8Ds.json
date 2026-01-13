@@ -1,0 +1,531 @@
+{
+  "updatedAt": "2025-10-13T13:36:48.000Z",
+  "createdAt": "2025-10-10T08:58:00.503Z",
+  "id": "ucPs7PTZJTcSN8Ds",
+  "name": "Tri-Modal Product Engine",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "url": "=https://fakestoreapi.com/products/{{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        928,
+        0
+      ],
+      "id": "af2c5fcf-7fe6-493e-9327-802ba33140f0",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an inclusive product description assistant.\n\nWrite a **short, friendly, one-line summary** for a product.\nInclude:\n- The product title\n- Price\n- One **unique or special feature** of the product\nKeep it:\n- Concise (1 sentence)\n- Easy to read\n- Accessible to everyone\n- Avoid marketing fluff\n\nProduct data:\nproduct_id: {{ $json.id }}\nTitle: {{ $json.title }}\nPrice: {{ $json.price }}\nDescription: {{ $json.description }}\nCategory: {{ $json.category.name }}\n",
+        "options": {
+          "systemMessage": "You write concise, human-sounding summaries suitable for text, voice, or SMS outputs.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1168,
+        0
+      ],
+      "id": "5b13e85c-e53a-40a5-8b12-039a6c67b93b",
+      "name": "🧠 Text Summary"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        944,
+        400
+      ],
+      "id": "1d519843-2eee-443b-ab2e-a921467a91f2",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=message: {{ $json.body.message }}\nYou are an AI data extractor.  \nThe user will type a message that includes a product ID.  \nYour task is to find and return **only the number (product ID)** mentioned.  \n\nRules:\n- Output only the numeric ID.\n- Do not include any text, labels, or explanation.\n- If no number is found, return an empty string.\n\nExample inputs and outputs:\nUser: I want product id 13 → 13  \nUser: Give me details for id 25 → 25  \nUser: Show me product 99 please → 99  \nUser: I need table id 7 → 7  \nUser: Hello → (empty)\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        608,
+        0
+      ],
+      "id": "0e25c3a9-c0fd-4ac3-943a-c642eca18ee9",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        224
+      ],
+      "id": "e0f276ef-65c2-4fdf-80ec-7872ad5f6a06",
+      "name": "When chat message received",
+      "webhookId": "20688197-248f-41f9-a921-9b776e1635f3"
+    },
+    {
+      "parameters": {
+        "url": "http://api.voicerss.org",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "e529ed32530e461ca82de116a6919fa8"
+            },
+            {
+              "name": "hl",
+              "value": "en-us"
+            },
+            {
+              "name": "src",
+              "value": "={{ $json.output }}"
+            },
+            {
+              "name": "c",
+              "value": "mp3"
+            },
+            {
+              "name": "f",
+              "value": "44khz_16bit_stereo"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data.mp3"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1504,
+        0
+      ],
+      "id": "6fccb764-3e85-43ce-ac41-ec0401d2e180",
+      "name": "voicerss.org"
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "data.mp3",
+        "name": "={{ $('HTTP Request').item.json.title }}",
+        "driveId": {
+          "__rl": true,
+          "value": "My Drive",
+          "mode": "list",
+          "cachedResultName": "My Drive",
+          "cachedResultUrl": "https://drive.google.com/drive/my-drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1tq4Uvt_0_pGB89TBW8lKM4BcnaARIzmH",
+          "mode": "list",
+          "cachedResultName": "n8n upload",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1tq4Uvt_0_pGB89TBW8lKM4BcnaARIzmH"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1680,
+        0
+      ],
+      "id": "dc884c7c-bcbb-4949-8844-0b4f48ffac91",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "HUgBuWJOD3ngv7CC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "=={{ $('HTML').item.json.html }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2608,
+        0
+      ],
+      "id": "050a8a6c-d7a8-4394-95fa-c20da7e6926f",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/audio/speech",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-4o-mini-tts"
+            },
+            {
+              "name": "voice",
+              "value": "alloy"
+            },
+            {
+              "name": "input",
+              "value": "={{ $('🧠 Text Summary').item.json.output }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "product187.mp3"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1664,
+        -208
+      ],
+      "id": "169dc8d3-029e-49e8-9255-5dc70e843d7f",
+      "name": "Openai"
+    },
+    {
+      "parameters": {
+        "html_content": "={{ $json.html }}",
+        "viewPortWidth": 720,
+        "viewPortHeight": 420,
+        "response_format_html": "png"
+      },
+      "type": "n8n-nodes-htmlcsstoimage.htmlCssToImage",
+      "typeVersion": 1,
+      "position": [
+        2448,
+        0
+      ],
+      "id": "1e5489da-d239-45b2-99f5-277ba841ed95",
+      "name": "HTML/CSS to Image",
+      "credentials": {
+        "htmlcsstoimgApi": {
+          "id": "Agus8xaWKOjJ6Yub",
+          "name": "Htmlcsstoimg account 2"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "Product_Engine",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "f374da23-7149-4f0c-b361-a2ed58c35294",
+      "name": "Webhook",
+      "webhookId": "7fc92011-7a61-4b0b-bb47-06707322a8c9"
+    },
+    {
+      "parameters": {
+        "html": "{{ $json.html }}"
+      },
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1.2,
+      "position": [
+        2272,
+        0
+      ],
+      "id": "a34412ec-cc8d-4d36-95cc-3980f1c65569",
+      "name": "HTML"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6ff4d4e2-6551-46e7-9284-6a68133b85d6",
+              "name": "html",
+              "value": "=<!-- visualHTML (Gmail-safe) -->\n<table role=\"presentation\" width=\"100%\" cellspacing=\"0\" cellpadding=\"0\" style=\"max-width:480px;border:1px solid #e6e8ee;border-radius:14px\">\n  <tr>\n    <td style=\"padding:16px;font-family:Inter,Arial,Helvetica,sans-serif\">\n      <img\n        src=\"{{ $('HTTP Request').item.json.image }}\"\n        alt=\"{{ $('HTTP Request').item.json.title }}\"\n        width=\"100%\"\n        style=\"display:block;border-radius:12px;height:auto\"\n      />\n      <h2 style=\"margin:12px 0 6px;font-size:18px;line-height:1.3;color:#111\">\n        {{ $('HTTP Request').item.json.title }}\n      </h2>\n      <p style=\"margin:0 0 10px;color:#555;font-size:14px;line-height:1.45\">\n        {{ $('HTTP Request').item.json.description }}\n      </p>\n\n      <!-- 🎧 Voice link -->\n      <p style=\"margin:0 0 14px\">\n        <a href=\"{{ $json.webContentLink }}\"\n           style=\"display:inline-block;background:#0b5fff;color:#fff;padding:8px 14px;border-radius:8px;text-decoration:none;font-size:14px\">\n          🔊 Listen to Voice\n        </a>\n      </p>\n\n      <table role=\"presentation\" cellspacing=\"0\" cellpadding=\"0\" width=\"100%\">\n        <tr>\n          <td style=\"font-weight:700;font-size:16px;color:#111\">\n            {{ $('HTTP Request').item.json.price }}\n          </td>\n          <td align=\"right\">\n            <a href=\"\"\n               style=\"display:inline-block;padding:8px 12px;border:1px solid #0b5fff;border-radius:10px;color:#0b5fff;text-decoration:none;font-size:14px\">\n              View\n            </a>\n          </td>\n        </tr>\n      </table>\n    </td>\n  </tr>\n</table>\n",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        2080,
+        0
+      ],
+      "id": "f5c0c92c-3ec3-4bd9-9b85-31726db98e50",
+      "name": "HTML1"
+    },
+    {
+      "parameters": {
+        "operation": "share",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ $json.id }}",
+          "mode": "id"
+        },
+        "permissionsUi": {
+          "permissionsValues": {
+            "role": "reader",
+            "type": "anyone",
+            "allowFileDiscovery": true
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        1888,
+        0
+      ],
+      "id": "5f7ba26a-306a-4849-bb9a-55c41bc966dd",
+      "name": "Share file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "HUgBuWJOD3ngv7CC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// --- Étape 1 : Récupérer l'ID du fichier depuis le nœud d'upload ---\nlet finalImageUrl = \"Image non disponible\";\n\ntry {\n  // CORRECTION ICI : On utilise le bon nom de nœud \"drive image\"\n  const uploadNode = $items(\"Share file\")[0];\n\n  // On vérifie que le nœud et son ID existent\n  if (uploadNode && uploadNode.json && uploadNode.json.id) {\n    const fileId = uploadNode.json.id;\n\n    // --- Étape 2 : Construire l'URL de téléchargement direct ---\n    finalImageUrl = https://drive.google.com/uc?id=${fileId}&export=download;\n  }\n} catch (e) {\n  console.warn(\"⚠ Impossible de lire l'ID depuis le nœud 'drive image' :\", e.message);\n}\n\n// --- Étape 3 : Retourner l'URL correctement construite ---\nreturn [{\n  json: {\n    imageUrl: finalImageUrl\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2112,
+        224
+      ],
+      "id": "a8090571-68b8-452d-b975-a1377d8187b7",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "🧠 Text Summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "🧠 Text Summary",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧠 Text Summary": {
+      "main": [
+        [
+          {
+            "node": "voicerss.org",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        []
+      ]
+    },
+    "voicerss.org": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Share file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML/CSS to Image": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML": {
+      "main": [
+        [
+          {
+            "node": "HTML/CSS to Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML1": {
+      "main": [
+        [
+          {
+            "node": "HTML",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Share file": {
+      "main": [
+        [
+          {
+            "node": "HTML1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "When chat message received": [
+      {
+        "json": {
+          "sessionId": "ce898ea8bd3b4f40a24ede9dc8def6ec",
+          "action": "sendMessage",
+          "chatInput": "cc"
+        }
+      }
+    ],
+    "🧠 Text Summary": [
+      {
+        "json": {
+          "output": "The BIYLACLESEN Women's 3-in-1 Snowboard Jacket Winter Coats is $56.99 and features a versatile 3-in-1 detachable design."
+        }
+      }
+    ]
+  },
+  "versionId": "acd53171-1707-4631-9c53-1f3e0195abec",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-10T08:58:00.528Z",
+      "createdAt": "2025-10-10T08:58:00.528Z",
+      "role": "workflow:owner",
+      "workflowId": "ucPs7PTZJTcSN8Ds",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
