@@ -1,0 +1,373 @@
+{
+  "updatedAt": "2025-11-12T10:39:49.000Z",
+  "createdAt": "2025-10-21T09:27:23.356Z",
+  "id": "yvHlxQ4OdrF73NnK",
+  "name": "flujo-captura-emails",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "lead",
+        "operation": "unsubscribe",
+        "campaignId": "={{$json[\"campaignId\"]}}",
+        "email": "={{ $json[\"leadEmail\"] }}"
+      },
+      "id": "ce63759e-1814-4218-8ede-6d7e3bdce278",
+      "name": "Lemlist - Unsubscribe",
+      "type": "n8n-nodes-base.lemlist",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "engagement",
+        "type": "task",
+        "metadata": {
+          "subject": "=OOO - Follow up with {{ $json[\"properties\"][\"firstname\"][\"value\"] }} {{ $json[\"properties\"][\"lastname\"][\"value\"] }}"
+        },
+        "additionalFields": {
+          "associations": {
+            "contactIds": "={{ $json[\"vid\"] }}"
+          }
+        }
+      },
+      "id": "b88099be-696d-4054-b269-730def0394e5",
+      "name": "follow up task",
+      "type": "n8n-nodes-base.hubspot",
+      "position": [
+        224,
+        832
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json[\"text\"].trim() }}",
+        "rules": {
+          "rules": [
+            {
+              "value2": "Unsubscribe"
+            },
+            {
+              "value2": "Interested",
+              "output": 1
+            },
+            {
+              "value2": "Out of Office",
+              "output": 2
+            }
+          ]
+        },
+        "fallbackOutput": 3
+      },
+      "id": "b0c6a629-5fcc-4fb3-be3c-c4b76537da2d",
+      "name": "Switch",
+      "type": "n8n-nodes-base.switch",
+      "position": [
+        -928,
+        480
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {
+          "clashHandling": {
+            "values": {
+              "resolveClash": "preferInput1"
+            }
+          }
+        }
+      },
+      "id": "b1fdf109-3554-492b-8f51-9cd247c0943b",
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -1168,
+        480
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "lemlistApi",
+        "requestMethod": "POST",
+        "url": "=https://api.lemlist.com/api/campaigns/YOUR_CAMPAIGN_ID/leads/{{$json[\"leadEmail\"]}}/interested",
+        "options": {}
+      },
+      "id": "33f643b2-8753-4eae-b008-756019006400",
+      "name": "lemlist - Mark as interested",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        0,
+        352
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "stage": "79009480",
+        "additionalFields": {
+          "associatedVids": "={{$json[\"canonical-vid\"]}}",
+          "dealName": "=New Deal with {{ $json[\"identity-profiles\"][0][\"identities\"][0][\"value\"] }}"
+        }
+      },
+      "id": "b829df96-f2db-49ad-91dc-a71f6c1ddd7d",
+      "name": "HubSpot - Create Deal",
+      "type": "n8n-nodes-base.hubspot",
+      "position": [
+        224,
+        560
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "contact",
+        "email": "={{ $json[\"leadEmail\"] }}",
+        "additionalFields": {
+          "firstName": "={{ $json[\"leadFirstName\"] }}",
+          "lastName": "={{ $json[\"leadLastName\"] }}"
+        }
+      },
+      "id": "3ca4bf24-3422-43de-b181-d4820344ef37",
+      "name": "HubSpot - Get contact ID",
+      "type": "n8n-nodes-base.hubspot",
+      "position": [
+        0,
+        560
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "channel": "Your channel name",
+        "text": "=Hello a new lead is interested. \n\nMore info in Hubspot here: \nhttps://app-eu1.hubspot.com/contacts/25897606/deal/{{$json[\"dealId\"]}}",
+        "otherOptions": {},
+        "attachments": []
+      },
+      "id": "c43ef023-69dc-44fc-8cf4-e7f5ab8f0827",
+      "name": "Slack",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        448,
+        560
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "resource": "contact",
+        "email": "={{ $json[\"leadEmail\"] }}",
+        "additionalFields": {
+          "firstName": "={{ $json[\"leadFirstName\"] }}",
+          "lastName": "={{ $json[\"leadLastName\"] }}"
+        }
+      },
+      "id": "c31cf656-7b93-437e-971f-e32a6ee93a00",
+      "name": "HubSpot - Get contact ID1",
+      "type": "n8n-nodes-base.hubspot",
+      "position": [
+        0,
+        832
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "channel": "Your channel name",
+        "text": "=Hello a lead replied to your emails. \n\nMore info in lemlist here: \nhttps://app.lemlist.com/teams/{{$json[\"teamId\"]}}/reports/campaigns/{{$json[\"campaignId\"]}}",
+        "otherOptions": {},
+        "attachments": []
+      },
+      "id": "6c9a8a69-42d1-48ee-af43-cea92b4e7655",
+      "name": "Slack1",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        0,
+        1088
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "event": "emailsReplied",
+        "options": {
+          "isFirst": true
+        }
+      },
+      "id": "9b3a7e6a-1c4c-4cc6-99ef-b90eb158e7f6",
+      "name": "Lemlist - Lead Replied",
+      "type": "n8n-nodes-base.lemlistTrigger",
+      "position": [
+        -1824,
+        512
+      ],
+      "webhookId": "c8f49f36-7ab6-4607-bc5a-41c9555ebd09",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "prompt": "=The following is a list of emails and the categories they fall into:\nCategories=[\"interested\", \"Out of office\", \"unsubscribe\", \"other\"]\n\nInterested is when the reply is positive.\"\n\n{{$json[\"text\"].replaceAll(/^\\s+|\\s+$/g, '').replace(/(\\r\\n|\\n|\\r)/gm, \"\")}}\\\"\nCategory:",
+        "options": {
+          "maxTokens": 6,
+          "temperature": 0,
+          "topP": 1
+        },
+        "requestOptions": {}
+      },
+      "id": "d7480c65-eae7-42a5-a450-ea0cf4d17b11",
+      "name": "OpenAI",
+      "type": "n8n-nodes-base.openAi",
+      "position": [
+        -1536,
+        320
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Lemlist - Unsubscribe",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "lemlist - Mark as interested",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "HubSpot - Get contact ID",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "HubSpot - Get contact ID1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Slack1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HubSpot - Create Deal": {
+      "main": [
+        [
+          {
+            "node": "Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Lemlist - Lead Replied": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "HubSpot - Get contact ID": {
+      "main": [
+        [
+          {
+            "node": "HubSpot - Create Deal",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HubSpot - Get contact ID1": {
+      "main": [
+        [
+          {
+            "node": "follow up task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "5ec3778a-d5aa-444d-8df6-b3df55477a7c",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-21T09:27:23.374Z",
+      "createdAt": "2025-10-21T09:27:23.374Z",
+      "role": "workflow:owner",
+      "workflowId": "yvHlxQ4OdrF73NnK",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
