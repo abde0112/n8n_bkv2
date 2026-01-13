@@ -1,0 +1,441 @@
+{
+  "updatedAt": "2025-10-25T23:42:01.000Z",
+  "createdAt": "2025-10-25T23:36:18.487Z",
+  "id": "vBtZ7m60Ls9aBzLR",
+  "name": "TIZI Invitation Automation (Full Flow)",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "batchSize": 5,
+        "options": {
+          "reset": true
+        }
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        704,
+        352
+      ],
+      "id": "c4376342-978c-42d7-9469-019f0e817ede",
+      "name": "Batch Processor"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w",
+          "mode": "list",
+          "cachedResultName": "Ark-x Days",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1980485376,
+          "mode": "list",
+          "cachedResultName": "TIZI Invitation Email Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit#gid=1980485376"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        176,
+        368
+      ],
+      "id": "0fcdcb9b-772b-432f-960a-29396806b3ba",
+      "name": "Get Contact List",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json['Email '] }}",
+        "subject": "Invitation to Join TIZI Leadership Program",
+        "emailType": "text",
+        "message": "=Dear {{ $json['Name '] }}\n\nWe are delighted to invite you to participate in the upcoming <b>TIZI Leadership Program</b> — a unique opportunity to engage with Morocco’s new generation of changemakers.\n\n📍 Location: Casablanca  \n📅 Date: November 15, 2025  \n\nPlease confirm your participation by replying to this email.\n\nWarm regards,  \n<b>The TIZI Team</b>  \nTariq Ibnou Ziyad Initiative  \nwww.tizi.ma",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        976,
+        368
+      ],
+      "id": "63c7c7ee-6c31-4d8c-ada4-1ed29c65d41b",
+      "name": "Send Invitation",
+      "webhookId": "3d65a309-67b7-419b-a80b-2e021e48ddca",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1520,
+        368
+      ],
+      "id": "6b95872c-5531-4040-ba53-7d37723d3751",
+      "name": "Wait",
+      "webhookId": "d44e8b4b-71f5-413b-9904-009daea5ac2a"
+    },
+    {
+      "parameters": {
+        "content": "Get all contacts from Google Sheets",
+        "height": 336,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        80,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "0053d5a1-b2b4-40c2-9523-308da92402ba",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "Filter → keep only rows where Status ≠ “Mark as Sent”",
+        "height": 336,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "d892f275-121d-484b-b2f7-225cae9f79f9",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "Send email to each remaining contact",
+        "height": 336,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        928,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "d5591831-cd49-486a-b83e-82d66d33c0f0",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "Update their status → “Mark as Sent”",
+        "height": 336,
+        "width": 272
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1200,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "341cc18a-44e0-48ea-b283-1675dbf58a29",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "sendTo": "=abdellahkrimo13@gmail.com",
+        "subject": "Invitation to Join TIZI Leadership Program",
+        "emailType": "text",
+        "message": "=Hello ,\n\nAll invitation emails have been successfully sent to your TIZI contact list.\n\n✅ Total Sent: {{ $items().length }}\n📅 Date: {{ $now }}\n",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2096,
+        352
+      ],
+      "id": "169d0630-72c7-462a-a356-f6c25c6107fd",
+      "name": "summary email",
+      "webhookId": "3d65a309-67b7-419b-a80b-2e021e48ddca",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "87506979-afa7-46f5-b1ad-0ddbb01b83ab",
+              "leftValue": "={{ $('Get Contact List').item.json.Status }}",
+              "rightValue": "Mark as Sent",
+              "operator": {
+                "type": "string",
+                "operation": "notContains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        448,
+        368
+      ],
+      "id": "8a51a467-6d1e-4ae6-bf68-cbd5fa13c6fd",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "mode": "chooseBranch"
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        1808,
+        352
+      ],
+      "id": "993e8fa9-cbf8-4afb-b1b4-44c85aea84f8",
+      "name": "Merge All Results1"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w",
+          "mode": "list",
+          "cachedResultName": "Ark-x Days",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1980485376,
+          "mode": "list",
+          "cachedResultName": "TIZI Invitation Email Automation",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1qbDDKtyjUWyWS75GamxN1iFBh4elxfd6U__QSHdHl4w/edit#gid=1980485376"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Mark as Sent",
+            "Email ": "={{ $('Get Contact List').item.json['Email '] }}"
+          },
+          "matchingColumns": [
+            "Email "
+          ],
+          "schema": [
+            {
+              "id": "ID",
+              "displayName": "ID",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Name ",
+              "displayName": "Name ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Email ",
+              "displayName": "Email ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1312,
+        368
+      ],
+      "id": "92488d44-cc33-4c9b-bd4f-7be78ca8fe49",
+      "name": "Update status1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        368
+      ],
+      "id": "ad0828b8-8617-47b9-923e-a0a60954de46",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "connections": {
+    "Batch Processor": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Send Invitation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Contact List": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Invitation": {
+      "main": [
+        [
+          {
+            "node": "Update status1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Merge All Results1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Batch Processor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge All Results1": {
+      "main": [
+        [
+          {
+            "node": "summary email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update status1": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get Contact List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "815ddd4c-95b7-4b67-a0bc-43ab4c291394",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-25T23:36:18.505Z",
+      "createdAt": "2025-10-25T23:36:18.505Z",
+      "role": "workflow:owner",
+      "workflowId": "vBtZ7m60Ls9aBzLR",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
