@@ -1,0 +1,813 @@
+{
+  "updatedAt": "2025-10-30T17:20:04.000Z",
+  "createdAt": "2025-10-28T13:57:15.194Z",
+  "id": "mXfadiUGsIBWcB0U",
+  "name": "DAY 24 & 25 RAG MCP",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "=https://drive.google.com/file/d/1FyLS665xcZdsG8z8fXI6sodolDRPlv5Y/view?usp=drive_link",
+          "mode": "url"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        720,
+        -32
+      ],
+      "id": "b4d3c977-4228-4e83-8db3-40f54a8a29fa",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "HUgBuWJOD3ngv7CC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "golf",
+          "mode": "list",
+          "cachedResultName": "golf"
+        },
+        "embeddingBatchSize": 2,
+        "options": {
+          "pineconeNamespace": "golf"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        944,
+        -32
+      ],
+      "id": "f53ea476-72f9-4a73-b83e-b993292dc41c",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "3cI5NN2AcMBFbbuJ",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "textSplittingMode": "custom",
+        "options": {
+          "metadata": {
+            "metadataValues": [
+              {
+                "name": "golf",
+                "value": "={{ $json.name }}"
+              }
+            ]
+          }
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        992,
+        208
+      ],
+      "id": "28c88939-f536-4888-8e3a-743d5e42715e",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "content": "# Knowledge Base\n",
+        "height": 940,
+        "width": 860,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        480,
+        -192
+      ],
+      "id": "7b8089f4-2021-426b-ba02-62f3a7724d9d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# RAG Chatbot\n",
+        "height": 940,
+        "width": 920,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        1360,
+        -192
+      ],
+      "id": "738f554d-9db2-444a-afd0-c506280b4d81",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are an intelligent orchestrator AI assistant specialized in two tasks:\ntime now is : {{ $now }}\n1️⃣ Golf Knowledge Agent (Pinecone Vector Store2)\n2️⃣ Calendar Management Agent (Google Calendar Tools)\n\nYour goal is to decide when to use each tool, based on user intent.\n\n---\n\n⚙️ **Routing Rules**\n\n- If the user asks about **golf rules**, regulations, etiquette, or tournaments → use the **Pinecone Vector Store2** tool.  \n  Example: “What happens if my ball goes out of bounds?” → Pinecone Vector Store2\n\n- If the user asks to **create, update, delete, or check calendar events** → use the **Google Calendar tools**.  \n  Example: “Add a meeting tomorrow at 3 PM” → Create event  \n  Example: “Show my events this week” → Get Many Events  \n  Example: “Delete my meeting with John” → Delete event  \n\n- If unsure, analyze using **Think** and decide logically. Do not guess.\n\n---\n\n📚 **Golf Rule Guidance**\n- Use only information from verified golf documents or the Pinecone Vector Database.\n- Include rule numbers, sections, and clear examples whenever possible.\n- Keep responses short and accurate (WhatsApp-style).\n\n---\n\n📅 **Calendar Guidance**\n- Clearly confirm the action and summarize.\n- Use natural phrases like:\n  - “✅ Event created: Team Meeting at 2 PM.”\n  - “📅 You have 3 meetings tomorrow.”\n  - “🗑️ Event deleted successfully.”\n\n---\n\n🧩 **Response Style**\n- Always answer clearly and conversationally (WhatsApp tone).\n- If the request is unclear, ask politely for clarification.\n- Respond in English (unless otherwise requested).\n- Avoid long or technical explanations.\n\n---\n\n🧠 **Example Dialogues**\n\n**User:** “What’s the rule about hitting from the rough?”  \n→ Use Pinecone Vector Store2  \n**Answer:** “Under Rule 13, you can hit from the rough but must not improve your lie or move loose impediments around the ball.”\n\n**User:** “Schedule a 1 PM golf training tomorrow.”  \n→ Use Google Calendar tool → Create event  \n**Answer:** “✅ Event ‘Golf Training’ added to your calendar for tomorrow at 1 PM.”\n\n**User:** “Show my calendar events next week.”  \n→ Use Google Calendar tool → Get Many Events  \n**Answer:** “📅 You have 4 events next week.”\n\n---\n\n🧭 **Goal**\nProvide accurate Golf Rule answers from Pinecone and manage all scheduling with Google Calendar — automatically choosing the correct tool each time."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        1632,
+        -48
+      ],
+      "id": "975befa6-cd22-4135-a5f1-b50cc62b1d61",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1648,
+        192
+      ],
+      "id": "93b00b53-49ae-4b66-a6fe-9475b0f1084d",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "public": true,
+        "options": {
+          "title": "Hi there! 👋",
+          "customCss": ":root {\n  /* 🎨 Modern Color Palette */\n  --chat--color-primary: #6c63ff;\n  --chat--color-primary-shade-50: #5a54e8;\n  --chat--color-primary-shade-100: #4a45d4;\n  --chat--color-secondary: #00c9a7;\n  --chat--color-secondary-shade-50: #00b093;\n  --chat--color-white: #ffffff;\n  --chat--color-light: #f9f9fb;\n  --chat--color-light-shade-50: #ececf3;\n  --chat--color-light-shade-100: #d2d5e0;\n  --chat--color-medium: #c9cce0;\n  --chat--color-dark: #1b1f3b;\n  --chat--color-disabled: #c9cce0;\n  --chat--color-typing: #666;\n\n  /* 🧱 Layout & Typography */\n  --chat--spacing: 1rem;\n  --chat--border-radius: 0.75rem;\n  --chat--transition-duration: 0.2s;\n  --chat--font-family: 'Inter', 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;\n\n  /* 💬 Window */\n  --chat--window--width: 420px;\n  --chat--window--height: 600px;\n  --chat--window--bottom: var(--chat--spacing);\n  --chat--window--right: var(--chat--spacing);\n  --chat--window--z-index: 9999;\n  --chat--window--border: 1px solid var(--chat--color-light-shade-100);\n  --chat--window--border-radius: 1rem;\n  --chat--window--margin-bottom: var(--chat--spacing);\n\n  /* 🧭 Header */\n  --chat--header--background: linear-gradient(135deg, var(--chat--color-primary), var(--chat--color-secondary));\n  --chat--header--color: var(--chat--color-white);\n  --chat--header--padding: 1.25rem;\n  --chat--heading--font-size: 1.4rem;\n  --chat--subtitle--font-size: 0.85rem;\n  --chat--subtitle--line-height: 1.4;\n\n  /* 💌 Messages */\n  --chat--message--font-size: 0.95rem;\n  --chat--message--padding: 0.8rem 1rem;\n  --chat--message--border-radius: 1rem;\n  --chat--message-line-height: 1.6;\n  --chat--message--margin-bottom: 0.75rem;\n  --chat--message--bot--background: var(--chat--color-white);\n  --chat--message--bot--color: var(--chat--color-dark);\n  --chat--message--user--background: var(--chat--color-primary);\n  --chat--message--user--color: var(--chat--color-white);\n  --chat--messages-list--padding: 1rem;\n  --chat--message--pre--background: rgba(0, 0, 0, 0.04);\n\n  /* ⚪ Toggle Button */\n  --chat--toggle--size: 64px;\n  --chat--toggle--border-radius: 50%;\n  --chat--toggle--background: var(--chat--color-primary);\n  --chat--toggle--hover--background: var(--chat--color-primary-shade-50);\n  --chat--toggle--color: var(--chat--color-white);\n  --chat--toggle--box-shadow: 0 4px 10px rgba(108, 99, 255, 0.4);\n\n  /* 🖊 Input */\n  --chat--textarea--height: 55px;\n  --chat--input--font-size: 1rem;\n  --chat--input--padding: 0.8rem 1rem;\n  --chat--input--background: var(--chat--color-white);\n  --chat--input--text-color: var(--chat--color-dark);\n  --chat--input--border: 1px solid var(--chat--color-light-shade-100);\n  --chat--input--border-radius: 0.75rem;\n  --chat--input--line-height: 1.5;\n  --chat--input--placeholder--font-size: 0.95rem;\n  --chat--input--border-active: 1px solid var(--chat--color-primary);\n\n  /* 🚀 Buttons */\n  --chat--button--background: var(--chat--color-primary);\n  --chat--button--color: var(--chat--color-white);\n  --chat--button--padding: 0.6rem 1.2rem;\n  --chat--button--border-radius: 0.75rem;\n  --chat--button--hover--background: var(--chat--color-primary-shade-50);\n\n  /* 📎 Send & File Buttons */\n  --chat--input--send--button--background: var(--chat--color-primary);\n  --chat--input--send--button--color: var(--chat--color-white);\n  --chat--input--send--button--background-hover: var(--chat--color-primary-shade-50);\n  --chat--input--file--button--color: var(--chat--color-secondary);\n  --chat--input--file--button--color-hover: var(--chat--color-secondary-shade-50);\n  --chat--files-spacing: 0.3rem;\n\n  /* 🪄 Body & Footer */\n  --chat--body--background: var(--chat--color-light);\n  --chat--footer--background: var(--chat--color-white);\n  --chat--footer--color: var(--chat--color-dark);\n}\n\n/* ✨ Message bubbles */\n.chat-message {\n  max-width: 70%;\n  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);\n  animation: fadeIn 0.3s ease;\n}\n\n.chat-message.user {\n  align-self: flex-end;\n}\n\n@keyframes fadeIn {\n  from { opacity: 0; transform: translateY(4px); }\n  to { opacity: 1; transform: translateY(0); }\n}\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        1424,
+        -48
+      ],
+      "id": "69df0025-dc38-482a-94a0-8a23ea685bad",
+      "name": "When chat message received",
+      "webhookId": "a11e8919-7740-49db-8a35-e5f483e7a1e9"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1blMWzm_BmZG-q8DFUTIzYCPd29oSXANJ",
+          "mode": "list",
+          "cachedResultName": "n8n",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1blMWzm_BmZG-q8DFUTIzYCPd29oSXANJ"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        544,
+        -32
+      ],
+      "id": "f74f6e92-b3cd-4bad-8905-9b67d7e5fa25",
+      "name": "Google Drive Trigger",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "HUgBuWJOD3ngv7CC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        768,
+        176
+      ],
+      "id": "2a646885-adc2-4c8d-83c5-e02ab282d28a",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        944,
+        368
+      ],
+      "id": "a652e4ed-1c7c-43f1-8bf2-e2ff5d6c0b91",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1504,
+        160
+      ],
+      "id": "2eb945a5-eeb6-4fd6-a7d3-2fedc8096f04",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "mpc"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        2448,
+        -32
+      ],
+      "id": "0c901d7d-e8de-4c7f-aeb1-c886218f62cf",
+      "name": "MCP Server Trigger",
+      "webhookId": "5365321e-58bf-4ed5-a42f-b4ac5f9c591b"
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('File', ``, 'string') }}",
+          "mode": "id"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTool",
+      "typeVersion": 3,
+      "position": [
+        2336,
+        176
+      ],
+      "id": "abb5a237-9d6e-4ea5-ba57-ad8210b7a1dd",
+      "name": "Download file in Google Drive",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "HUgBuWJOD3ngv7CC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "description": "Returns documents related to All and Advanced Golf Rules",
+        "topK": "=2"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolVectorStore",
+      "typeVersion": 1.1,
+      "position": [
+        2656,
+        144
+      ],
+      "id": "39e5954d-fd62-4c60-9220-f9b0dfcf5da9",
+      "name": "Answer questions with a vector store2"
+    },
+    {
+      "parameters": {
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "golf",
+          "mode": "list",
+          "cachedResultName": "golf"
+        },
+        "options": {
+          "pineconeNamespace": "golf"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        2448,
+        288
+      ],
+      "id": "b63a8fd5-438c-44f9-94e3-e06ceb4930a2",
+      "name": "Pinecone Vector Store2",
+      "credentials": {
+        "pineconeApi": {
+          "id": "3cI5NN2AcMBFbbuJ",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.rerankerCohere",
+      "typeVersion": 1,
+      "position": [
+        2624,
+        464
+      ],
+      "id": "df32b493-9e00-4e8d-bb46-39d1f5f098db",
+      "name": "Reranker Cohere1",
+      "credentials": {
+        "cohereApi": {
+          "id": "sfV0a9YWWEJMiOVo",
+          "name": "CohereApi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2400,
+        480
+      ],
+      "id": "a6627107-66b4-4cb2-a72b-9d26c1b8c81a",
+      "name": "Embeddings Google Gemini2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2848,
+        336
+      ],
+      "id": "f4c672e2-94d5-4f98-b33e-da4538d757b4",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "http://localhost:5678/mcp/mpc",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        1952,
+        208
+      ],
+      "id": "f7b78029-8c02-45af-99d0-86d07a5cecaf",
+      "name": "MCP Client"
+    },
+    {
+      "parameters": {
+        "content": "# MCP Pinecone \n\n",
+        "height": 940,
+        "width": 860,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        2320,
+        -192
+      ],
+      "id": "5537a6a0-9eb9-48d1-8b25-a70ba415e8e6",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "start": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Start', ``, 'string') }}",
+        "end": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End', ``, 'string') }}",
+        "useDefaultReminders": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Use_Default_Reminders', ``, 'boolean') }}",
+        "additionalFields": {
+          "attendees": [],
+          "description": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Description', ``, 'string') }}",
+          "summary": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Summary', ``, 'string') }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        3280,
+        192
+      ],
+      "id": "9e6c6d87-92d0-4d3b-91f0-1e45668c6f26",
+      "name": "Create an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        3472,
+        192
+      ],
+      "id": "c1896df4-b98a-4bd6-a488-61f909a6cb14",
+      "name": "Delete an event",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "timeMin": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('After', ``, 'string') }}",
+        "timeMax": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Before', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        3664,
+        192
+      ],
+      "id": "a04d746f-de2e-4696-8f23-b279a03578b1",
+      "name": "Get Many Events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "eventId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event_ID', ``, 'string') }}",
+        "updateFields": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        3872,
+        192
+      ],
+      "id": "c4d5a8a3-32a0-4040-b571-05e20ffa09c2",
+      "name": "Update Events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "calendar"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        3360,
+        -32
+      ],
+      "id": "95a44038-f1f9-4839-8769-5f7119667efb",
+      "name": "MCP Server Trigger1",
+      "webhookId": "7aebc8f8-e779-4eed-8874-f9497baac92c"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "http://localhost:5678/mcp/calendar",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.2,
+      "position": [
+        1776,
+        272
+      ],
+      "id": "f8c67b8f-0ec4-4b9a-afe9-c617d0fea231",
+      "name": "MCP Client1"
+    },
+    {
+      "parameters": {
+        "content": "# MCP Calendar\n\n",
+        "height": 940,
+        "width": 860,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        3216,
+        -192
+      ],
+      "id": "2f5cccb0-45a0-4a4e-b6bd-445f82db5364",
+      "name": "Sticky Note3"
+    }
+  ],
+  "connections": {
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger": {
+      "main": [
+        [
+          {
+            "node": "Download file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file in Google Drive": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store2": {
+      "ai_vectorStore": [
+        [
+          {
+            "node": "Answer questions with a vector store2",
+            "type": "ai_vectorStore",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Answer questions with a vector store2",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Answer questions with a vector store2": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create an event": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete an event": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Many Events": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Events": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger1",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Client1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "timezone": "Africa/Casablanca",
+    "callerPolicy": "workflowsFromSameOwner",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Google Drive Trigger": {
+      "lastTimeChecked": "2025-10-30T17:18:55Z"
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "4250d8a5-b736-48a2-acf4-c7664e76f457",
+  "activeVersionId": null,
+  "triggerCount": 4,
+  "shared": [
+    {
+      "updatedAt": "2025-10-28T13:57:15.231Z",
+      "createdAt": "2025-10-28T13:57:15.231Z",
+      "role": "workflow:owner",
+      "workflowId": "mXfadiUGsIBWcB0U",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
