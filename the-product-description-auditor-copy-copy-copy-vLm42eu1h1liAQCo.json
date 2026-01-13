@@ -1,0 +1,405 @@
+{
+  "updatedAt": "2025-09-27T10:42:58.000Z",
+  "createdAt": "2025-09-10T14:17:38.822Z",
+  "id": "vLm42eu1h1liAQCo",
+  "name": "The Product Description Auditor copy copy copy",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -160,
+        96
+      ],
+      "id": "84548adb-82cc-4932-8f24-079734124922",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://fakestoreapi.com/products",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        288,
+        0
+      ],
+      "id": "1b4e77f1-b3bf-498e-abd8-793a81f124dd",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "30d4631c-a327-4d74-a674-b7a4cd100bd6",
+              "name": "product name",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "77c3e275-b3a2-47f5-adca-bdf133214d5e",
+              "name": "price",
+              "value": "={{ $json.price }}",
+              "type": "string"
+            },
+            {
+              "id": "554b36f8-d8ba-4aeb-b895-2f76fa7a6f8a",
+              "name": "description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "cba9f25a-da85-4430-a7db-b069eb3a96ec",
+              "name": "imageUrl ",
+              "value": "={{ $json.image }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        512,
+        0
+      ],
+      "id": "4301dbfc-818f-4fe7-b466-5c1adc48b0eb",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"red_flags\": [\"master\", \"slave\", \"whitelist\", \"blacklist\" ]\n  \n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        64,
+        0
+      ],
+      "id": "cbee1983-ba32-4938-9f81-e6d235410c58",
+      "name": "define red flags"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d1593eda-8dd7-4a5b-a8e8-8fa6a2442b63",
+              "leftValue": "={{ $('Edit Fields').item.json.description }}",
+              "rightValue": "={{ $('define red flags').item.json.red_flags }}",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        960,
+        96
+      ],
+      "id": "e01d70d2-340b-4411-b358-50fc8663f1c4",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1yh54Tofp4kub64THctG_-Uxub0AIY4LV5br6zo2mqrg",
+          "mode": "list",
+          "cachedResultName": "product catalog collector",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yh54Tofp4kub64THctG_-Uxub0AIY4LV5br6zo2mqrg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1yh54Tofp4kub64THctG_-Uxub0AIY4LV5br6zo2mqrg/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Product name": "={{ $('Edit Fields').item.json['product name'] }}",
+            "price": "={{ $('Edit Fields').item.json.price }}",
+            "description": "={{ $('Edit Fields').item.json.description }}",
+            "imageUrl": "={{ $('Edit Fields').item.json['imageUrl '] }}"
+          },
+          "matchingColumns": [
+            "Product name"
+          ],
+          "schema": [
+            {
+              "id": "Product name",
+              "displayName": "Product name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "imageUrl",
+              "displayName": "imageUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1232,
+        208
+      ],
+      "id": "212faf29-54d8-4319-839e-49f68a3a3473",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ad150c4e-aa35-466a-986d-5ad123032c07",
+              "name": "product name",
+              "value": "slave",
+              "type": "string"
+            },
+            {
+              "id": "11ce8ae8-1f63-4ba4-a419-1b01450b3782",
+              "name": "price",
+              "value": "slave",
+              "type": "string"
+            },
+            {
+              "id": "d7441950-1881-41f4-83d3-52d13b5ee46c",
+              "name": "description",
+              "value": "slave",
+              "type": "string"
+            },
+            {
+              "id": "8b753009-cd27-4acb-b775-ef966948ac4a",
+              "name": "imageUrl",
+              "value": "slave",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        512,
+        192
+      ],
+      "id": "1d78ef97-40bf-47b0-b451-5dd62d583834",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        736,
+        96
+      ],
+      "id": "88463206-48b8-4c54-9415-3052292b8785",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=🚩 Needs Review: {{ $json['product name'] }} contains flagged language.  \nDescription: GOOD {{ $json.description }}\nggggggggggggg",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1184,
+        -16
+      ],
+      "id": "5919829f-c0d9-48f2-8d4a-4277f696a8ea",
+      "name": "Discord1",
+      "webhookId": "12da9357-40d8-4397-9504-96a02ea54cd2",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "skGsil2IBOoEYiyT",
+          "name": "Discord Webhook account 3"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "define red flags",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "define red flags": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Discord1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "624bfdf5-a8d2-4abf-bf3e-ea562ffec787",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-10T14:17:38.845Z",
+      "createdAt": "2025-09-10T14:17:38.845Z",
+      "role": "workflow:owner",
+      "workflowId": "vLm42eu1h1liAQCo",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
