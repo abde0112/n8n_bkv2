@@ -1,0 +1,1115 @@
+{
+  "updatedAt": "2025-09-29T09:45:44.000Z",
+  "createdAt": "2025-09-26T09:40:35.278Z",
+  "id": "2hLfP0QR2ZSn0pfg",
+  "name": "SUB ARK-X DAY 10 Certification Project",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        1248,
+        0
+      ],
+      "id": "e6c58cb1-e468-4bf7-bbdd-dd358e599de5",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "jsCode": "let enriched = [];\nfor (const item of items) {\n  let rawOutput = item.json.output || item.json.choices?.[0]?.message?.content || \"\";\n\n  // 🔥 Clean markdown fences like ```json ... ```\n  rawOutput = rawOutput.replace(/```json/gi, \"\").replace(/```/g, \"\").trim();\n\n  let output;\n  try {\n    output = JSON.parse(rawOutput);\n  } catch (e) {\n    output = {\n      short_title: null,\n      bullets: [],\n      seo_keywords: [],\n      image_alt_text: null,\n      long_description: null\n    };\n  }\n\n  enriched.push({\n    json: {\n      product_id: output.id || null,\n      short_title: output.short_title,\n      bullets: output.bullets,\n      seo_keywords: output.seo_keywords,\n      image_alt_text: output.image_alt_text,\n      long_description: output.long_description,\n      audit_passed: false,\n      audit_reasons: []\n    }\n  });\n}\nreturn enriched;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        0
+      ],
+      "id": "314bdf68-e0ae-4313-afbc-fae82bc524d5",
+      "name": "Clean & Convert AI JSON"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "13acd441-1163-4966-8bc4-d173b5178621",
+              "leftValue": "={{ $json.short_title.length() }}",
+              "rightValue": 40,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            },
+            {
+              "id": "974e1b4b-ced9-4944-9429-1ef8133235b6",
+              "leftValue": "={{ $json.short_title }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "notEmpty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1856,
+        0
+      ],
+      "id": "2b54511c-80c3-4cc7-8211-85e9a6d7c621",
+      "name": "Quality Control"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1QaG5Dtg4q9jyLnC01SlSadilg6NZlPzatu1e8uiFPNI",
+          "mode": "list",
+          "cachedResultName": "1 Mini-Certification Challenge",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QaG5Dtg4q9jyLnC01SlSadilg6NZlPzatu1e8uiFPNI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Product Catalog",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QaG5Dtg4q9jyLnC01SlSadilg6NZlPzatu1e8uiFPNI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {
+            "product_id": "={{ $json.product_id }}",
+            "short_title": "={{ $json.product_id }}",
+            "bullets": "={{ $json.bullets }}",
+            "seo_keywords": "={{ $json.seo_keywords }}",
+            "image_alt_text": "={{ $json.image_alt_text }}",
+            "long_description": "={{ $json.long_description }}",
+            "audit_passed": "TRUE",
+            "audit_reasons": "={{ $json.audit_reasons }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "product_id",
+              "displayName": "product_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "currency",
+              "displayName": "currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "description_raw",
+              "displayName": "description_raw",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "short_title",
+              "displayName": "short_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "bullets",
+              "displayName": "bullets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "seo_keywords",
+              "displayName": "seo_keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image_alt_text",
+              "displayName": "image_alt_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "long_description",
+              "displayName": "long_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "audit_passed",
+              "displayName": "audit_passed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "audit_reasons",
+              "displayName": "audit_reasons",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2128,
+        -112
+      ],
+      "id": "dd8f126a-0437-462f-8b8e-cec42a3a549e",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1QaG5Dtg4q9jyLnC01SlSadilg6NZlPzatu1e8uiFPNI",
+          "mode": "list",
+          "cachedResultName": "1 Mini-Certification Challenge",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QaG5Dtg4q9jyLnC01SlSadilg6NZlPzatu1e8uiFPNI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 526027257,
+          "mode": "list",
+          "cachedResultName": "not passed",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1QaG5Dtg4q9jyLnC01SlSadilg6NZlPzatu1e8uiFPNI/edit#gid=526027257"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "product_id",
+              "displayName": "product_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "title",
+              "displayName": "title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "category",
+              "displayName": "category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "currency",
+              "displayName": "currency",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "description_raw",
+              "displayName": "description_raw",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "short_title",
+              "displayName": "short_title",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "bullets",
+              "displayName": "bullets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "seo_keywords",
+              "displayName": "seo_keywords",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "image_alt_text",
+              "displayName": "image_alt_text",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "long_description",
+              "displayName": "long_description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "audit_passed",
+              "displayName": "audit_passed",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "audit_reasons",
+              "displayName": "audit_reasons",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2128,
+        112
+      ],
+      "id": "6ef88bc0-b6e4-40ca-8b12-53553c104e7f",
+      "name": "Append row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "abdellahkrimo13@gmail.com",
+        "subject": "={{ $json.count_product_id }}✅ Product Accepted ",
+        "message": "=<html>\n  <body style=\"font-family: Arial, sans-serif; background:#f6f9fc; margin:0; padding:20px;\">\n    <table align=\"center\" width=\"500\" style=\"background:#ffffff; border-radius:8px; padding:20px; border:1px solid #e2e8f0;\">\n      <tr>\n        <td style=\"color:#2d3748; font-size:15px;\">\n          <p style=\"margin:0;\">✅ {{ $json.count_product_id }} products have passed the audit.</p>\n        </td>\n      </tr>\n    </table>\n  </body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2720,
+        -112
+      ],
+      "id": "a3f10821-ccab-4f4f-b494-6134155d1aa3",
+      "name": "Send a message",
+      "webhookId": "b01b0ca3-4fa2-49fa-9e5c-ba7c7dfea7c2",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sendTo": "abdellahkrimo13@gmail.com",
+        "subject": "=❌ Product Rejected",
+        "message": "=<html>\n  <body style=\"font-family: Arial, sans-serif; background:#f6f9fc; margin:0; padding:20px;\">\n    <table align=\"center\" width=\"500\" style=\"background:#ffffff; border-radius:8px; padding:20px; border:1px solid #e2e8f0;\">\n      <tr>\n        <td style=\"color:#2d3748; font-size:15px;\">\n          <p style=\"margin:0;\">✅ {{ $json.count_product_id }} products have passed the audit.</p>\n        </td>\n      </tr>\n    </table>\n  </body>\n</html>\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        2720,
+        112
+      ],
+      "id": "ba28e830-7e2a-40ca-83cc-71bcc6254190",
+      "name": "Send a message1",
+      "webhookId": "07f3a269-c74e-4adc-ba3d-db2c96422cc1",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "📝 5. Parse AI JSON\n\nFunction Node → Clean AI response.",
+        "height": 272,
+        "width": 256,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1424,
+        -144
+      ],
+      "typeVersion": 1,
+      "id": "3c3ed264-964c-4525-9a1d-488f6a3081b8",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "✅❌ 6. Audit Check\n\nIF Node or Function Node:\nRules:\n\nshort_title not empty.\n\nseo_keywords.length >= 3.\n\nlong_description.length >= 50.\n\nIf pass → audit_passed = true.\n\nIf fail → add audit_reasons[].",
+        "height": 464,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1792,
+        -320
+      ],
+      "typeVersion": 1,
+      "id": "248718e4-fd51-49d6-860c-0737c58ca7c1",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "field": "product_id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        2400,
+        -112
+      ],
+      "id": "24b0956e-95f1-4494-a9a1-1384a37956e9",
+      "name": "Summarize"
+    },
+    {
+      "parameters": {
+        "fieldsToSummarize": {
+          "values": [
+            {
+              "field": "product_id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.summarize",
+      "typeVersion": 1.1,
+      "position": [
+        2416,
+        112
+      ],
+      "id": "4dde151c-71bd-4f4a-afdf-a1c537bec411",
+      "name": "Summarize1"
+    },
+    {
+      "parameters": {
+        "content": "📧 8. Send Email\n\nEmail Node → Send ai_email_html.\n\nSubject:",
+        "height": 640,
+        "width": 272,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2624,
+        -384
+      ],
+      "typeVersion": 1,
+      "id": "b500abd9-a276-4c44-a779-638f483fbaf4",
+      "name": "Sticky Note6"
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "Clean & Convert AI JSON",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean & Convert AI JSON": {
+      "main": [
+        [
+          {
+            "node": "Quality Control",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quality Control": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "Summarize",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet1": {
+      "main": [
+        [
+          {
+            "node": "Summarize1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize1": {
+      "main": [
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Clean & Convert AI JSON": [
+      {
+        "json": {
+          "product_id": "1",
+          "short_title": "Fjallraven - Foldsack No. 1 Backpack, Fits 15 Laptops",
+          "bullets": [
+            "Durable design perfect for everyday use and outdoor walks.",
+            "Features a padded sleeve to securely fit up to 15-inch laptops.",
+            "Classic Fjallraven style combines functionality with timeless appeal."
+          ],
+          "seo_keywords": [
+            "Fjallraven Foldsack",
+            "laptop backpack",
+            "everyday daypack",
+            "15 inch laptop bag",
+            "outdoor casual backpack"
+          ],
+          "image_alt_text": "A Fjallraven Foldsack No. 1 backpack in a natural setting, highlighting its functional design and spacious main compartment.",
+          "long_description": "The Fjallraven Foldsack No. 1 is the ideal everyday pack, seamlessly blending into your urban lifestyle or accompanying you on leisurely walks in the forest. Crafted for durability and practicality, it includes a dedicated padded sleeve designed to keep laptops up to 15 inches safe and secure. With its timeless design and thoughtful features, this backpack is perfect for carrying all your essentials, combining classic style with modern utility for any adventure.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "2",
+          "short_title": "Men's Premium Slim Fit Henley T-Shirt",
+          "bullets": [
+            "Modern slim fit design with stylish contrast raglan long sleeves.",
+            "Lightweight, soft fabric ensures breathable and comfortable all-day wear.",
+            "Features a classic three-button Henley placket for versatile styling.",
+            "Durable, solid stitched construction built for lasting quality and fit."
+          ],
+          "seo_keywords": [
+            "Men's Slim Fit Henley",
+            "Casual Raglan T-Shirt",
+            "Breathable Men's Tee",
+            "Durable Fashion Shirt",
+            "3-Button Placket Top"
+          ],
+          "image_alt_text": "A man wears a premium slim-fit Henley t-shirt with contrast raglan sleeves and a three-button placket.",
+          "long_description": "Elevate your casual wardrobe with our Men's Premium Slim Fit Henley T-Shirt, designed for both comfort and contemporary style. This versatile tee boasts a flattering slim-fitting silhouette, accentuated by contrast raglan long sleeves and a classic three-button Henley placket. Crafted from a lightweight and exceptionally soft fabric, it promises breathable comfort for extended wear. The solid stitched construction ensures remarkable durability, making this a reliable choice for everyday fashion or as a spirited top for baseball enthusiasts. Experience the perfect fusion of enduring quality, comfort, and effortlessly cool style.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "3",
+          "short_title": "Men's Versatile Cotton Outdoor Jacket",
+          "bullets": [
+            "All-season comfort for Spring, Autumn, and Winter.",
+            "Ideal for various outdoor activities: hiking, camping, cycling, and travel.",
+            "Durable cotton construction provides lasting wear and warmth.",
+            "Thoughtful gift for fathers, husbands, or sons on special occasions."
+          ],
+          "seo_keywords": [
+            "Men's cotton jacket",
+            "Versatile outdoor outerwear",
+            "Spring fall winter jacket",
+            "Hiking camping jacket",
+            "Gift for men"
+          ],
+          "image_alt_text": "A versatile men's cotton jacket suitable for various outdoor activities in different seasons.",
+          "long_description": "This Men's Cotton Jacket is the ultimate versatile outerwear, perfect for keeping you comfortable during Spring, Autumn, and Winter. Its durable design makes it suitable for a wide range of activities, including daily commuting, hiking, camping, mountain climbing, cycling, traveling, and other outdoor adventures. Beyond its practical functionality, this jacket serves as an excellent gift choice, conveying warm-hearted love to your father, husband, or son, making it an ideal present for Thanksgiving or Christmas Day.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "4",
+          "short_title": "Men's Casual Slim Fit Shirt",
+          "bullets": [
+            "Modern slim fit silhouette for a sharp, contemporary look",
+            "Versatile design perfect for casual outings or smart-casual occasions",
+            "Comfortable fabric ensures ease of wear throughout the day",
+            "Ideal for creating stylish, effortless everyday outfits"
+          ],
+          "seo_keywords": [
+            "men's slim fit shirt",
+            "casual men's wear",
+            "stylish men's top",
+            "fitted men's shirt",
+            "comfortable casual shirt"
+          ],
+          "image_alt_text": "A man models a sleek men's casual slim fit shirt, showcasing its modern cut and versatile style.",
+          "long_description": "Elevate your everyday wardrobe with our Men's Casual Slim Fit Shirt, meticulously designed for the modern man. This shirt combines a contemporary tailored silhouette that flatters the physique with the comfort needed for all-day wear, making it an essential piece for any casual or smart-casual setting. Whether you're heading out for a weekend brunch or a relaxed evening gathering, its versatile style ensures you look effortlessly sharp. Please be aware that the actual color of the garment may differ slightly due to screen variations, and we strongly recommend reviewing the detailed size information provided on the product page, as body builds vary, to ensure your perfect fit.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "5",
+          "short_title": "John Hardy Legends Naga Gold & Silver Dragon Bracelet",
+          "bullets": [
+            "Inspired by the mythical Naga water dragon, guardian of the ocean's pearl.",
+            "Wear facing inward to attract love and abundance.",
+            "Wear facing outward for powerful protection.",
+            "Exquisite John Hardy craftsmanship with gold & silver detailing."
+          ],
+          "seo_keywords": [
+            "John Hardy Naga Bracelet",
+            "Dragon Jewelry Gold Silver",
+            "Women's Luxury Bracelet",
+            "Mythical Protection Jewelry",
+            "Designer Chain Bracelet"
+          ],
+          "image_alt_text": "A John Hardy Legends Naga gold and silver dragon station chain bracelet, symbolizing protection and abundance.",
+          "long_description": "Embrace the profound symbolism and exquisite artistry of the John Hardy Women's Legends Naga Gold & Silver Dragon Station Chain Bracelet, a highlight from our cherished Legends Collection. This stunning piece draws its inspiration from the mythical Naga, a revered water dragon fabled to protect the ocean's most precious pearl. Designed with intention, you can wear the dragon facing inward to invite love and abundance into your life, or position it outward to invoke its powerful protective energies, making it more than just a bracelet – it's a wearable talisman of grace and strength.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "6",
+          "short_title": "Dainty Solid Gold Petite Micropave Jewelry",
+          "bullets": [
+            "Exquisitely crafted from genuine solid gold for enduring beauty.",
+            "Features a delicate petite micropave design for subtle, sophisticated sparkle.",
+            "Proudly designed and sold by Hafeez Center in the United States.",
+            "Shop with confidence thanks to our 30-day satisfaction guarantee."
+          ],
+          "seo_keywords": [
+            "solid gold jewelry",
+            "petite micropave design",
+            "dainty gold piece",
+            "Hafeez Center USA",
+            "fine jewelry gift"
+          ],
+          "image_alt_text": "A close-up view of a delicate solid gold petite micropave jewelry piece, highlighting its intricate detail and subtle sparkle.",
+          "long_description": "Elevate your style with our exquisite Solid Gold Petite Micropave jewelry, a truly captivating piece designed for timeless elegance. Meticulously crafted from genuine solid gold, this item showcases a sophisticated micropave design, creating a subtle yet brilliant sparkle that gracefully complements any outfit. Every piece reflects the quality and dedication of Hafeez Center, proudly designed and sold right here in the United States. We are committed to your complete satisfaction, offering a straightforward 30-day return or exchange policy, so you can shop with absolute confidence and peace of mind.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "7",
+          "short_title": "White Gold Plated Princess Cut Solitaire Promise Ring",
+          "bullets": [
+            "Exquisite princess cut solitaire design",
+            "Elegant white gold plated finish",
+            "Perfect for engagements, weddings, and anniversaries",
+            "A timeless promise ring for your loved one"
+          ],
+          "seo_keywords": [
+            "White Gold Plated Ring",
+            "Princess Cut Ring",
+            "Solitaire Engagement Ring",
+            "Promise Ring for Her",
+            "Wedding Anniversary Gift"
+          ],
+          "image_alt_text": "A stunning white gold plated princess cut solitaire ring sparkles beautifully.",
+          "long_description": "Celebrate your enduring love with our exquisite White Gold Plated Princess Cut Solitaire Promise Ring. This classic piece features a brilliant created diamond in a timeless princess cut, designed to capture hearts. With its elegant white gold plating, it makes a perfect symbol of commitment for engagements, weddings, anniversaries, or a cherished Valentine's Day gift to truly spoil your loved one. Its sophisticated design ensures it's a piece she'll adore for years to come, embodying grace and lasting affection.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "8",
+          "short_title": "Elegant Rose Gold Stainless Steel Double Flared Tunnels",
+          "bullets": [
+            "Crafted from premium 316L Stainless Steel for lasting durability.",
+            "Exquisite rose gold plating provides a sophisticated, modern aesthetic.",
+            "Double flared design ensures a secure and comfortable fit.",
+            "Hypoallergenic material, ideal for sensitive skin."
+          ],
+          "seo_keywords": [
+            "rose gold tunnel plugs",
+            "stainless steel ear gauges",
+            "double flared body jewelry",
+            "hypoallergenic ear tunnels",
+            "piercing jewelry rose gold"
+          ],
+          "image_alt_text": "A pair of shiny rose gold plated 316L stainless steel double flared tunnel plug earrings.",
+          "long_description": "Elevate your ear game with these exquisite Rose Gold Plated Double Flared Tunnel Plug Earrings, meticulously crafted from premium 316L Stainless Steel. Designed for both style and comfort, their luxurious rose gold finish adds a touch of modern sophistication to any look, while the high-quality stainless steel ensures exceptional durability and hypoallergenic wear, making them ideal for sensitive skin. The secure double flared design provides a comfortable, confident fit, making these elegant tunnels a perfect statement piece for everyday wear or special occasions.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "9",
+          "short_title": "WD 2TB Elements Portable External Hard Drive - USB 3.0",
+          "bullets": [
+            "Blazing-Fast USB 3.0 Speeds: Transfer large files quickly and efficiently.",
+            "Massive 2TB Storage: Ample space for all your photos, videos, music, and documents.",
+            "Boost PC Performance: Free up internal drive space for a faster computer.",
+            "Universal Compatibility: Works seamlessly with USB 3.0 & 2.0 devices, Windows PCs."
+          ],
+          "seo_keywords": [
+            "WD 2TB External Hard Drive",
+            "Portable USB 3.0 HDD",
+            "Fast Data Transfer Storage",
+            "PC Performance Boost",
+            "Windows Compatible Drive"
+          ],
+          "image_alt_text": "A sleek, compact WD 2TB Elements portable external hard drive, ideal for on-the-go storage.",
+          "long_description": "Experience seamless digital storage with the WD 2TB Elements Portable External Hard Drive. Designed for ultimate convenience, this compact drive offers a generous 2TB of space, perfect for backing up your important documents, photos, videos, and music. Benefit from ultra-fast data transfers thanks to its USB 3.0 connectivity, while maintaining backward compatibility with USB 2.0 devices. Easily improve your PC's performance by offloading files, and enjoy out-of-the-box compatibility with Windows 10, 8.1, and 7, formatted in NTFS. Whether you're a student, professional, or digital enthusiast, this reliable portable drive ensures your data is always accessible and secure, wherever you go.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "10",
+          "short_title": "SanDisk SSD PLUS 1TB Internal SSD - SATA III 6 Gb/s",
+          "bullets": [
+            "Experience significantly faster boot-up, shutdown, and application loading.",
+            "Boosts PC performance with enhanced burst write speeds for daily tasks.",
+            "Enjoy a perfect balance of reliability and high-speed data transfer.",
+            "Achieves blazing read/write speeds of up to 535MB/s / 450MB/s."
+          ],
+          "seo_keywords": [
+            "SanDisk SSD 1TB",
+            "Internal SSD SATA III",
+            "Fast PC storage upgrade",
+            "Solid State Drive",
+            "High-speed data transfer"
+          ],
+          "image_alt_text": "A SanDisk SSD PLUS 1TB internal solid-state drive, designed for fast PC upgrades.",
+          "long_description": "Upgrade your computer with the SanDisk SSD PLUS 1TB internal SSD and experience a dramatic improvement in speed and responsiveness. This SATA III 6 Gb/s drive ensures significantly faster boot-up, shutdown, and application loading compared to traditional hard drives. Engineered to boost burst write performance, it's ideal for typical PC workloads, offering a perfect balance of reliability and high-speed data transfer. Achieve impressive read/write speeds of up to 535MB/s and 450MB/s, making your daily computing tasks smoother and more efficient.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "11",
+          "short_title": "Silicon Power 256GB SSD - 3D NAND Performance Boost",
+          "bullets": [
+            "Experience lightning-fast bootup and significantly improved overall system performance.",
+            "Utilizes advanced 3D NAND flash and SLC Cache Technology for high transfer speeds and an extended lifespan.",
+            "Ultra-slim 7mm design perfectly suited for Ultrabooks and ultra-slim notebooks.",
+            "Enhanced reliability and optimized performance with TRIM, ECC, RAID, and Garbage Collection support."
+          ],
+          "seo_keywords": [
+            "256GB SSD",
+            "SATA III drive",
+            "3D NAND flash",
+            "laptop performance upgrade",
+            "SLC Cache SSD"
+          ],
+          "image_alt_text": "A sleek 2.5-inch Silicon Power 256GB SSD, featuring a metallic finish, designed for high-speed data transfer.",
+          "long_description": "Transform your computing experience with the Silicon Power 256GB SSD, engineered with advanced 3D NAND flash technology to deliver remarkable transfer speeds. This powerful drive ensures lightning-fast bootup times and a dramatic improvement in overall system performance, making your daily tasks more fluid and efficient. Its innovative SLC Cache Technology not only provides a significant performance boost but also contributes to the SSD's extended longevity. Designed with versatility in mind, its ultra-slim 7mm profile makes it an ideal upgrade for Ultrabooks and other ultra-slim notebooks. Enjoy peace of mind with enhanced reliability and optimized performance, thanks to comprehensive support for TRIM command, Garbage Collection, RAID, and ECC (Error Checking & Correction) technologies.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "12",
+          "short_title": "WD 4TB Portable Gaming Drive for PS4 - Expand Storage",
+          "bullets": [
+            "Massive 4TB storage to expand your PlayStation 4 game library.",
+            "Fast, plug-and-play setup for instant gaming on the go.",
+            "Sleek, compact design ensures portability and style.",
+            "Backed by a 3-year manufacturer's limited warranty for peace of mind."
+          ],
+          "seo_keywords": [
+            "WD 4TB PS4 drive",
+            "PlayStation 4 external HDD",
+            "Gaming storage expansion",
+            "Portable PS4 hard drive",
+            "WD gaming drive"
+          ],
+          "image_alt_text": "A sleek, black WD 4TB portable external hard drive designed for PlayStation 4 gaming.",
+          "long_description": "Unleash the full potential of your PlayStation 4 with the WD 4TB Gaming Drive. This portable external hard drive offers massive capacity, allowing you to expand your PS4 game library without worrying about running out of space. Its fast, plug-and-play setup ensures you can get back to gaming quickly and effortlessly, while the sleek, compact design makes it easy to take your favorite games on the go. Experience a seamless gaming adventure with reliable storage, backed by a 3-year manufacturer's limited warranty for ultimate peace of mind.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "13",
+          "short_title": "Acer SB220Q 21.5\" Full HD IPS Ultra-Thin Monitor",
+          "bullets": [
+            "Vibrant 21.5\" Full HD (1920x1080) IPS display for stunning visuals.",
+            "Experience smooth, tear-free gaming with Radeon FreeSync technology and 75Hz refresh rate.",
+            "Sleek zero-frame, ultra-thin design enhances any modern workspace.",
+            "Fast 4ms response time ensures fluid, crisp images for action-packed content."
+          ],
+          "seo_keywords": [
+            "Acer monitor",
+            "21.5 inch Full HD",
+            "IPS FreeSync display",
+            "Ultra-thin computer monitor",
+            "75Hz gaming monitor"
+          ],
+          "image_alt_text": "An Acer SB220Q ultra-thin monitor featuring a 21.5-inch Full HD IPS display with a zero-frame design on a desk.",
+          "long_description": "Immerse yourself in stunning visuals with the Acer SB220Q bi 21.5-inch Full HD IPS Ultra-Thin Monitor. This display delivers crisp 1920 x 1080 resolution and vibrant colors across wide 178-degree viewing angles, perfect for everything from professional work to casual entertainment. Featuring Radeon FreeSync technology and a swift 75Hz refresh rate via HDMI, it ensures incredibly smooth, tear-free gaming and video playback. With a rapid 4ms response time, dynamic content remains clear and ghost-free. Its elegant zero-frame design and ultra-thin profile not only save desk space but also offer a modern, expansive viewing experience.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": null,
+          "short_title": "Samsung 49\" CHG90 144Hz Super Ultrawide QLED Gaming Monitor",
+          "bullets": [
+            "Experience immersive 49-inch 32:9 super ultrawide curved gameplay.",
+            "Stunning QLED technology with HDR delivers vibrant, true-to-life colors and deep contrast.",
+            "Dominate with a silky-smooth 144Hz refresh rate and lightning-fast 1ms response time."
+          ],
+          "seo_keywords": [
+            "Samsung 49 inch monitor",
+            "Ultrawide curved gaming",
+            "QLED HDR display",
+            "144Hz 1ms monitor",
+            "LC49HG90DMNXZA"
+          ],
+          "image_alt_text": "A large black Samsung 49-inch curved ultrawide QLED gaming monitor on a stand.",
+          "long_description": "Elevate your gaming experience to new heights with the Samsung 49-Inch CHG90 Super Ultrawide Curved Gaming Monitor. This monumental 32:9 aspect ratio display effectively gives you the screen real estate of two 27-inch monitors side-by-side, drawing you deep into the action. Witness breathtaking visuals powered by Quantum Dot (QLED) technology and HDR support, delivering incredibly realistic colors, profound contrasts, and factory-calibrated accuracy. Beyond stunning aesthetics, this monitor is engineered for performance, boasting a blazing 144Hz refresh rate and an ultra-fast 1ms response time, crucial for eliminating motion blur, ghosting, and input lag, ensuring every frame is smooth and precise for a truly competitive edge.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "15",
+          "short_title": "Women's 3-in-1 Winter Snowboard Jacket - Warm & Versatile",
+          "bullets": [
+            "Versatile 3-in-1 design adapts to any weather condition and season.",
+            "Warm, skin-friendly fleece liner provides superior comfort and insulation.",
+            "Multiple zippered pockets, including a hidden one, keep essentials secure.",
+            "Adjustable and detachable hood & cuffs offer a custom, windproof fit."
+          ],
+          "seo_keywords": [
+            "Women's 3-in-1 jacket",
+            "Winter snowboard coat",
+            "Waterproof ski jacket",
+            "Warm fleece liner",
+            "Multi-season outerwear"
+          ],
+          "image_alt_text": "A woman wearing a versatile BIYLACLESEN 3-in-1 snowboard winter jacket with a detachable hood.",
+          "long_description": "Stay prepared for any weather with the BIYLACLESEN Women's 3-in-1 Snowboard Jacket, designed for ultimate versatility and comfort. This innovative winter coat features a detachable warm fleece liner that can be worn separately, together, or as a lightweight shell, making it ideal for adapting to different seasons and climates. Crafted from 100% polyester, it boasts an adjustable and detachable hood and cuffs to effectively block wind and water, ensuring a snug, comfortable fit. Multiple zippered pockets, including two hand, two chest, and one hidden inside, provide secure storage for all your essentials, keeping your valuables safe while you enjoy your outdoor adventures.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "16",
+          "short_title": "Women's Faux Leather Moto Jacket with Removable Hood",
+          "bullets": [
+            "Achieve two distinct looks with the versatile removable hood design.",
+            "Crafted from soft, durable faux leather for classic biker style & comfort.",
+            "Features functional front pockets, stylish waist buttons, and detailed stitching."
+          ],
+          "seo_keywords": [
+            "women's faux leather jacket",
+            "moto biker jacket",
+            "removable hood jacket",
+            "women's biker coat",
+            "stylish faux leather"
+          ],
+          "image_alt_text": "A woman models a black faux leather moto biker jacket with a removable grey hood.",
+          "long_description": "Elevate your wardrobe with the Lock and Love Women's Faux Leather Moto Biker Jacket, a versatile staple designed for modern style and comfort. This unique 2-For-One jacket features a convenient removable hood, allowing you to effortlessly switch between a classic moto look and a casual hooded denim-style vibe. Constructed from high-quality faux leather for a sleek finish and lined with soft polyester, it offers both durability and all-day wearability. Practical design elements include two front pockets, stylish button details on the waist, and intricate stitching at the sides, adding an edgy touch to any outfit. Keep this fashionable piece looking its best with hand wash care only.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "17",
+          "short_title": "Women's Lightweight Striped Rain Jacket Windbreaker",
+          "bullets": [
+            "Lightweight and versatile, perfect for travel, climbing, or casual wear.",
+            "Features an adjustable drawstring waist for a flattering, customized fit.",
+            "Secure button and zipper front closure with two spacious side pockets.",
+            "Stylish striped lining and a comfortable, adjustable cotton-lined hood.",
+            "Hip-length design offers excellent coverage and protection from the elements."
+          ],
+          "seo_keywords": [
+            "Women's rain jacket",
+            "Lightweight windbreaker",
+            "Striped raincoat",
+            "Climbing jacket women",
+            "Waterproof outerwear"
+          ],
+          "image_alt_text": "A women's lightweight striped rain jacket in a stylish design with a hood and adjustable waist.",
+          "long_description": "Stay dry and stylish with this versatile women's rain jacket, perfect for everything from climbing adventures to daily casual wear. Designed for comfort, it features a lightweight construction with long sleeves, a comfortable hooded design, and an adjustable drawstring waist for a customized, flattering fit. The secure button and zipper front closure offers reliable protection, while the fully striped lining adds a touch of chic sophistication. Practicality is key with two generously sized side pockets to safely store your essentials, and the hip-length coverage provides ample protection against unexpected showers, making this raincoat a functional yet fashionable choice for any outing.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "18",
+          "short_title": "MBJ Women's Solid Short Sleeve Boat Neck Tee",
+          "bullets": [
+            "Luxurious blend of 95% Rayon and 5% Spandex for ultimate comfort.",
+            "Lightweight fabric with exceptional stretch ensures a perfect, flattering fit.",
+            "Features elegant ribbed details on the sleeves and neckline for added style.",
+            "Durable double stitching on the bottom hem provides lasting quality."
+          ],
+          "seo_keywords": [
+            "women's short sleeve top",
+            "boat neck t-shirt",
+            "rayon spandex blend",
+            "comfortable stretch top",
+            "solid color tee"
+          ],
+          "image_alt_text": "A solid short sleeve boat neck t-shirt for women, crafted from a comfortable, stretchy fabric with ribbed details.",
+          "long_description": "Experience effortless style and ultimate comfort with the MBJ Women's Solid Short Sleeve Boat Neck Tee. Crafted from a luxurious and soft blend of 95% Rayon and 5% Spandex, this top offers a lightweight feel with exceptional stretch, ensuring a flattering fit for all-day wear. Designed with elegant ribbed detailing on the sleeves and neckline, and finished with a durable double-stitched bottom hem, it's a versatile piece perfect for any casual or dressed-up occasion. Easy to care for, simply avoid bleaching to maintain its vibrant color and soft texture.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "19",
+          "short_title": "Opna Women's Moisture-Wicking V-Neck Performance Tee",
+          "bullets": [
+            "Advanced moisture-wicking fabric keeps you dry and comfortable",
+            "Lightweight and highly breathable for optimal performance",
+            "Soft V-neck collar with a sleek, feminine slimmer fit",
+            "Pre-shrunk 100% polyester for a lasting, perfect fit"
+          ],
+          "seo_keywords": [
+            "women's moisture wicking shirt",
+            "performance t-shirt women",
+            "breathable short sleeve top",
+            "v-neck athletic shirt",
+            "women's workout apparel"
+          ],
+          "image_alt_text": "A woman models a sleek, V-neck, short-sleeve, moisture-wicking performance t-shirt in a flattering fit.",
+          "long_description": "Experience ultimate comfort and style with the Opna Women's Short Sleeve Moisture-Wicking Performance Tee. Crafted from 100% cationic polyester interlock, this pre-shrunk top is designed to deliver a great, lasting fit while actively keeping you dry and comfortable. Its lightweight and highly breathable fabric expertly wicks moisture away from your skin, making it the perfect choice for workouts, sports, or any active day. Featuring a soft, comfortable V-neck collar and a slimmer, more feminine silhouette, this shirt offers added comfort without sacrificing style, ensuring you look and feel your best.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      },
+      {
+        "json": {
+          "product_id": "20",
+          "short_title": "Women's Soft Cotton Blend V-Neck Short Sleeve T-Shirt",
+          "bullets": [
+            "Premium 95% Cotton, 5% Spandex blend for ultimate softness and stretch.",
+            "Chic V-Neck and classic short sleeve design for effortless style.",
+            "Versatile wear: perfect for casual outings, office, beach, or home.",
+            "Breathable, all-season fabric ensures comfort year-round."
+          ],
+          "seo_keywords": [
+            "Women's casual t-shirt",
+            "V-neck short sleeve top",
+            "Soft cotton blend tee",
+            "Stretchy women's shirt",
+            "Versatile everyday wear"
+          ],
+          "image_alt_text": "A casual V-neck short sleeve t-shirt for women, made from a soft and stretchy cotton blend.",
+          "long_description": "Elevate your everyday wardrobe with the DANVOUY Women's Casual Cotton Blend T-Shirt, designed for ultimate comfort and versatile style. Crafted from a premium blend of 95% cotton and 5% spandex, this tee offers a super soft feel with just the right amount of stretch, ensuring all-day comfort without compromising on fit. Featuring a chic V-neck and classic short sleeves, it's perfect for effortlessly transitioning from a relaxed day at home to a busy office environment, a sunny beach outing, or casual street style. Its durable and breathable fabric makes it an ideal choice for any season, allowing you to enjoy its fashionable appeal year-round.",
+          "audit_passed": false,
+          "audit_reasons": []
+        }
+      }
+    ]
+  },
+  "versionId": "671bb553-6718-4131-a216-91a17e262cbc",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-26T09:40:35.293Z",
+      "createdAt": "2025-09-26T09:40:35.293Z",
+      "role": "workflow:owner",
+      "workflowId": "2hLfP0QR2ZSn0pfg",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
