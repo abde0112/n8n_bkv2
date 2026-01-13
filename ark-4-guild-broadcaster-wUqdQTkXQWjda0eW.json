@@ -1,0 +1,112 @@
+{
+  "updatedAt": "2025-08-12T14:14:57.000Z",
+  "createdAt": "2025-08-12T12:07:48.599Z",
+  "id": "wUqdQTkXQWjda0eW",
+  "name": "ark 4 Guild Broadcaster",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        -16
+      ],
+      "id": "f4b35579-97f7-4f2f-9b25-88d4a816e177",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://thequoteshub.com/api/",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        128,
+        -16
+      ],
+      "id": "12950ba4-add5-4aa9-b730-b84a5525b2fa",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "resource": "message",
+        "guildId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "channelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        336,
+        -16
+      ],
+      "id": "e18972a5-b6d1-48ca-8b2f-c679f19359de",
+      "name": "Send a message",
+      "webhookId": "0c138e3b-0bb0-440c-9272-460270899fde",
+      "credentials": {
+        "discordBotApi": {
+          "id": "beCpzI57JJrOaRb9",
+          "name": "Discord Bot account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "f177b034-6b26-4460-9bd2-f774fb60a047",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-08-12T12:07:48.660Z",
+      "createdAt": "2025-08-12T12:07:48.660Z",
+      "role": "workflow:owner",
+      "workflowId": "wUqdQTkXQWjda0eW",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
