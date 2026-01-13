@@ -1,0 +1,627 @@
+{
+  "updatedAt": "2025-09-27T10:50:47.000Z",
+  "createdAt": "2025-08-25T15:05:32.509Z",
+  "id": "afhE94DnrSpGNlzK",
+  "name": "Innovate Inc",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "url": "={{ $json.directUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        928,
+        304
+      ],
+      "id": "69d6787e-3572-4556-8f17-22dedb243a14",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "15tCjDwUy_De02rh8ChOmCBRVUc0TWnUqRGTdnPUv0eI",
+          "mode": "list",
+          "cachedResultName": "ATM 2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15tCjDwUy_De02rh8ChOmCBRVUc0TWnUqRGTdnPUv0eI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15tCjDwUy_De02rh8ChOmCBRVUc0TWnUqRGTdnPUv0eI/edit#gid=0"
+        },
+        "event": "rowAdded",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        368,
+        304
+      ],
+      "id": "f8e5bd64-c2af-46ea-b9ee-f7a4f92a989d",
+      "name": "Google Sheets Trigger1",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "TkDPqn2l1NnPZ0mh",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const url = $input.first().json['Resume URL'];\nlet fileId;\n\n// 1️⃣ Try extracting ID from /d/FILE_ID/ pattern\nlet match = url.match(/\\/d\\/([a-zA-Z0-9_-]+)/);\nif (match) {\n    fileId = match[1];\n} else {\n    // 2️⃣ Try extracting ID from ?id=FILE_ID pattern\n    match = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);\n    if (match) {\n        fileId = match[1];\n    } else {\n        throw new Error(\"Impossible d'extraire l'ID depuis l'URL : \" + url);\n    }\n}\n\n// Construire le lien direct\nconst directUrl = `https://drive.google.com/uc?export=download&id=${fileId}`;\n\nreturn [\n  {\n    json: {\n      directUrl\n    }\n  }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        656,
+        304
+      ],
+      "id": "90eeeec4-08bb-408b-b8f3-3ae7021365e7",
+      "name": "Code1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Extract from File (text)').item.json.text }}\n{{ $('Google Sheets Trigger1').item.json['Job Description'] }}return a structured response (like JSON) containing:\n\nA Job Title: The title of the job being applied to, exactly as it appears in the Job Description.\n\nA Match Score: A score from 0-100 indicating how well the candidate's experience matches the job description.\n\nA Summary: An array of 3 strings, with each string being a bullet-point highlight of the candidate's most relevant skills.\n\nA Rationale: A brief, one-sentence explanation for the score it gave.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1440,
+        304
+      ],
+      "id": "9ca338d5-39b9-474c-8e90-b524b06d70e5",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        1392,
+        528
+      ],
+      "id": "3e282752-bbb6-49f9-b940-efb4220f6839",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Y5EZ7nONrSFTfDWw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"job_title\": \"Community Manager\",\n  \"match_score\": 90,\n  \"summary\": [\n    \"Proven experience in community building and managing engaged online communities, including founding and growing multiple tech communities with thousands of members.\",\n    \"Strong communication, leadership, and collaboration skills demonstrated by organizing over 50 online events and receiving multiple community recognition badges.\",\n    \"Technical expertise and teamwork with marketing/product teams through content sharing, event management, and user engagement, alongside full-stack development skills supporting technical initiatives.\"\n  ],\n  \"rationale\": \"The candidate has extensive community management experience, leadership in event coordination, and communication skills directly aligned with the job description, supplemented by technical expertise that can enhance cross-team collaboration.\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1680,
+        512
+      ],
+      "id": "06af68f8-e1ad-4788-9d45-34ad4c719e4a",
+      "name": "Structured Output Parser1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "01125d5a-9f4e-4a24-a72e-6cbd74be05c7",
+              "leftValue": "={{ $json.output.match_score }}",
+              "rightValue": 80,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            },
+            {
+              "id": "60f6bfe6-49e2-4c7c-a01b-601e76f8a23c",
+              "leftValue": "",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1824,
+        304
+      ],
+      "id": "6932a6fc-a044-4d96-b55d-d650f672a7d8",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=Name: {{ $('Google Sheets Trigger1').item.json['Candidate Name'] }}\nJob title: {{ $json.output.job_title }}\nScore: {{ $json.output.match_score }}\nSummary: {{ $json.output.summary }}\nRationale: {{ $json.output.rationale }}\nLink:{{ $('HTTP Request').item.json.directUrl }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        2112,
+        224
+      ],
+      "id": "c0479114-5a24-47e2-abd9-a50c2a07621b",
+      "name": "Discord",
+      "webhookId": "b6c3620c-40d1-43e4-8429-5e28ed132da3",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "skGsil2IBOoEYiyT",
+          "name": "Discord Webhook account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "15tCjDwUy_De02rh8ChOmCBRVUc0TWnUqRGTdnPUv0eI",
+          "mode": "list",
+          "cachedResultName": "ATM 2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15tCjDwUy_De02rh8ChOmCBRVUc0TWnUqRGTdnPUv0eI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15tCjDwUy_De02rh8ChOmCBRVUc0TWnUqRGTdnPUv0eI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Promising",
+            "AI Score": "={{ $('AI Agent').item.json.output.match_score }}",
+            "AI Summary": "={{ $('AI Agent').item.json.output.summary }}",
+            "Scrore Rationale": "={{ $('AI Agent').item.json.output.rationale }}",
+            "Candidate Name": "={{ $('Google Sheets Trigger1').item.json['Candidate Name'] }}",
+            "Email": "={{ $('Google Sheets Trigger1').item.json.Email }}",
+            "Resume URL": "={{ $('HTTP Request').item.json.directUrl }}",
+            "Job Description": "={{ $('Google Sheets Trigger1').item.json['Job Description'] }}"
+          },
+          "matchingColumns": [
+            "Candidate Name"
+          ],
+          "schema": [
+            {
+              "id": "Candidate Name",
+              "displayName": "Candidate Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Resume URL",
+              "displayName": "Resume URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Description",
+              "displayName": "Job Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Score",
+              "displayName": "AI Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Scrore Rationale",
+              "displayName": "Scrore Rationale",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Summary",
+              "displayName": "AI Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2336,
+        224
+      ],
+      "id": "101d1548-6aae-4fb6-90fd-6cec2a52bf8a",
+      "name": "Update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UHnf1b14DL7VAJgV",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "documentId": {
+          "__rl": true,
+          "value": "15tCjDwUy_De02rh8ChOmCBRVUc0TWnUqRGTdnPUv0eI",
+          "mode": "list",
+          "cachedResultName": "ATM 2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15tCjDwUy_De02rh8ChOmCBRVUc0TWnUqRGTdnPUv0eI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/15tCjDwUy_De02rh8ChOmCBRVUc0TWnUqRGTdnPUv0eI/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Status": "Rejected",
+            "AI Score": "={{ $('AI Agent').item.json.output.match_score }}",
+            "AI Summary": "={{ $('AI Agent').item.json.output.summary }}",
+            "Scrore Rationale": "={{ $('AI Agent').item.json.output.rationale }}",
+            "Candidate Name": "={{ $('Google Sheets Trigger1').item.json['Candidate Name'] }}",
+            "Resume URL": "={{ $('Code1').item.json.directUrl }}"
+          },
+          "matchingColumns": [
+            "Candidate Name"
+          ],
+          "schema": [
+            {
+              "id": "Candidate Name",
+              "displayName": "Candidate Name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Resume URL",
+              "displayName": "Resume URL",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Job Description",
+              "displayName": "Job Description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Status",
+              "displayName": "Status",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Score",
+              "displayName": "AI Score",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Scrore Rationale",
+              "displayName": "Scrore Rationale",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "AI Summary",
+              "displayName": "AI Summary",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "row_number",
+              "displayName": "row_number",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "number",
+              "canBeUsedToMatch": true,
+              "readOnly": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        2064,
+        512
+      ],
+      "id": "3cf7e56b-7cef-4ac5-8235-7a9a44f075e6",
+      "name": "Update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "UHnf1b14DL7VAJgV",
+          "name": "Google Sheets account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        1184,
+        304
+      ],
+      "id": "774dbe15-559d-433d-a117-5747aeabb88e",
+      "name": "Extract from File (text)"
+    }
+  ],
+  "connections": {
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Extract from File (text)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Code1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code1": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Discord": {
+      "main": [
+        [
+          {
+            "node": "Update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File (text)": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": {
+    "node:Google Sheets Trigger": {
+      "documentId": "1zr2UIvorwsH4UpJ9_xzDAV29ZDXPZAFEPkElMtPBcUE",
+      "sheetId": 0,
+      "lastIndexChecked": 1
+    },
+    "node:Google Sheets Trigger1": {
+      "documentId": "15tCjDwUy_De02rh8ChOmCBRVUc0TWnUqRGTdnPUv0eI",
+      "sheetId": 0,
+      "lastIndexChecked": 1
+    }
+  },
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "c3d24167-ef6a-48e3-9776-bb536a9f72c4",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-08-25T15:05:32.521Z",
+      "createdAt": "2025-08-25T15:05:32.521Z",
+      "role": "workflow:owner",
+      "workflowId": "afhE94DnrSpGNlzK",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
