@@ -1,0 +1,71 @@
+{
+  "updatedAt": "2025-09-24T20:15:50.000Z",
+  "createdAt": "2025-09-24T11:28:55.026Z",
+  "id": "8RpnzyqICeam1bl7",
+  "name": "My workflow 9",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "documentId": {
+          "__rl": true,
+          "value": "1pUeUR9kkW1aAHKa1BSJYNs735fnh-kfLjERkRoDTGB8",
+          "mode": "list",
+          "cachedResultName": "VOC to blog",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1pUeUR9kkW1aAHKa1BSJYNs735fnh-kfLjERkRoDTGB8/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "2bdd8bc8-35c5-4ece-be3b-1273ffe8d9e2",
+      "name": "Google Sheets Trigger",
+      "credentials": {
+        "googleSheetsTriggerOAuth2Api": {
+          "id": "TkDPqn2l1NnPZ0mh",
+          "name": "Google Sheets Trigger account"
+        }
+      }
+    }
+  ],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "9eff0efa-f5dc-4139-b15b-9abd53978c99",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-24T11:28:55.040Z",
+      "createdAt": "2025-09-24T11:28:55.040Z",
+      "role": "workflow:owner",
+      "workflowId": "8RpnzyqICeam1bl7",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
