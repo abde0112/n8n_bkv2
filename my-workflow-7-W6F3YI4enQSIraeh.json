@@ -1,0 +1,425 @@
+{
+  "updatedAt": "2025-09-18T08:16:53.000Z",
+  "createdAt": "2025-09-16T15:22:56.175Z",
+  "id": "W6F3YI4enQSIraeh",
+  "name": "My workflow 7",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "40d4e540-70d5-495e-9707-5ea13c0e694a",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -96,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "maxItems": 3
+      },
+      "id": "5674ecc4-58b9-4eeb-bc22-51d3ccb39947",
+      "name": "Limit",
+      "type": "n8n-nodes-base.limit",
+      "position": [
+        352,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss?hl=it&gl=IT&ceid=IT:it",
+        "options": {
+          "ignoreSSL": false
+        }
+      },
+      "id": "c9f531ce-d7db-41ca-a424-ad50f30ce1e8",
+      "name": "Reading Google News RSS",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "position": [
+        128,
+        0
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c51f320e-4fb8-4bd4-8e36-9330e251936e",
+              "name": "google_news_url",
+              "type": "string",
+              "value": "={{ JSON.parse(JSON.parse($json.data.split('\\n\\n')[1])[0][2])[1] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "69a7c6cc-546d-4298-92fd-ac7b9d7b261a",
+      "name": "Decoded url",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1664,
+        0
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://news.google.com/_/DotsSplashUi/data/batchexecute",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/x-www-form-urlencoded;charset=UTF-8"
+            },
+            {
+              "name": "User-Agent",
+              "value": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/129.0.0.0 Safari/537.36"
+            },
+            {
+              "name": "Referer",
+              "value": "https://www.google.com/"
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "form-urlencoded",
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "f.req",
+              "value": "={{ $json.f_req }}"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "fullResponse": true,
+              "responseFormat": "text"
+            }
+          }
+        }
+      },
+      "id": "a5b94b9f-3c65-419d-b4c9-92f4ff035c84",
+      "name": "Call decoding URL",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        1456,
+        0
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "jsCode": "return $input.all().map(item => {\n    const gn_art_id = item.json.base64Str;\n    const timestamp = item.json.timestamp;\n    const signature = item.json.signature;\n\n    const articlesReq = [\n        'Fbv4je',\n        `[\"garturlreq\",[[\"X\",\"X\",[\"X\",\"X\"],null,null,1,1,\"US:en\",null,1,null,null,null,null,null,0,1],\"X\",\"X\",1,[1,1,1],1,1,null,0,0,null,0],\"${gn_art_id}\",${timestamp},\"${signature}\"]`,\n    ];\n\n    return {\n        json: {\n            f_req: JSON.stringify([[articlesReq]])  // Questo verrà usato nel nodo HTTP Request\n        }\n    };\n});"
+      },
+      "id": "1bd6bdfa-a9ee-4501-94e6-34a5c212d5a8",
+      "name": "Prepare decoding variables",
+      "type": "n8n-nodes-base.code",
+      "position": [
+        1232,
+        0
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Limit').item.json.link }}",
+        "options": {}
+      },
+      "id": "d144c7c6-d2a8-469f-9e60-2dfce4f003c5",
+      "name": "Get encoded news URL",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        576,
+        0
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b5a11795-2bd1-412f-a215-f7402bece002",
+              "name": "signature",
+              "type": "string",
+              "value": "={{ $json.signature }}"
+            },
+            {
+              "id": "33267283-3ac8-4d65-9a01-c7f154a7d061",
+              "name": "timestamp",
+              "type": "string",
+              "value": "={{ $json.timestamp }}"
+            },
+            {
+              "id": "bff8f19a-30d6-4307-87da-9b98b26cee8b",
+              "name": "base64Str",
+              "type": "string",
+              "value": "={{ $('Limit').item.json.guid }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "ff5aa2dc-9181-41ba-8cf6-9194bc64b5b1",
+      "name": "Map needed keys",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1008,
+        0
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "operation": "extractHtmlContent",
+        "extractionValues": {
+          "values": [
+            {
+              "key": "signature",
+              "cssSelector": "div",
+              "returnValue": "attribute",
+              "attribute": "data-n-a-sg"
+            },
+            {
+              "key": "timestamp",
+              "cssSelector": "div",
+              "returnValue": "attribute",
+              "attribute": "data-n-a-ts"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a076ca47-558f-4270-b6bd-38d7e715a776",
+      "name": "Extract decoding keys",
+      "type": "n8n-nodes-base.html",
+      "position": [
+        784,
+        0
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.google_news_url }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1888,
+        0
+      ],
+      "id": "7d647792-15c5-4716-846a-16cccaa6e964",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Summarize {{ $json.data }} into a LinkedIn-style post.  \nReturn only the post content (concise, engaging, professional).  \nAlso generate a very short image prompt idea that visually matches the post.",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2,
+      "position": [
+        2112,
+        0
+      ],
+      "id": "a0c22936-509f-4e4d-ad4e-36e9c79a2a90",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash-latest",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        2192,
+        224
+      ],
+      "id": "34b324df-60e7-444b-88df-c80504ff0b31",
+      "name": "Google Gemini Chat Model"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"post\": \"string (the LinkedIn post content only, no extras)\",\n  \"image_prompt\": \"string (a short image description matching the post)\"\n}\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        2288,
+        224
+      ],
+      "id": "b07cf92a-1765-47a4-81aa-ee76e483b2de",
+      "name": "Structured Output Parser"
+    }
+  ],
+  "connections": {
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Get encoded news URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Decoded url": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map needed keys": {
+      "main": [
+        [
+          {
+            "node": "Prepare decoding variables",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Call decoding URL": {
+      "main": [
+        [
+          {
+            "node": "Decoded url",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get encoded news URL": {
+      "main": [
+        [
+          {
+            "node": "Extract decoding keys",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract decoding keys": {
+      "main": [
+        [
+          {
+            "node": "Map needed keys",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reading Google News RSS": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare decoding variables": {
+      "main": [
+        [
+          {
+            "node": "Call decoding URL",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Reading Google News RSS",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "c8bfce45-82d1-4f7c-8759-b7337547dfbb",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-16T15:22:56.200Z",
+      "createdAt": "2025-09-16T15:22:56.200Z",
+      "role": "workflow:owner",
+      "workflowId": "W6F3YI4enQSIraeh",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
