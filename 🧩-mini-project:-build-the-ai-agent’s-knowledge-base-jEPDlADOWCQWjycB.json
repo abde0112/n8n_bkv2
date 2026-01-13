@@ -1,0 +1,210 @@
+{
+  "updatedAt": "2025-10-20T11:18:09.000Z",
+  "createdAt": "2025-10-20T09:59:26.529Z",
+  "id": "jEPDlADOWCQWjycB",
+  "name": "🧩 MINI-PROJECT: Build the AI Agent’s Knowledge Base",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "791d2c6c-1f34-4557-af72-da4c78287d5b",
+      "name": "When chat message received",
+      "webhookId": "4247bb9c-9d79-4c49-b599-a4661832dc87"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an AI assistant for an e-commerce company. You have access to two sources of information:\n\n1. **Structured data in Airtable** – includes products, categories, prices, stock, SKUs, etc.\n2. **Unstructured knowledge in Notion** – includes FAQs, return policies, shipping info, and other guides.\n\nYour task:\n- Understand user questions.\n- Retrieve accurate information from the correct source (Airtable for facts/numbers, Notion for explanations/guides).\n- Combine information if needed.\n- Respond clearly and concisely.\n\nInstructions:\n1. If the user asks for a **product-specific fact** (price, stock, category, SKU), fetch it from Airtable.\n2. If the user asks for a **policy, procedure, or general explanation**, fetch it from Notion.\n3. Always format your response in a friendly, professional tone.\n4. If data is missing or unclear, say: \"I couldn’t find that information, please check with support.\"\n5. Avoid making assumptions; rely only on the data from Airtable and Notion.\n\nExample queries and reasoning:\n- User: \"What is the price of the Wireless Mouse?\"\n  - Check Airtable Products table → fetch Price → reply: \"The Wireless Mouse costs $19.99.\"\n- User: \"What is your return policy for electronics?\"\n  - Search Notion FAQ database → find relevant FAQ → summarize → reply.\n\nOutput format:\n- Use complete sentences.\n- Include relevant details (product name, numbers, categories, dates if applicable).\n- Do not include internal IDs or technical info in the answer.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "0803a997-330f-40fa-a5b1-0484d77c2a30",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "6e8af7a2-cf8c-4a32-9062-9e5e4f4a90ef",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        208
+      ],
+      "id": "f9ba31ae-83b3-4cfa-b181-948ecbd7e460",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "value": "app5a5P7U0dwkyYXF",
+          "mode": "list",
+          "cachedResultName": "Ark-x Days",
+          "cachedResultUrl": "https://airtable.com/app5a5P7U0dwkyYXF"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbluYf0YYX7jlKFMn",
+          "mode": "list",
+          "cachedResultName": "E-commerce Agent DB",
+          "cachedResultUrl": "https://airtable.com/app5a5P7U0dwkyYXF/tbluYf0YYX7jlKFMn"
+        },
+        "id": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        240
+      ],
+      "id": "f6667328-aaf6-4745-acc3-86d85a88e2d7",
+      "name": "Get a record in Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "D5OyRen7Y9yEq0t5",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "=29295f9ac9ba8028b32ee58ae98b242e",
+          "mode": "id"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "simple": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Simplify', ``, 'boolean') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notionTool",
+      "typeVersion": 2.2,
+      "position": [
+        400,
+        240
+      ],
+      "id": "f482c00a-5cc1-487f-a364-81d201a9e974",
+      "name": "Get many database pages in Notion",
+      "credentials": {
+        "notionApi": {
+          "id": "15yDo1cdhGUKYF4b",
+          "name": "Notion account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a record in Airtable": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many database pages in Notion": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "6465dbb2-cc12-4c4f-bf59-d95627ad586f",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-20T09:59:26.555Z",
+      "createdAt": "2025-10-20T09:59:26.555Z",
+      "role": "workflow:owner",
+      "workflowId": "jEPDlADOWCQWjycB",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
