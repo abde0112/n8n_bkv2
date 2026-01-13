@@ -1,0 +1,1899 @@
+{
+  "updatedAt": "2026-01-12T14:23:01.427Z",
+  "createdAt": "2026-01-06T14:45:31.607Z",
+  "id": "a6V7tL8rwM2PmTIS",
+  "name": "1 Seo Automation",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "d7210ae7-1826-4963-9b2f-cd81d75e0922",
+      "name": "Merge Data",
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 2.1,
+      "position": [
+        -7408,
+        2928
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"gpt-4o\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an SEO keyword expert.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Topic: {{ $json.topic }}\\nReturn ONLY valid JSON with: primary_keyword, secondary_keywords (array of 5), long_tail_keywords (array of 10), lsi_keywords (array of 15), search_intent, content_format\"\n    }\n  ],\n  \"temperature\": 0.7\n} ",
+        "options": {}
+      },
+      "id": "61c79266-74a1-4efb-804d-51c0c9372624",
+      "name": "Keyword Research",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -7120,
+        2928
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the raw text content from the previous OpenAI node\nconst response = $input.first().json;\nlet content = response.choices[0].message.content;\n\n// 2. Remove the Markdown code blocks (```json ... ```)\n// This regex replaces ```json, ```, and newlines with nothing\nconst cleanContent = content.replace(/^```json\\s*|\\s*```$/g, '').trim();\n\nlet parsedData;\ntry {\n  // 3. Convert the clean string into a real JSON Object\n  parsedData = JSON.parse(cleanContent);\n} catch (error) {\n  // Fallback if parsing fails\n  parsedData = { error: \"Could not parse JSON\", raw: content };\n}\n\n// 4. Return the clean data\nreturn { json: parsedData };"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6912,
+        2928
+      ],
+      "id": "529fbcfd-d94f-45d9-8c02-6cf5511b812a",
+      "name": "Parse Keywords"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  {\n    \"model\": \"gpt-4o\",\n    \"messages\": [\n      {\n        \"role\": \"system\",\n        \"content\": \"You are an expert content writer. Write naturally and avoid AI patterns.\"\n      },\n      {\n        \"role\": \"user\",\n        \"content\": \"Write a 2000 word article.\\n\\nHere is the Outline:\\n\" + JSON.stringify($json) + \"\\n\\nHere are the Keywords to include:\\n\" + JSON.stringify($('Parse Keywords').item.json) + \"\\n\\nUse professional-conversational tone. Include keywords naturally. Format in Markdown.\"\n      }\n    ],\n    \"temperature\": 0.8,\n    \"max_tokens\": 4000\n  }\n}}",
+        "options": {}
+      },
+      "id": "861bf448-4d8d-4ba2-9994-eeb9a8aeaf91",
+      "name": "Content Outline/Generate Article",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -6656,
+        2928
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the response from the \"Generate Article\" node\nconst response = $input.first().json;\n\n// 2. Extract the text content (The Markdown Article)\nconst articleText = response.choices[0].message.content;\n\n// 3. Return it as a simple field called \"article\"\nreturn {\n  json: {\n    article: articleText\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -6448,
+        2928
+      ],
+      "id": "9dbc532d-ad67-4e4e-8c24-3927ee27eeed",
+      "name": "Clean Article"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  {\n    \"model\": \"gpt-4o\",\n    \"messages\": [\n      {\n        \"role\": \"system\",\n        \"content\": \"You are an SEO optimizer.\"\n      },\n      {\n        \"role\": \"user\",\n        \"content\": \"Optimize this article for SEO:\\n\\n\" + $json.article + \"\\n\\nTasks:\\n1. Ensure 2-3% keyword density.\\n2. Add missing LSI keywords.\\n3. Improve readability (short paragraphs, bullet points).\\n4. Return ONLY the improved article in Markdown.\"\n      }\n    ],\n    \"temperature\": 0.7\n  }\n}}",
+        "options": {}
+      },
+      "id": "0d502c78-a767-4a36-adb0-40d6954bf11a",
+      "name": "SEO Optimization",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -6192,
+        2928
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the response from SEO Optimization node\nconst response = $input.first().json;\nlet content = response.choices[0].message.content;\n\n// Brute-force remove the Markdown code wrappers\nconst cleanArticle = content\n  .replace(/```markdown/gi, \"\") // Removes the top ```markdown\n  .replace(/```/g, \"\")         // Removes the bottom ```\n  .trim();                     // Removes extra spaces/lines\n\nreturn {\n  json: {\n    final_article: cleanArticle\n  }\n};"
+      },
+      "id": "697559e1-cddd-4514-ab42-518ecf7caaa8",
+      "name": "Clean Final Article",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5984,
+        2928
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "config-1",
+              "name": "niche",
+              "value": "AI and Technology",
+              "type": "string"
+            },
+            {
+              "id": "config-2",
+              "name": "target_audience",
+              "value": "Tech entrepreneurs and developers",
+              "type": "string"
+            },
+            {
+              "id": "config-3",
+              "name": "articles_per_run",
+              "value": 3,
+              "type": "number"
+            },
+            {
+              "id": "config-4",
+              "name": "tone",
+              "value": "professional-conversational",
+              "type": "string"
+            },
+            {
+              "id": "config-5",
+              "name": "target_word_count",
+              "value": 2000,
+              "type": "number"
+            },
+            {
+              "id": "config-6",
+              "name": "wordpress_url",
+              "value": "https://iptvs-subscription.com",
+              "type": "string"
+            },
+            {
+              "id": "config-7",
+              "name": "min_quality_score",
+              "value": 75,
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "53aa0b8a-a270-4567-87d0-7a53761e849b",
+      "name": "Set Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        -8288,
+        2928
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.perplexity.ai/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n  \"model\": \"sonar-pro\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are an SEO research analyst.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Find 5 trending topics from the last 48 hours in: AI and Technology. Return ONLY valid JSON with this structure: {\\\"trending_topics\\\": [{\\\"topic\\\": \\\"\\\", \\\"trend_reason\\\": \\\"\\\", \\\"primary_keyword\\\": \\\"\\\", \\\"sources\\\": [], \\\"publish_dates\\\": [], \\\"content_angle\\\": \\\"\\\", \\\"seo_potential\\\": \\\"high\\\"}]}\"\n    }\n  ],\n  \"temperature\": 0.7\n}",
+        "options": {}
+      },
+      "id": "18809cf4-5897-4ae4-a727-3f1baf9dcac6",
+      "name": "Perplexity Research",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -8064,
+        2928
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "options": {
+          "search": "={{ $json.primary_keyword }}"
+        }
+      },
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        -7600,
+        3152
+      ],
+      "id": "4350d0a7-1426-4760-b085-9db5c583974c",
+      "name": "Get many posts",
+      "alwaysOutputData": true,
+      "credentials": {
+        "wordpressApi": {
+          "id": "sr95ya8oSFF31OOK",
+          "name": "iptvs-subscription"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const response = $input.first().json;\nconst config = $('Set Configuration').first().json;\nlet topics = [];\ntry {\n  let content = response.choices[0].message.content;\n  content = content.replace(/```json\\n?/g, '').replace(/```/g, '').trim();\n  const parsed = JSON.parse(content);\n  topics = parsed.trending_topics || [];\n} catch (e) {\n  console.error('Parse error:', e);\n  return [];\n}\nconst validTopics = topics.filter(t => t.topic && t.primary_keyword && t.sources && t.sources.length >= 2).map((t, i) => ({...t, topic_score: 70, topic_index: i, workflow_config: config})).slice(0, config.articles_per_run);\nreturn validTopics.map(t => ({json: t}));"
+      },
+      "id": "a7722ad4-44c2-4e2a-94da-5b7678241fe0",
+      "name": "Filter Topics",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -7840,
+        2928
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 6 * * *"
+            }
+          ]
+        }
+      },
+      "id": "6fa8f952-fde1-4063-88f2-59a82e9f1cff",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -8512,
+        2928
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "no-dup",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "ea655e86-faed-40df-8a37-33e86aee4084",
+      "name": "No Duplicate?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -7264,
+        3200
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/images/generations",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{\n  {\n    \"model\": \"dall-e-3\",\n    \"prompt\": \"A futuristic, high-tech feature image representing \" + $('Prepare WP Data').item.json.wp_title + \". Minimalist style, 4k resolution, no text.\",\n    \"n\": 1,\n    \"size\": \"1024x1024\"\n  }\n}}",
+        "options": {}
+      },
+      "id": "96d489b7-18d3-4a89-b970-dadd02e62a4c",
+      "name": "Generate Image",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -5504,
+        2928
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the Clean Article from the previous node\nconst article = $input.first().json.final_article;\n\n// 2. Get the Topic (Try to get it from 'Merge Data', otherwise use a default)\nlet topic = \"AI Article\";\ntry {\n  topic = $('Merge Data').item.json.topic;\n} catch(e) {\n  // If Merge Data isn't found, try to guess the topic from the first line\n  const match = article.match(/^#\\s*(.+)$/m);\n  if (match) topic = match[1];\n}\n\n// 3. Create a URL Slug (e.g. \"AI Models 2026\" -> \"ai-models-2026\")\nconst slug = topic.toLowerCase()\n  .replace(/[^a-z0-9]+/g, '-') // Replace symbols with -\n  .replace(/(^-|-$)/g, '');    // Remove extra - at start/end\n\n// 4. Create a short Excerpt (First 150 chars, no symbols)\nconst excerpt = article.substring(0, 150).replace(/#|\\*/g, '') + \"...\";\n\n// 5. Extract the Title (The text after the first #)\nconst titleMatch = article.match(/^#\\s*(.+)$/m);\nconst title = titleMatch ? titleMatch[1] : topic;\n\n// 6. Remove the H1 Title from the body content (so it doesn't appear twice)\nconst bodyWithoutH1 = article.replace(/^#\\s*.+$/m, '').trim();\n\nreturn {\n  json: {\n    wp_title: title,\n    wp_slug: slug,\n    wp_excerpt: excerpt,\n    wp_content: bodyWithoutH1\n  }\n};"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -5776,
+        2928
+      ],
+      "id": "b11c7e1a-1670-4d45-a209-7ce53b57a953",
+      "name": "Prepare WP Data"
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.data[0].url }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "image.png"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        -5296,
+        2928
+      ],
+      "id": "aa986f6b-b7af-48a8-a557-dd8b51f02b53",
+      "name": "Download Image"
+    },
+    {
+      "parameters": {
+        "content": "## Write SEO Optimized Blog Post\n\n\n",
+        "height": 440,
+        "width": 420,
+        "color": 3
+      },
+      "id": "7e1fb2db-4805-4c22-a7c1-51a970561d59",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -7536,
+        4080
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "title": "={{ $('Combine Blog Details1').item.json.data[2].output.title }}",
+        "additionalFields": {
+          "authorId": 1,
+          "content": "={{ $json.content }}",
+          "slug": "={{ $('Combine Blog Details1').item.json.data[2].output.slug }}",
+          "status": "publish",
+          "commentStatus": "closed",
+          "sticky": false,
+          "postTemplate": {
+            "values": {}
+          }
+        }
+      },
+      "id": "6afd94a6-464a-44c2-a622-751f77b053fd",
+      "name": "Wordpress1",
+      "type": "n8n-nodes-base.wordpress",
+      "position": [
+        -6832,
+        4896
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "wordpressApi": {
+          "id": "sr95ya8oSFF31OOK",
+          "name": "iptvs-subscription"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "## Post on Wordpress\n\n\n",
+        "height": 280,
+        "width": 300,
+        "color": 4
+      },
+      "id": "7dac6571-b8f1-44b7-9f87-53ba56934b68",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -6992,
+        4784
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "de6d0985-2e55-4d2f-b63f-b99e21095820",
+      "name": "OpenAI Chat Model1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -6928,
+        4512
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "KgsXR5Ga5dON4Aie",
+          "name": "SEO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\"slug\": \"rpo-benefits-recruitment\",\n\"title\": \"7 Key Advantages of RPO for Modern Recruitment\",\n\"meta\": \"Explore how Recruitment Process Outsourcing (RPO) enhances hiring efficiency, reduces costs, and expands talent pools for businesses seeking top candidates.\"\n}"
+      },
+      "id": "8f99edf5-e1e4-49a2-a040-c26c70be3215",
+      "name": "Structured Output Parser1",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        -6688,
+        4512
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=**Create a slug, blog post title, and meta description for the following blog post:**\n\n{{ $json.output }}\n\n**Slug Guidelines:**\n- Keep it concise (4-5 words maximum).\n- Include the primary keyword related to recruitment or HR.\n- Use hyphens to separate words.\n- Avoid unnecessary words, articles, or prepositions.\n- Ensure it reflects the main topic of the blog post.\n- Make it readable and relevant for both users and search engines.\n\n**Title Guidelines:**\n- Avoid AI words like \"Transform\" or \"Revolutionize\" and similar overused terms.\n- Avoid using a colon (:) in the title.\n- Never structure it as a primary/secondary title separated by a colon.\n- Include the primary keyword related to recruitment or HR (e.g., 'AI in recruitment' or 'talent acquisition trends').\n- Clearly inform users what they can expect from reading the blog post.\n- Be concise and engaging, ideally 50-60 characters long.\n- Incorporate power words that appeal to HR professionals and recruiters.\n\n**Meta Description Guidelines:**\n- Avoid AI words like \"Transform\" or \"Revolutionize\" and similar overused terms.\n- Be concise: Limit to 150-160 characters to ensure full visibility in search results.\n- Include keywords: Naturally incorporate primary recruitment-related keywords to enhance relevance and visibility.\n- Provide value: Clearly convey the benefits or insights readers will gain from the article.\n- Be engaging: Use action-oriented language or a thought-provoking question to encourage clicks.\n- Align with content: Accurately reflect the blog post's content to meet user expectations and reduce bounce rates.\n- Highlight expertise: Subtly emphasize SocialFind's authority in the recruitment field.\n\nYour output must be a single valid JSON object with these 3 fields:\n-slug: The slug\n-title: The blog post title\n-meta: The meta description  \n\nEach should be presented without any additional text, explanation, quotation marks, or formatting.\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "id": "661506e4-55de-4f67-bb07-3e246616e916",
+      "name": "Create Title, Slug, Meta1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -6880,
+        4336
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Only output the HTML content without preamble or further explanation. Generate WordPress-compatible HTML for a blog post based on the provided content.\n\n### CONTENT PROCESSING:\n- Process all content from {{ $json.output }}\n- Preserve all original facts, information, and URLs\n- Format according to the specifications below\n\n### REQUIRED STRUCTURE (IN THIS ORDER):\n1. Title (H2)\n2. Estimated reading time\n3. Key takeaways (3-5 bullet points)\n4. Table of contents (linked to all headings)\n5. Main content (with proper heading hierarchy)\n6. FAQ section\n\n### STYLING REQUIREMENTS:\n- Style Override: Include a style section with !important declarations\n- Links: All hyperlinks, TOC items, and FAQ questions must be #00c2ff (blue)\n- Headings: All headings need a bottom border in #00c2ff with padding\n- Spacing: Add <br><br> between each major section\n\n### ENGAGEMENT FORMATTING:\n- Use bold, italics, bullet points, quotes, and highlighting for emphasis\n- Create proper paragraph structure with appropriate line breaks\n- NO emojis allowed\n- Use whitespace strategically for readability\n\n### HYPERLINK HANDLING (CRITICAL):\n- When URLs appear next to keyphrases (e.g., \"AI tools (https://example.com)\")\n- Convert to: <a href=\"https://example.com\" style=\"color: #00c2ff !important;\">AI tools</a>\n- The KEYPHRASE must be linked, never the URL itself\n\n### WORDPRESS COMPATIBILITY:\n- Use WordPress block classes (wp-block-heading, wp-block-paragraph, etc.)\n- Add heading IDs starting with \"h-\" for better TOC linking\n- Ensure all styles use !important to override theme styles\n\nDO NOT include any explanations, code tags, or comments. Output ONLY the raw HTML.\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2c8bd71c-9f19-45bd-b18c-3c79922e1d92",
+      "name": "Create HTML1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        -6848,
+        3920
+      ],
+      "typeVersion": 1.8,
+      "credentials": {
+        "openAiApi": {
+          "id": "KgsXR5Ga5dON4Aie",
+          "name": "SEO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "numberInputs": 3
+      },
+      "id": "5208df5e-23e6-4821-84b5-93ea12ad76d3",
+      "name": "Merge1",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        -6256,
+        4208
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://southpost.free.nf//wp-json/wp/v2/media",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "wordpressApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Disposition",
+              "value": "=attachment; filename=\"cover-image-{{ $('Wordpress1').item.json.id }}.jpeg\""
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "id": "0c03e051-c9ae-4b7c-8d93-4f9afd06bc87",
+      "name": "Upload Image to Wordpress1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -5824,
+        4880
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "wordpressApi": {
+          "id": "sr95ya8oSFF31OOK",
+          "name": "iptvs-subscription"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://southpost.free.nf//wp-json/wp/v2/posts/{{ $('Wordpress1').item.json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "wordpressApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "featured_media",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "62214562-b4cd-4261-8cc7-c7747b51d6e5",
+      "name": "Set Image on Wordpress Post1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -5632,
+        4880
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "wordpressApi": {
+          "id": "sr95ya8oSFF31OOK",
+          "name": "iptvs-subscription"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert AI newsletter writer specializing in creating engaging, informative content about artificial intelligence trends, tools, and industry news. Your goal is to produce compelling newsletters that educate readers about the latest AI developments, practical applications, and emerging technologies while maintaining a professional yet accessible tone.\n\nYou publish newsletters covering the most significant AI developments, breakthrough technologies, tool releases, and industry insights. You are provided with curated articles from top tech publications.\n\n**Your Goal:** Produce engaging, well-researched newsletter content that educates readers about AI developments, showcases practical applications, and positions  as a trusted authority in AI automation and virtual assistant services.\n\nGiven the research findings **Research Article:**\n{{ $json.articlesList }}, write a comprehensive newsletter/blog post that:\n\n- Includes the focus keyword in the blog title, H2 header, and early in the introduction\n- Synthesizes insights from multiple articles into a cohesive narrative\n- Is detailed and informative, explaining AI concepts in accessible language\n- Uses an engaging, professional tone that makes technical content approachable\n- Flows naturally and logically with clear structure\n- Is between 1500 to 2000 words long\n- Is written for business professionals, entrepreneurs, and tech-forward leaders\n- Mentions the focus keyword naturally in the first paragraph\n\n**Additional requirements:**\n- Include practical takeaways that readers can apply to their businesses\n- Highlight how AI automation and consulting services (AI TechScope's specialty) relate to these trends\n- Connect AI developments to business efficiency, digital transformation, and workflow optimization\n- Showcase how AI TechScope's expertise in n8n automation, AI consulting, and website development can help businesses leverage these technologies\n- Include a call-to-action (CTA) encouraging readers to explore AI TechScope's AI automation and consulting services\n\nCreate the entire blog post draft in your first output. Don't stop or cut it short.\n\nYour output must be the blog post and nothing else.\n\n\n**Company Information:** {{ $json.Description }}\n\n**Research Article:**\n{{ $json.articlesList }}",
+        "options": {}
+      },
+      "id": "d7ce7c59-cdaa-4ce7-aa04-29c90772bbdd",
+      "name": "Copywriter AI Agent1",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -7392,
+        4208
+      ],
+      "typeVersion": 1.8
+    },
+    {
+      "parameters": {
+        "content": "## Create Title, Slug & Meta\n\n\n",
+        "height": 440,
+        "width": 440,
+        "color": 7
+      },
+      "id": "7705109d-19b2-4dba-9365-767ce995a68d",
+      "name": "Sticky Note11",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -7008,
+        4176
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "0afb2988-1481-4b04-b16d-fb33c50a16d0",
+              "name": "content",
+              "type": "string",
+              "value": "={{ $json.data[0].message.content.replaceAll('```html', '').replaceAll('```','') }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f7eb61ab-b2ce-4413-93c2-37ce59bccef5",
+      "name": "Cleanup HTML 1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -6048,
+        4464
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "## Set Image for Wordpress Post",
+        "height": 280,
+        "width": 1220
+      },
+      "id": "8e4e9a77-03a7-4592-8abc-7f632ae2efdc",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -6656,
+        4768
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "cca7e4c3-a99f-47af-88c5-a11ac6a76fe3",
+      "name": "gpt-4o-mini1",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -7456,
+        4416
+      ],
+      "typeVersion": 1.2,
+      "credentials": {
+        "openAiApi": {
+          "id": "KgsXR5Ga5dON4Aie",
+          "name": "SEO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "aggregate": "aggregateAllItemData",
+        "options": {}
+      },
+      "id": "ee7fa3ea-14c1-4c65-bdc2-dce2a69b32d4",
+      "name": "Combine Blog Details1",
+      "type": "n8n-nodes-base.aggregate",
+      "position": [
+        -6048,
+        4208
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "url": "={{ $('Search Pexels Image1').item.json.photos[0].src.large2x }}",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "84b131cd-7822-4a28-8ba1-87f6fed6cdbe",
+      "name": "Download Pexels Image1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -6016,
+        4880
+      ],
+      "typeVersion": 4.2,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o",
+          "mode": "list",
+          "cachedResultName": "GPT-4O"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=\n\n\"Generate 1-3 relevant search keywords for finding a professional stock photo related to: {{ $json.title.raw }}. Focus on tangible, visual concepts (e.g., 'technology workspace' instead of abstract terms). Return only the keywords, no explanation.\""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -6608,
+        4880
+      ],
+      "id": "83fc30ed-0934-4f12-81b2-f4be36589138",
+      "name": "Message a model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "KgsXR5Ga5dON4Aie",
+          "name": "SEO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sortFieldsUi": {
+          "sortField": [
+            {
+              "fieldName": "pubDate",
+              "order": "descending"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "name": "Sort by Date (Newest First)",
+      "type": "n8n-nodes-base.sort",
+      "typeVersion": 1,
+      "position": [
+        -8080,
+        4544
+      ],
+      "id": "e6358193-a322-4711-93db-490ee5e8a5ad"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Take only the first 10 items from the sorted array\nconst items = $input.all();\nconst top10 = items.slice(0, 10);\n\nreturn top10;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -7888,
+        4544
+      ],
+      "id": "05d9d975-2e77-4198-b92a-886a2caa0301",
+      "name": "Limit to Top 10 Articles"
+    },
+    {
+      "parameters": {
+        "url": "https://techcrunch.com/tag/artificial-intelligence/feed/",
+        "options": {}
+      },
+      "name": "TechCrunch AI1",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        -8512,
+        4592
+      ],
+      "id": "f66f2b3e-022d-4ca4-9e1d-5f6e88464b70"
+    },
+    {
+      "parameters": {
+        "url": "https://www.theverge.com/rss/ai-artificial-intelligence/index.xml",
+        "options": {}
+      },
+      "name": "The Verge AI1",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        -8496,
+        4128
+      ],
+      "id": "a3ac3243-4ef2-458a-86ca-61b912b10b13"
+    },
+    {
+      "parameters": {
+        "url": "https://news.ycombinator.com/rss",
+        "options": {}
+      },
+      "name": "Hacker News1",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        -8512,
+        4288
+      ],
+      "id": "35c35302-d629-47ed-9907-aa9ed031eda6"
+    },
+    {
+      "parameters": {
+        "url": "https://www.reddit.com/r/artificial/.rss",
+        "options": {
+          "customFields": ""
+        }
+      },
+      "name": "Reddit AI1",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        -8512,
+        4448
+      ],
+      "id": "0822c2cd-1058-4406-a249-72a8e9478d58"
+    },
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss/search?q=AI+tools+OR+ChatGPT+OR+automation+OR+%22HighLevel%22+OR+%22GoHighLevel%22+OR+%22AI+CRM%22&hl=en-US&gl=US&ceid=US:en",
+        "options": {}
+      },
+      "name": "Google News AI Tools & CRMs1",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [
+        -8528,
+        4768
+      ],
+      "id": "e6fc0fee-5a8b-4812-9341-4896b67e5451"
+    },
+    {
+      "parameters": {
+        "numberInputs": 5
+      },
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        -8224,
+        4496
+      ],
+      "id": "493d5c36-b0ac-414d-85cb-8ef7be71c572",
+      "name": "Merge2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\n\nlet articlesList = \"\";\n\nitems.forEach((item, index) => {\n  const title = item.json.title || 'No title';\n  const link = item.json.link || item.json.url || 'No link';\n  const pubDate = item.json.pubDate || item.json.isoDate || 'Unknown date';\n  const description = item.json.contentSnippet || item.json.description || 'No description';\n  const source = item.json.creator || item.json.author || 'Unknown source';\n  \n  articlesList += `${index + 1}. **${title}**\\n`;\n  articlesList += `   Source: ${source}\\n`;\n  articlesList += `   Published: ${pubDate}\\n`;\n  articlesList += `   Link: ${link}\\n`;\n  articlesList += `   Summary: ${description}\\n\\n`;\n});\n\nreturn [{\n  json: {\n    articlesList: articlesList,\n    Keyword: \"AI trends and tools\", // Default keyword - can be customized\n    Description: \"AITechScope is a leading provider of virtual assistant services, specializing in AI-powered automation, n8n workflow development, and business process optimization. We help businesses leverage cutting-edge AI tools and technologies to scale operations, reduce costs, and improve efficiency through intelligent delegation and automation solutions.\"\n  }\n}];\n"
+      },
+      "name": "Format Articles List",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -7552,
+        4208
+      ],
+      "id": "9ca4be92-ded6-4c50-a886-f6492394cfd1"
+    },
+    {
+      "parameters": {
+        "url": "=https://api.pexels.com/v1/search?query={{ $json.message.content }}&per_page=1",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9f21a212-f7a4-421a-a919-38aaeddacd01",
+      "name": "Search Pexels Image1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -6224,
+        4880
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "content": "## Create HTML\n",
+        "width": 512
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -6976,
+        3888
+      ],
+      "typeVersion": 1,
+      "id": "2e618e3d-23a5-4767-b155-9d007191fc33",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "## Rss ",
+        "height": 992
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -8576,
+        4032
+      ],
+      "typeVersion": 1,
+      "id": "6d547261-a87e-4ba4-bf9e-a0540592db96",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds"
+            }
+          ]
+        }
+      },
+      "name": "Schedule Trigger - Mon & Thu 9AM",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [
+        -8752,
+        4448
+      ],
+      "id": "ad131ff0-c14a-4c3d-a5af-ad082edc20de"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        -7680,
+        4544
+      ],
+      "id": "380d9833-d5e0-41fc-a161-a4fb2d48fc7a",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://southpost.free.nf//wp-json/wp/v2/media {{ $json.link }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "wordpressApi",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Disposition",
+              "value": "=attachment; filename=\"cover-image-{{ $('Download Image').item.json.data[0].url }}.jpeg\""
+            }
+          ]
+        },
+        "sendBody": true,
+        "contentType": "binaryData",
+        "inputDataFieldName": "data",
+        "options": {}
+      },
+      "id": "ee9906a2-7fba-40c9-9e5b-a64c68f36197",
+      "name": "Upload Image to Wordpress",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -4864,
+        2928
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "wordpressApi": {
+          "id": "sr95ya8oSFF31OOK",
+          "name": "iptvs-subscription"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://southpost.free.nf//wp-json/wp/v2/posts/{{ $('Wordpress1').item.json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "wordpressApi",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "featured_media",
+              "value": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b40dbc13-c953-42b6-a133-e55cf02ee909",
+      "name": "Set Image on Wordpress Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -4688,
+        2928
+      ],
+      "typeVersion": 4.2,
+      "credentials": {
+        "wordpressApi": {
+          "id": "sr95ya8oSFF31OOK",
+          "name": "iptvs-subscription"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "title": "={{ $('Prepare WP Data').item.json.wp_title }}",
+        "additionalFields": {
+          "authorId": 2,
+          "content": "={{ $('Prepare WP Data').item.json.wp_content }}",
+          "slug": "={{ $('Prepare WP Data').item.json.wp_slug }}",
+          "status": "publish",
+          "commentStatus": "closed",
+          "sticky": false,
+          "postTemplate": {
+            "values": {}
+          }
+        }
+      },
+      "id": "c7fe5b8f-4cdf-4a47-b415-67af7a194ae9",
+      "name": "Wordpress",
+      "type": "n8n-nodes-base.wordpress",
+      "position": [
+        -5104,
+        2928
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "wordpressApi": {
+          "id": "sr95ya8oSFF31OOK",
+          "name": "iptvs-subscription"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "title": "={{ $('Prepare WP Data').item.json.wp_title }}",
+        "additionalFields": {
+          "authorId": 2,
+          "content": "=<img src=\"{{ $json.data[0].url }}\" alt=\"Cover Image\">\n{{ $('Prepare WP Data').item.json.wp_content }}",
+          "slug": "={{ $('Prepare WP Data').item.json.wp_slug }}",
+          "status": "draft",
+          "commentStatus": "closed",
+          "sticky": false,
+          "categories": [
+            280
+          ],
+          "tags": [
+            281
+          ],
+          "postTemplate": {
+            "values": {}
+          }
+        }
+      },
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        -5120,
+        3120
+      ],
+      "id": "f63b7644-ce82-4f9b-822b-191b05d8e42d",
+      "name": "Wordpress2",
+      "credentials": {
+        "wordpressApi": {
+          "id": "sr95ya8oSFF31OOK",
+          "name": "iptvs-subscription"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Merge Data": {
+      "main": [
+        [
+          {
+            "node": "Keyword Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Keyword Research": {
+      "main": [
+        [
+          {
+            "node": "Parse Keywords",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Keywords": {
+      "main": [
+        [
+          {
+            "node": "Content Outline/Generate Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Content Outline/Generate Article": {
+      "main": [
+        [
+          {
+            "node": "Clean Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Article": {
+      "main": [
+        [
+          {
+            "node": "SEO Optimization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SEO Optimization": {
+      "main": [
+        [
+          {
+            "node": "Clean Final Article",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean Final Article": {
+      "main": [
+        [
+          {
+            "node": "Prepare WP Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Configuration": {
+      "main": [
+        [
+          {
+            "node": "Perplexity Research",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Perplexity Research": {
+      "main": [
+        [
+          {
+            "node": "Filter Topics",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many posts": {
+      "main": [
+        [
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Filter Topics": {
+      "main": [
+        [
+          {
+            "node": "Get many posts",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Image": {
+      "main": [
+        [
+          {
+            "node": "Download Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prepare WP Data": {
+      "main": [
+        [
+          {
+            "node": "Generate Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Image": {
+      "main": [
+        [
+          {
+            "node": "Wordpress",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Wordpress2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wordpress1": {
+      "main": [
+        [
+          {
+            "node": "Message a model1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Create Title, Slug, Meta1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser1": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Create Title, Slug, Meta1",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Title, Slug, Meta1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Create HTML1": {
+      "main": [
+        [
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge1": {
+      "main": [
+        [
+          {
+            "node": "Combine Blog Details1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image to Wordpress1": {
+      "main": [
+        [
+          {
+            "node": "Set Image on Wordpress Post1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Copywriter AI Agent1": {
+      "main": [
+        [
+          {
+            "node": "Create Title, Slug, Meta1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Merge1",
+            "type": "main",
+            "index": 1
+          },
+          {
+            "node": "Create HTML1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Cleanup HTML 1": {
+      "main": [
+        [
+          {
+            "node": "Wordpress1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "gpt-4o-mini1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Copywriter AI Agent1",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine Blog Details1": {
+      "main": [
+        [
+          {
+            "node": "Cleanup HTML 1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Pexels Image1": {
+      "main": [
+        [
+          {
+            "node": "Upload Image to Wordpress1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model1": {
+      "main": [
+        [
+          {
+            "node": "Search Pexels Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Sort by Date (Newest First)": {
+      "main": [
+        [
+          {
+            "node": "Limit to Top 10 Articles",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit to Top 10 Articles": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Merge2": {
+      "main": [
+        [
+          {
+            "node": "Sort by Date (Newest First)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "TechCrunch AI1": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "The Verge AI1": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Hacker News1": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 2
+          }
+        ]
+      ]
+    },
+    "Reddit AI1": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 3
+          }
+        ]
+      ]
+    },
+    "Google News AI Tools & CRMs1": {
+      "main": [
+        [
+          {
+            "node": "Merge2",
+            "type": "main",
+            "index": 4
+          }
+        ]
+      ]
+    },
+    "Format Articles List": {
+      "main": [
+        [
+          {
+            "node": "Copywriter AI Agent1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Pexels Image1": {
+      "main": [
+        [
+          {
+            "node": "Download Pexels Image1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger - Mon & Thu 9AM": {
+      "main": [
+        [
+          {
+            "node": "TechCrunch AI1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "The Verge AI1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Hacker News1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Reddit AI1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Google News AI Tools & CRMs1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Image on Wordpress Post1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Format Articles List",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Image to Wordpress": {
+      "main": [
+        [
+          {
+            "node": "Set Image on Wordpress Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wordpress": {
+      "main": [
+        [
+          {
+            "node": "Upload Image to Wordpress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Keyword Research": [
+      {
+        "json": {
+          "id": "chatcmpl-CwdMDMP3u22Lqeb5TlXCRHk7Xf7Rc",
+          "object": "chat.completion",
+          "created": 1768090349,
+          "model": "gpt-4o-2024-08-06",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "```json\n{\n  \"primary_keyword\": \"Compact high-reasoning AI models\",\n  \"secondary_keywords\": [\n    \"Falcon-H1R 7B\",\n    \"AI model optimization\",\n    \"small AI models\",\n    \"efficient AI reasoning\",\n    \"AI model performance\"\n  ],\n  \"long_tail_keywords\": [\n    \"benefits of compact high-reasoning AI models\",\n    \"Falcon-H1R 7B specifications and features\",\n    \"how compact AI models improve efficiency\",\n    \"comparison of Falcon-H1R 7B with other models\",\n    \"implementing compact AI models in business\",\n    \"advantages of small AI models in reasoning tasks\",\n    \"performance analysis of Falcon-H1R 7B\",\n    \"compact AI models for resource-limited environments\",\n    \"reducing computational costs with compact AI models\",\n    \"future trends in compact high-reasoning AI models\"\n  ],\n  \"lsi_keywords\": [\n    \"AI model efficiency\",\n    \"machine learning optimization\",\n    \"artificial intelligence models\",\n    \"deep learning compact models\",\n    \"AI reasoning capabilities\",\n    \"resource-efficient AI\",\n    \"AI model scalability\",\n    \"neural network optimization\",\n    \"small-scale AI solutions\",\n    \"advanced AI algorithms\",\n    \"AI model deployment\",\n    \"high-performance AI systems\",\n    \"AI computational costs\",\n    \"next-generation AI models\",\n    \"AI technology advancements\"\n  ],\n  \"search_intent\": \"informational\",\n  \"content_format\": \"blog post\"\n}\n```",
+                "refusal": null,
+                "annotations": []
+              },
+              "logprobs": null,
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 81,
+            "completion_tokens": 315,
+            "total_tokens": 396,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "audio_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "audio_tokens": 0,
+              "accepted_prediction_tokens": 0,
+              "rejected_prediction_tokens": 0
+            }
+          },
+          "service_tier": "default",
+          "system_fingerprint": "fp_deacdd5f6f"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Content Outline/Generate Article": [
+      {
+        "json": {
+          "id": "chatcmpl-CwdsmB86NzP0FbBavxiMNOBK7Yn4x",
+          "object": "chat.completion",
+          "created": 1768092368,
+          "model": "gpt-4o-2024-08-06",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "# The Rise of Compact High-Reasoning AI Models: A Deep Dive into Falcon-H1R 7B and Beyond\n\nIn the rapidly evolving world of artificial intelligence, the demand for efficient, high-performing models is more pronounced than ever. As industries increasingly adopt AI to streamline operations and enhance decision-making, the need for **compact high-reasoning AI models** has become critical. These models provide exceptional reasoning capabilities while maintaining a compact size, making them ideal for a variety of applications. In this article, we explore the advantages and specifications of the Falcon-H1R 7B, a leading model in this domain, and delve into the broader benefits and applications of small AI models.\n\n## Understanding Compact High-Reasoning AI Models\n\n**Compact high-reasoning AI models** are designed to deliver powerful reasoning and decision-making abilities within a smaller, more efficient framework. Unlike extensive models that require enormous computational resources, these compact models optimize performance without compromising on the quality of outputs. This balance is crucial for businesses and developers looking to implement AI solutions in resource-constrained environments.\n\n### Benefits of Compact High-Reasoning AI Models\n\nThe advantages of compact high-reasoning AI models extend beyond simple resource efficiency:\n\n1. **Resource Efficiency**: By requiring fewer computational resources, these models reduce both operational costs and environmental impact, making them highly sustainable.\n2. **Faster Deployment**: Smaller models mean quicker deployment times, allowing businesses to implement AI solutions rapidly without extensive infrastructure changes.\n3. **Scalability**: They offer greater scalability, enabling companies to expand their AI capabilities as needed without overhauling existing systems.\n4. **Improved Accessibility**: Organizations with limited access to advanced computing infrastructure can still leverage powerful AI capabilities.\n\n## Introducing Falcon-H1R 7B: Specifications and Features\n\nThe **Falcon-H1R 7B** stands out as a leader among compact high-reasoning AI models. This model is engineered to deliver exceptional AI model performance while maintaining a compact size, making it perfect for diverse applications across industries.\n\n### Falcon-H1R 7B Specifications and Features\n\n- **Parameters**: With 7 billion parameters, Falcon-H1R 7B strikes a balance between performance and resource efficiency, ensuring robust AI reasoning capabilities.\n- **Optimization**: Built with advanced AI model optimization techniques, it effectively manages resource allocation to enhance efficiency.\n- **Performance**: Designed for efficient AI reasoning, the model excels in tasks requiring high cognitive abilities such as natural language processing and complex problem-solving.\n- **Implementation**: Its adaptable architecture allows seamless integration into various business environments, making it an attractive option for companies looking to leverage AI technology advancements.\n\n### Performance Analysis of Falcon-H1R 7B\n\nIn performance analysis, the Falcon-H1R 7B demonstrates noteworthy results. It consistently outperforms many of its counterparts in terms of speed and accuracy, making it a preferred choice for applications that require real-time processing and decision-making. Its adept handling of complex reasoning tasks showcases the true potential of compact AI models in delivering high-quality outputs.\n\n## How Compact AI Models Improve Efficiency\n\n**How compact AI models improve efficiency** can be understood by examining their architecture and deployment strategies. These models are crafted to maximize output while keeping computational demands to a minimum.\n\n### Reducing Computational Costs with Compact AI Models\n\nOne of the standout benefits of compact AI models is their ability to **reduce computational costs**. By minimizing the resources needed for processing, businesses can allocate their budgets more efficiently, investing in other areas of growth and innovation. This cost-effectiveness also opens doors for smaller enterprises to adopt advanced AI solutions.\n\n### Compact AI Models for Resource-Limited Environments\n\nIn environments where resources are constrained, such as remote or underdeveloped areas, compact AI models offer a viable solution. They provide the necessary cognitive power without the demand for extensive infrastructure, ensuring that even in resource-limited settings, AI can be a powerful tool for development and progress.\n\n## Implementing Compact AI Models in Business\n\nThe implementation of compact AI models in business settings is a strategic move that can lead to significant operational enhancements. From streamlining processes to enhancing customer experience, these models play a crucial role in modern business landscapes.\n\n### Advantages of Small AI Models in Reasoning Tasks\n\nThe **advantages of small AI models in reasoning tasks** are particularly evident in sectors like healthcare, finance, and customer service. Their ability to process large volumes of data and generate insights quickly enables businesses to make informed decisions, improve service delivery, and maintain a competitive edge.\n\n## Comparison of Falcon-H1R 7B with Other Models\n\nWhen comparing the Falcon-H1R 7B with other models, several factors stand out:\n\n1. **Performance**: While larger models may offer higher parameter counts, the Falcon-H1R 7B delivers comparable performance with optimized efficiency.\n2. **Versatility**: Its design allows for a wide range of applications, making it suitable for various industries and use cases.\n3. **Cost-Effectiveness**: The reduced computational needs translate to lower operational costs, making it a financially advantageous choice.\n\n## Future Trends in Compact High-Reasoning AI Models\n\nLooking ahead, the **future trends in compact high-reasoning AI models** suggest continued innovation and adoption. As technology advances, we can expect these models to become even more efficient and capable. Key trends include:\n\n- **Enhanced Scalability**: Future models will likely offer greater scalability, allowing businesses to expand their AI capabilities seamlessly.\n- **Increased Accessibility**: As costs continue to drop, more organizations will have the opportunity to implement sophisticated AI solutions.\n- **Integration with Emerging Technologies**: The synergy between compact AI models and other technologies, such as the Internet of Things (IoT) and edge computing, will further enhance their utility and impact.\n\n## Conclusion\n\nCompact high-reasoning AI models like the Falcon-H1R 7B represent a significant step forward in the field of artificial intelligence. Their blend of performance, efficiency, and adaptability makes them invaluable assets for businesses looking to harness AI's full potential. By reducing computational costs and improving accessibility, these models pave the way for a future where AI is an integral part of every industry. As we move forward, the continued development and implementation of these compact models will undoubtedly drive innovation and growth, transforming how we interact with technology and each other.",
+                "refusal": null,
+                "annotations": []
+              },
+              "logprobs": null,
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 518,
+            "completion_tokens": 1289,
+            "total_tokens": 1807,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "audio_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "audio_tokens": 0,
+              "accepted_prediction_tokens": 0,
+              "rejected_prediction_tokens": 0
+            }
+          },
+          "service_tier": "default",
+          "system_fingerprint": "fp_deacdd5f6f"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "SEO Optimization": [
+      {
+        "json": {
+          "id": "chatcmpl-Cwe7a1aztmWBJDIsEH8VTinNq9TPb",
+          "object": "chat.completion",
+          "created": 1768093286,
+          "model": "gpt-4o-2024-08-06",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "```markdown\n# The Rise of Compact High-Reasoning AI Models: A Deep Dive into Falcon-H1R 7B and Beyond\n\nIn the rapidly evolving world of artificial intelligence, the demand for efficient, high-performing models is more pronounced than ever. As industries increasingly adopt AI to streamline operations and enhance decision-making, the need for **compact high-reasoning AI models** has become critical. These models provide exceptional reasoning capabilities while maintaining a compact size, making them ideal for a variety of applications. In this article, we explore the advantages and specifications of the Falcon-H1R 7B, a leading model in this domain, and delve into the broader benefits and applications of small AI models.\n\n## Understanding Compact High-Reasoning AI Models\n\n**Compact high-reasoning AI models** are designed to deliver powerful reasoning and decision-making abilities within a smaller, more efficient framework. Unlike extensive models that require enormous computational resources, these compact models optimize performance without compromising on the quality of outputs. This balance is crucial for businesses and developers looking to implement AI solutions in resource-constrained environments.\n\n### Benefits of Compact High-Reasoning AI Models\n\nThe advantages of compact high-reasoning AI models extend beyond simple resource efficiency:\n\n- **Resource Efficiency**: By requiring fewer computational resources, these models reduce both operational costs and environmental impact, making them highly sustainable.\n- **Faster Deployment**: Smaller models mean quicker deployment times, allowing businesses to implement AI solutions rapidly without extensive infrastructure changes.\n- **Scalability**: They offer greater scalability, enabling companies to expand their AI capabilities as needed without overhauling existing systems.\n- **Improved Accessibility**: Organizations with limited access to advanced computing infrastructure can still leverage powerful AI capabilities.\n\n## Introducing Falcon-H1R 7B: Specifications and Features\n\nThe **Falcon-H1R 7B** stands out as a leader among compact high-reasoning AI models. This model is engineered to deliver exceptional AI model performance while maintaining a compact size, making it perfect for diverse applications across industries.\n\n### Falcon-H1R 7B Specifications and Features\n\n- **Parameters**: With 7 billion parameters, Falcon-H1R 7B strikes a balance between performance and resource efficiency, ensuring robust AI reasoning capabilities.\n- **Optimization**: Built with advanced AI model optimization techniques, it effectively manages resource allocation to enhance efficiency.\n- **Performance**: Designed for efficient AI reasoning, the model excels in tasks requiring high cognitive abilities such as natural language processing and complex problem-solving.\n- **Implementation**: Its adaptable architecture allows seamless integration into various business environments, making it an attractive option for companies looking to leverage AI technology advancements.\n\n### Performance Analysis of Falcon-H1R 7B\n\nIn performance analysis, the Falcon-H1R 7B demonstrates noteworthy results. It consistently outperforms many of its counterparts in terms of speed and accuracy, making it a preferred choice for applications that require real-time processing and decision-making. Its adept handling of complex reasoning tasks showcases the true potential of compact AI models in delivering high-quality outputs.\n\n## How Compact AI Models Improve Efficiency\n\n**How compact AI models improve efficiency** can be understood by examining their architecture and deployment strategies. These models are crafted to maximize output while keeping computational demands to a minimum.\n\n### Reducing Computational Costs with Compact AI Models\n\nOne of the standout benefits of compact AI models is their ability to **reduce computational costs**. By minimizing the resources needed for processing, businesses can allocate their budgets more efficiently, investing in other areas of growth and innovation. This cost-effectiveness also opens doors for smaller enterprises to adopt advanced AI solutions.\n\n### Compact AI Models for Resource-Limited Environments\n\nIn environments where resources are constrained, such as remote or underdeveloped areas, compact AI models offer a viable solution. They provide the necessary cognitive power without the demand for extensive infrastructure, ensuring that even in resource-limited settings, AI can be a powerful tool for development and progress.\n\n## Implementing Compact AI Models in Business\n\nThe implementation of compact AI models in business settings is a strategic move that can lead to significant operational enhancements. From streamlining processes to enhancing customer experience, these models play a crucial role in modern business landscapes.\n\n### Advantages of Small AI Models in Reasoning Tasks\n\nThe **advantages of small AI models in reasoning tasks** are particularly evident in sectors like healthcare, finance, and customer service. Their ability to process large volumes of data and generate insights quickly enables businesses to make informed decisions, improve service delivery, and maintain a competitive edge.\n\n## Comparison of Falcon-H1R 7B with Other Models\n\nWhen comparing the Falcon-H1R 7B with other models, several factors stand out:\n\n- **Performance**: While larger models may offer higher parameter counts, the Falcon-H1R 7B delivers comparable performance with optimized efficiency.\n- **Versatility**: Its design allows for a wide range of applications, making it suitable for various industries and use cases.\n- **Cost-Effectiveness**: The reduced computational needs translate to lower operational costs, making it a financially advantageous choice.\n\n## Future Trends in Compact High-Reasoning AI Models\n\nLooking ahead, the **future trends in compact high-reasoning AI models** suggest continued innovation and adoption. As technology advances, we can expect these models to become even more efficient and capable. Key trends include:\n\n- **Enhanced Scalability**: Future models will likely offer greater scalability, allowing businesses to expand their AI capabilities seamlessly.\n- **Increased Accessibility**: As costs continue to drop, more organizations will have the opportunity to implement sophisticated AI solutions.\n- **Integration with Emerging Technologies**: The synergy between compact AI models and other technologies, such as the Internet of Things (IoT) and edge computing, will further enhance their utility and impact.\n\n## Conclusion\n\nCompact high-reasoning AI models like the Falcon-H1R 7B represent a significant step forward in the field of artificial intelligence. Their blend of performance, efficiency, and adaptability makes them invaluable assets for businesses looking to harness AI's full potential. By reducing computational costs and improving accessibility, these models pave the way for a future where AI is an integral part of every industry. As we move forward, the continued development and implementation of these compact models will undoubtedly drive innovation and growth, transforming how we interact with technology and each other.\n```\n",
+                "refusal": null,
+                "annotations": []
+              },
+              "logprobs": null,
+              "finish_reason": "stop"
+            }
+          ],
+          "usage": {
+            "prompt_tokens": 1354,
+            "completion_tokens": 1287,
+            "total_tokens": 2641,
+            "prompt_tokens_details": {
+              "cached_tokens": 0,
+              "audio_tokens": 0
+            },
+            "completion_tokens_details": {
+              "reasoning_tokens": 0,
+              "audio_tokens": 0,
+              "accepted_prediction_tokens": 0,
+              "rejected_prediction_tokens": 0
+            }
+          },
+          "service_tier": "default",
+          "system_fingerprint": "fp_a0e9480a2f"
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Perplexity Research": [
+      {
+        "json": {
+          "id": "c2afa42b-5834-480e-ba1f-09264f2826bb",
+          "model": "sonar-pro",
+          "created": 1768087694,
+          "usage": {
+            "prompt_tokens": 75,
+            "completion_tokens": 904,
+            "total_tokens": 979,
+            "search_context_size": "low",
+            "cost": {
+              "input_tokens_cost": 0,
+              "output_tokens_cost": 0.014,
+              "request_cost": 0.006,
+              "total_cost": 0.02
+            }
+          },
+          "citations": [
+            "https://www.aiapps.com/blog/ai-news-january-2026-breakthroughs-launches-trends/",
+            "https://www.ibm.com/think/news/ai-tech-trends-predictions-2026",
+            "https://sloanreview.mit.edu/article/five-trends-in-ai-and-data-science-for-2026/",
+            "https://www.vtnetzwelt.com/ai-development/latest-tech-ai-updates-what-january-2026-is-really-telling-us/",
+            "https://www.deloitte.com/us/en/insights/topics/technology-management/tech-trends.html",
+            "https://www.crescendo.ai/news/latest-ai-news-and-updates"
+          ],
+          "search_results": [
+            {
+              "title": "Top AI News for January 2026: Breakthroughs, Launches & Trends ...",
+              "url": "https://www.aiapps.com/blog/ai-news-january-2026-breakthroughs-launches-trends/",
+              "date": "2026-01-08",
+              "last_updated": "2026-01-10",
+              "snippet": "AI is transforming industries in January 2026, with major advancements across robotics, autonomous vehicles, and specialized tools.",
+              "source": "web"
+            },
+            {
+              "title": "The trends that will shape AI and tech in 2026 - IBM",
+              "url": "https://www.ibm.com/think/news/ai-tech-trends-predictions-2026",
+              "date": "2026-01-01",
+              "last_updated": "2026-01-09",
+              "snippet": "Reporter Anabelle Nicoud spoke to several experts across AI, security, quantum and beyond to better understand where tech will take us in 2026.",
+              "source": "web"
+            },
+            {
+              "title": "Five Trends in AI and Data Science for 2026",
+              "url": "https://sloanreview.mit.edu/article/five-trends-in-ai-and-data-science-for-2026/",
+              "date": "2026-01-06",
+              "last_updated": "2026-01-08",
+              "snippet": "AI experts Thomas H. Davenport and Randy Bean explain the top 2026 AI trends leaders should watch for.",
+              "source": "web"
+            },
+            {
+              "title": "Latest Tech & AI Updates January 2026 - AI Trends & Insights",
+              "url": "https://www.vtnetzwelt.com/ai-development/latest-tech-ai-updates-what-january-2026-is-really-telling-us/",
+              "date": "2026-01-04",
+              "last_updated": "2026-01-10",
+              "snippet": "January 2026 marks a turning point for AI. The focus has shifted from experimentation to accountability, reliability, and real-world impact.",
+              "source": "web"
+            },
+            {
+              "title": "Tech Trends 2026 | Deloitte Insights",
+              "url": "https://www.deloitte.com/us/en/insights/topics/technology-management/tech-trends.html",
+              "date": "2025-12-10",
+              "last_updated": "2026-01-09",
+              "snippet": "Tech Trends 2026 · AI goes physical: Navigating the convergence of AI and robotics · The agentic reality check: Preparing for a silicon-based ...",
+              "source": "web"
+            },
+            {
+              "title": "Latest AI News and AI Breakthroughs that Matter Most: 2026 & 2025",
+              "url": "https://www.crescendo.ai/news/latest-ai-news-and-updates",
+              "date": "2025-12-18",
+              "last_updated": "2026-01-10",
+              "snippet": "AI System Automates Radiology Labeling to Streamline Medical Imaging. Date: January 6, 2026. Summary: Researchers have introduced a new AI framework capable ...",
+              "source": "web"
+            }
+          ],
+          "object": "chat.completion",
+          "choices": [
+            {
+              "index": 0,
+              "message": {
+                "role": "assistant",
+                "content": "{\"trending_topics\":[{\"topic\":\"Compact high‑reasoning AI models (e.g., Falcon‑H1R 7B)\",\"trend_reason\":\"New transformer–Mamba hybrid models like Falcon‑H1R deliver near–state‑of‑the‑art reasoning with far fewer parameters, signaling a shift from sheer scale to efficiency and task‑specific design.[1]\",\"primary_keyword\":\"Falcon-H1R 7B reasoning model\",\"sources\":[\"aiapps.com – Top AI News for January 2026: Breakthroughs, Launches & Trends\",\"IBM Think – The trends that will shape AI and tech in 2026\"],\"publish_dates\":[\"2026-01-05\",\"2026-01-07\"],\"content_angle\":\"Explain how compact, high‑reasoning models enable on‑device and edge AI, contrasting them with giant LLMs in terms of latency, cost, and energy use for real‑world deployments.\",\"seo_potential\":\"high\"},{\"topic\":\"Agentic AI and ‘super agents’ for complex workflows\",\"trend_reason\":\"Vendors and enterprises are rapidly moving from single chatbots to multi‑agent systems and ‘super agents’ that can orchestrate end‑to‑end business workflows across tools and environments.[1][2][3]\",\"primary_keyword\":\"agentic AI super agents\",\"sources\":[\"aiapps.com – Top AI News for January 2026: Breakthroughs, Launches & Trends\",\"IBM Think – The trends that will shape AI and tech in 2026\",\"MIT Sloan Management Review – Five Trends in AI and Data Science for 2026\"],\"publish_dates\":[\"2026-01-05\",\"2026-01-06\",\"2026-01-06\"],\"content_angle\":\"Position agentic AI as the next UX and automation layer, covering real use cases, current limitations, and why analysts see both hype and strong medium‑term value.\",\"seo_potential\":\"high\"},{\"topic\":\"Physical AI: convergence of robotics, autonomous systems, and AI\",\"trend_reason\":\"Early 2026 coverage highlights ‘physical AI’ as a key frontier, with platforms like NVIDIA Alpamayo for autonomous driving and consumer robots such as LG CLOiD moving from lab to deployment.[1][2][5]\",\"primary_keyword\":\"physical AI robotics 2026\",\"sources\":[\"aiapps.com – Top AI News for January 2026: Breakthroughs, Launches & Trends\",\"IBM Think – The trends that will shape AI and tech in 2026\",\"Deloitte Insights – Tech Trends 2026\"],\"publish_dates\":[\"2026-01-05\",\"2026-01-07\",\"2026-01-04\"],\"content_angle\":\"Cover how AI is leaving the screen and entering the physical world via cars, home robots, and industrial systems, and what this means for safety, regulation, and new business models.\",\"seo_potential\":\"high\"},{\"topic\":\"Shift from AI experimentation to accountability and reliability\",\"trend_reason\":\"January 2026 analysis stresses that AI is now embedded infrastructure, with emphasis shifting from pilots and experimentation to governance, reliability, and measurable business impact.[3][4]\",\"primary_keyword\":\"AI accountability and governance 2026\",\"sources\":[\"MIT Sloan Management Review – Five Trends in AI and Data Science for 2026\",\"VT Netzwelt – Latest Tech & AI Updates January 2026\"],\"publish_dates\":[\"2026-01-06\",\"2026-01-06\"],\"content_angle\":\"Explore how organizations are building AI governance, risk, and compliance frameworks, and why reliability and auditability are becoming core buying criteria for AI platforms.\",\"seo_potential\":\"high\"},{\"topic\":\"Open‑source and small language models for enterprise use\",\"trend_reason\":\"Experts report accelerating momentum for open‑source and smaller, domain‑specific models that deliver strong performance with lower cost and better interoperability than closed, mega‑scale systems.[1][2]\",\"primary_keyword\":\"open source small language models 2026\",\"sources\":[\"aiapps.com – Top AI News for January 2026: Breakthroughs, Launches & Trends\",\"IBM Think – The trends that will shape AI and tech in 2026\"],\"publish_dates\":[\"2026-01-05\",\"2026-01-07\"],\"content_angle\":\"Analyze why enterprises are embracing open‑source and small language models for specialized tasks, including vendor‑risk reduction, customization, and infrastructure efficiency.\",\"seo_potential\":\"high\"}]}"
+              },
+              "delta": {
+                "role": "assistant",
+                "content": ""
+              },
+              "finish_reason": "stop"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Generate Image": [
+      {
+        "json": {
+          "created": 1768095268,
+          "data": [
+            {
+              "revised_prompt": "Imagine a high-tech future scene demonstrating the advent of compact, high-reasoning AI models. The primary focus should be on a representation of the Falcon-H1R 7B model, presented in a deep-dive exploration beyond the ordinary. The aesthetics should oscillate between futurism and minimalism. Ensure the representation is detailed, favoring a 4k resolution and abstaining from the inclusion of any text. Use advanced lighting techniques to make the AI models look vibrant and compelling, hinting at their constantly evolving nature. Avoid any form of human interaction or involvement in the scene to sustain the emphasis on artificial intelligence.",
+              "url": "https://oaidalleapiprodscus.blob.core.windows.net/private/org-aAtyOeIoCbsRozEHNr021STv/user-LlxQLGESAvwKzt6nbIfmrUPI/img-rnMLRLMuzrB04tUtvbyDOIuL.png?st=2026-01-11T00%3A34%3A27Z&se=2026-01-11T02%3A34%3A27Z&sp=r&sv=2024-08-04&sr=b&rscd=inline&rsct=image/png&skoid=67205dde-9780-4119-bbff-6343b48e42b6&sktid=a48cca56-e6da-484e-a814-9c849652bcb3&skt=2026-01-11T01%3A34%3A27Z&ske=2026-01-12T01%3A34%3A27Z&sks=b&skv=2024-08-04&sig=5v8YCBQtjmbI5lEQXCz8hF0sj0M79tNFc1IaxfBIEYo%3D"
+            }
+          ]
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "dd202cc9-7964-461c-8248-19943a701a2b",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-06T14:45:31.623Z",
+      "createdAt": "2026-01-06T14:45:31.623Z",
+      "role": "workflow:owner",
+      "workflowId": "a6V7tL8rwM2PmTIS",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
