@@ -1,0 +1,82 @@
+{
+  "updatedAt": "2025-09-27T10:41:58.000Z",
+  "createdAt": "2025-09-08T14:47:48.306Z",
+  "id": "MezWRKoHAsIxunOo",
+  "name": "My First Workflow",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n\"productid\": 123,\n\"name\": \"Classic T-Shirt\",\n\"category\": \"Apparel\",\n\"price\": 29.99,\n\"instock\": true\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        176
+      ],
+      "id": "9df46f6e-7930-417c-b7e3-059829ac492d",
+      "name": "Edit Fields",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        32,
+        176
+      ],
+      "id": "64907b77-6333-4842-9265-d181d842380f",
+      "name": "When clicking ‘Execute workflow’"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "Edit Fields": [
+      {
+        "json": {
+          "productid": 123,
+          "name": "Classic T-Shirt",
+          "category": "Apparel",
+          "price": 29.99,
+          "instock": true
+        }
+      }
+    ]
+  },
+  "versionId": "82a185de-0aa4-49f5-b359-9cc2305d02b8",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-08T14:47:48.338Z",
+      "createdAt": "2025-09-08T14:47:48.338Z",
+      "role": "workflow:owner",
+      "workflowId": "MezWRKoHAsIxunOo",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
