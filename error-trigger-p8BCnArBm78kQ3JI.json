@@ -1,0 +1,77 @@
+{
+  "updatedAt": "2025-10-09T15:37:56.000Z",
+  "createdAt": "2025-10-09T15:36:39.095Z",
+  "id": "p8BCnArBm78kQ3JI",
+  "name": "Error Trigger",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "15f78df5-a6ca-40bf-9993-aca7af8480ff",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ffd73945-7d4e-4eac-b0d2-544f2d8d0593",
+              "name": "message",
+              "value": "hellooool msl ;",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "4ae464f9-a80b-4089-ac0d-cedc3a950cf3",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "fe2baf24-3596-41a0-97cd-35d75eac58c6",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-09T15:36:39.112Z",
+      "createdAt": "2025-10-09T15:36:39.112Z",
+      "role": "workflow:owner",
+      "workflowId": "p8BCnArBm78kQ3JI",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
