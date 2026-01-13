@@ -1,0 +1,78 @@
+{
+  "updatedAt": "2025-08-17T18:58:21.000Z",
+  "createdAt": "2025-08-14T19:49:46.439Z",
+  "id": "qtFemK3F1QQZxvCJ",
+  "name": "My workflow 3",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "5f877910-ad42-434c-85c0-d5ee64a98651",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "245a87c3-c26d-4aad-8430-dfa4047acf74",
+      "name": "whatsapp-incoming",
+      "webhookId": "5f877910-ad42-434c-85c0-d5ee64a98651"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "http://YOUR-SERVER-IP:3000/send",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"to\": \"{{ $json.from }}\",\n  \"message\": \"Hello! Thanks for your message.\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        352,
+        0
+      ],
+      "id": "a293b5f3-421c-47ef-a906-19df13db93fe",
+      "name": "HTTP Request"
+    }
+  ],
+  "connections": {
+    "whatsapp-incoming": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "e3ba9575-ec2b-4f47-b1e2-83d77d526e0d",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-08-14T19:49:46.456Z",
+      "createdAt": "2025-08-14T19:49:46.456Z",
+      "role": "workflow:owner",
+      "workflowId": "qtFemK3F1QQZxvCJ",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
