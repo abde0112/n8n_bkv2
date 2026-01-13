@@ -1,0 +1,580 @@
+{
+  "updatedAt": "2025-09-11T15:40:11.000Z",
+  "createdAt": "2025-09-11T10:37:33.277Z",
+  "id": "k2TvllaEJsA6it1d",
+  "name": "DAY 3 A3 copy copy",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -448,
+        256
+      ],
+      "id": "277d54e6-7f98-41f9-85be-a189d316db1a",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"redFlags\": [\n    \"laptop\",\n    \"Engagement\",\n    \"slave\",\n    \"blacklist\",\n    \"whitelist\",\n    \"ordinateur\",\n    \"\\\\b\\\\d{10}\\\\b\",\n    \"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\\\.[A-Za-z]{2,}\"\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -240,
+        256
+      ],
+      "id": "a3c7ef00-ce46-4671-8ddc-4e47dd923a98",
+      "name": "Define Red Flags"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "6ab5b252-84fc-43c7-8186-746c79bda68d",
+              "name": "productName",
+              "value": "Test Laptop - whitelisted",
+              "type": "string"
+            },
+            {
+              "id": "02318512-d6cd-4ef2-b4e6-f472a7a03bbc",
+              "name": "description",
+              "value": "This laptop comes with whitelist options and a support email: test@example.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -32,
+        256
+      ],
+      "id": "5dd7aa71-8ceb-46b7-8497-da6382e6e0ab",
+      "name": "Test Product (only for manual testing). For production, replace with your real trigger node"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the incoming item(s)\nconst item = items[0]; \n\n// Red flags list (coming from Set Node or hardcoded)\nconst redFlags = item.json.redFlags || [\n  \"laptop\",\n  \"Engagement\",\n  \"slave\",\n  \"blacklist\",\n  \"whitelist\",\n  \"ordinateur\",\n  \"\\\\b\\\\d{10}\\\\b\", // phone number\n  \"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\\\.[A-Za-z]{2,}\" // email\n];\n\n// Prepare regex hits\nconst description = item.json.description || \"\";\nconst regexHits = [];\n\nfor (const pattern of redFlags) {\n  const regex = new RegExp(pattern, \"gi\");\n  if (regex.test(description)) {\n    regexHits.push(pattern);\n  }\n}\n\n// Attach results back into the item\nitem.json.regexHits = regexHits;\nitem.json.regexFlag = regexHits.length > 0;\n\nreturn [item];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        256
+      ],
+      "id": "264d61a3-1961-4912-b170-184c7049272c",
+      "name": "Regex Check"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a structured JSON generator.\n\nAnalyze the following product description for biased, offensive, or sensitive content.\n\nReturn ONLY a JSON object in this exact format, with no explanation, no markdown, no extra keys:\n\n{\n  \"flagged\": true/false,\n  \"categories\": [ \"list of reasons\" ],\n  \"cleaned_description\": \"cleaned version of description\",\n  \"cleaned_title\": \"cleaned version of title\"\n}\n\nDescription: {{ $json.description }}\nTitle: {{ $json.productName }}\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        256
+      ],
+      "id": "f35bc2cb-d767-49b8-a3ca-0e4abad9b392",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        256,
+        464
+      ],
+      "id": "0309851d-5101-4e2b-bb5e-6c7c2742e590",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Y5EZ7nONrSFTfDWw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.riskLevel }}",
+                    "rightValue": "✅ Pass",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "bca9a093-da25-4a72-a231-ff2804a9b48f"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7bcd8290-d77a-4efb-88a6-bf6196c54ab2",
+                    "leftValue": "={{ $json.riskLevel }}",
+                    "rightValue": "⚠️ Review Needed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "698ece33-e7e2-4cee-aa4c-7aaa54f52e0c",
+                    "leftValue": "={{ $json.riskLevel }}",
+                    "rightValue": "🚨 High-Risk",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1472,
+        240
+      ],
+      "id": "56cd1bc6-1a85-496d-bd1e-dc0c4a4dd1a4",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1D8izuwak_aPKbqXIHzE1WxQDssMV3BrWONcoq7rgGQc",
+          "mode": "list",
+          "cachedResultName": "DAY 3 A3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1D8izuwak_aPKbqXIHzE1WxQDssMV3BrWONcoq7rgGQc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1D8izuwak_aPKbqXIHzE1WxQDssMV3BrWONcoq7rgGQc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1776,
+        96
+      ],
+      "id": "93f3bdc2-64c2-4bd2-acee-d19eba267156",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"flagged\": false,\n  \"categories\": [],\n  \"cleaned_description\": \"This laptop comes with whitelist options and a support email: test@example.com\",\n  \"cleaned_title\": \"Test Laptop - whitelisted\"\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        528,
+        592
+      ],
+      "id": "cdaed0af-3f96-418f-a26a-a3a12a0d35f9",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        464,
+        736
+      ],
+      "id": "ebe7d456-74a9-4d7b-94a4-0e0ed538c2f0",
+      "name": "OpenAI Chat Model1",
+      "credentials": {
+        "openAiApi": {
+          "id": "Y5EZ7nONrSFTfDWw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1D8izuwak_aPKbqXIHzE1WxQDssMV3BrWONcoq7rgGQc",
+          "mode": "list",
+          "cachedResultName": "DAY 3 A3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1D8izuwak_aPKbqXIHzE1WxQDssMV3BrWONcoq7rgGQc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1D8izuwak_aPKbqXIHzE1WxQDssMV3BrWONcoq7rgGQc/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "aiFlag",
+              "displayName": "aiFlag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "aiCategories",
+              "displayName": "aiCategories",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "biasScore",
+              "displayName": "biasScore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "riskLevel",
+              "displayName": "riskLevel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1776,
+        336
+      ],
+      "id": "2be929f5-5abf-4e48-b1f7-146e67a31f7d",
+      "name": "Append or update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  // Clone object without \"output\"\n  const { output, ...rest } = item.json;\n\n  const text = rest.cleanedDescription || \"\";\n\n  // Regex for email and numbers\n  const emailRegex = /[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}/g;\n  const numberRegex = /\\b\\d{7,15}\\b/g; // captures phone-like numbers\n\n  const emails = text.match(emailRegex) || [];\n  const numbers = text.match(numberRegex) || [];\n\n  return {\n    json: {\n      ...rest,\n      emails,\n      numbers\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        768,
+        256
+      ],
+      "id": "3e198b19-04e0-465e-9e02-70158b685ab1",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const regexFlag = item.json.regexFlag || false;\n  const aiFlag = item.json.aiFlag || false;\n\n  // Assign scores\n  let score = 0;\n  if (regexFlag) score += 30;\n  if (aiFlag) score += 50;\n\n  // Determine risk level\n  let riskLevel = \"✅ Pass\";\n  if (score > 40 && score <= 70) riskLevel = \"⚠️ Review Needed\";\n  if (score > 70) riskLevel = \"🚨 High-Risk\";\n\n  return {\n    json: {\n      ...item.json,\n      biasScore: score,\n      riskLevel: riskLevel\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1280,
+        256
+      ],
+      "id": "6f73082a-b271-431f-b6b3-dc50022c924b",
+      "name": "riskLevel code"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const aiOutput = item.json.output; // the JSON string from AI Agent\n  let flagged = false;\n  let categories = [];\n\n  try {\n    const parsed = JSON.parse(aiOutput);\n    flagged = parsed.flagged || false;\n    categories = parsed.categories || [];\n  } catch (err) {\n    flagged = false;\n    categories = [];\n  }\n\n  // add to item for next step (Bias Scorer)\n  return { \n    json: { \n      ...item.json, \n      aiFlag: flagged, \n      aiCategories: categories \n    } \n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1008,
+        256
+      ],
+      "id": "16ea8d43-092f-4796-8b32-8a55304cd760",
+      "name": "parsed and return items"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Define Red Flags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define Red Flags": {
+      "main": [
+        [
+          {
+            "node": "Test Product (only for manual testing). For production, replace with your real trigger node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Product (only for manual testing). For production, replace with your real trigger node": {
+      "main": [
+        [
+          {
+            "node": "Regex Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Regex Check": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        []
+      ]
+    },
+    "OpenAI Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "parsed and return items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "riskLevel code": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parsed and return items": {
+      "main": [
+        [
+          {
+            "node": "riskLevel code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "631f2fd9-42bb-4fe5-93a6-9d7b32b1a74c",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-11T10:37:33.307Z",
+      "createdAt": "2025-09-11T10:37:33.307Z",
+      "role": "workflow:owner",
+      "workflowId": "k2TvllaEJsA6it1d",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
