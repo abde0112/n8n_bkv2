@@ -1,0 +1,103 @@
+{
+  "updatedAt": "2025-09-27T10:41:49.000Z",
+  "createdAt": "2025-08-17T18:59:09.720Z",
+  "id": "qPRdNUstws0aBsep",
+  "name": "simple telegram",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "f22f92f7-e9a0-425d-9aa6-76b8e9a44c08",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://zenquotes.io/api/random",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "d4e0901d-7492-4014-9ab2-65b520e4c18e",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "chatId": "1534111206",
+        "text": "={{ $json.q }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "ea9e9371-6ddd-436e-bd2c-a950168e8d90",
+      "name": "Send a text message",
+      "webhookId": "12ddc24e-9b3f-40b2-b251-c799daa0b7a8",
+      "credentials": {
+        "telegramApi": {
+          "id": "pf9UKBdqknPRDCOl",
+          "name": "Telegram account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "db678a60-0e21-40b1-92cc-9eca927b0e73",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-08-17T18:59:09.730Z",
+      "createdAt": "2025-08-17T18:59:09.730Z",
+      "role": "workflow:owner",
+      "workflowId": "qPRdNUstws0aBsep",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
