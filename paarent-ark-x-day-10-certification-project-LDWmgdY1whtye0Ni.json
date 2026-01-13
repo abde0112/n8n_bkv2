@@ -1,0 +1,365 @@
+{
+  "updatedAt": "2025-09-29T09:50:47.000Z",
+  "createdAt": "2025-09-29T09:06:46.643Z",
+  "id": "LDWmgdY1whtye0Ni",
+  "name": "Paarent ARK-X DAY 10 Certification Project",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "url": "https://fakestoreapi.com/products",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        176,
+        0
+      ],
+      "id": "37959c6a-d41f-4b78-9e26-51985d077e5b",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -64,
+        0
+      ],
+      "id": "3cc91274-0951-4059-a5f1-c90555b61a3c",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: items from HTTP Request (assumes items[0].json is array or HTTP Request returns array as top-level)\nconst input = items[0].json;\n\n// Handle two shapes n8n may present:\n// - If HTTP Request returned an array, n8n usually maps each array element to an item (items already many).\n// - If items come in a single item with json being array, we iterate.\nlet products = [];\n\n// Case 1: items is many, each .json is a product\nif (Array.isArray(items) && items.length > 1 && items[0].json && items[0].json.title) {\n  products = items.map(it => it.json);\n} else if (Array.isArray(input)) {\n  // Case 2: single item where json is an array\n  products = input;\n} else if (input.products && Array.isArray(input.products)) {\n  products = input.products;\n} else {\n  // Fallback — try to coerce\n  products = Array.isArray(input) ? input : [input];\n}\n\n// Normalization helper\nfunction normalizeProduct(p) {\n  return {\n    product_id: p.id != null ? String(p.id) : (p.sku ? String(p.sku) : null),\n    title: p.title || p.name || '',\n    category: p.category || p.department || '',\n    price: (p.price != null) ? Number(p.price) : null,\n    currency: p.currency || 'USD',\n    description_raw: p.description || p.long_description || '',\n    images: Array.isArray(p.images) ? p.images.join(',') : (p.image ? String(p.image) : ''),\n    inventory: (p.rating && p.rating.count != null) ? Number(p.rating.count) : (p.stock != null ? Number(p.stock) : null),\n    source_origin: 'FakeStoreAPI',\n    normalized_at: new Date().toISOString(),\n    ai_meta_description: '',\n    audit_passed: false,\n    audit_reasons: []\n  };\n}\n\nconst out = products.map(p => ({ json: normalizeProduct(p) }));\nreturn out;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        640,
+        0
+      ],
+      "id": "caf1a2a0-3c96-4a47-a2cc-1c6ef8c4c31e",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "batchSize": 5,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        992,
+        0
+      ],
+      "id": "4a333363-8bcd-410c-b9d9-be8d6f85ee06",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert ecommerce copywriter. Given the product input JSON, return a JSON object with fields: short_title (<=60 chars), bullets (3-5 short benefit bullets), seo_keywords (5 words/phrases), image_alt_text (one short sentence), long_description (1 paragraph). Output ONLY valid JSON.\n\nUser: PRODUCT JSON:\n{\n\"id\":\"{{ $json.product_id }}\",\n  \"title\":\"{{ $json.title }}\",\n  \"description\": \"{{ $json.description_raw }}\",\n  \"category\": \"{{ $json.category }}\"\n}\nreturn id ",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1264,
+        80
+      ],
+      "id": "b2bc07b4-3473-4a9e-bee5-8072a0184f14",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1232,
+        304
+      ],
+      "id": "5559d00d-d959-43f2-b06b-d02836e0c49b",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"short_title\": \"...\",\n  \"bullets\": [\"...\",\"...\"],\n  \"seo_keywords\": [\"a\",\"b\",\"c\"],\n  \"image_alt_text\": \"...\",\n  \"long_description\": \"...\"\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        1440,
+        304
+      ],
+      "id": "2ab682c9-0949-4585-aefa-86cdd16adab9",
+      "name": "Structured Output Parser",
+      "disabled": true
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        432,
+        0
+      ],
+      "id": "b7c60160-97f1-4ba0-bac3-af79daa4061e",
+      "name": "Limit",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "🕒 1. Trigger\n\nUse Cron (auto) or Webhook (manual test).\n\nRuns daily / scheduled",
+        "height": 320,
+        "width": 256
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -128,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "3c98a042-8095-41bf-9437-42eef56571ae",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "🤖 4. AI Agent 1 (Enrichment)\n\nSystem Prompt → Ecommerce copywriter.\n\nUser Prompt → Product JSON.\n\nOutput → short_title, bullets, seo_keywords, image_alt_text, long_description.",
+        "height": 352
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1552,
+        32
+      ],
+      "typeVersion": 1,
+      "id": "6c078f23-4bd0-490c-b9b9-8da7b45c3bff",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "🌐 2. Extract Data\n\nHTTP Request Node → Fetch product catalog (FakeStoreAPI).\n\nOutput = raw JSON.",
+        "height": 320,
+        "width": 192,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        144,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "937561e9-39b4-4007-8578-174a776680db",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "🔧 3. Transform Data\n\nFunction Node → Normalize JSON.\n",
+        "height": 336,
+        "width": 176,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        608,
+        -160
+      ],
+      "typeVersion": 1,
+      "id": "7dd7751a-8c48-4405-be37-7fc9c10a8a17",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "2hLfP0QR2ZSn0pfg",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/2hLfP0QR2ZSn0pfg",
+          "cachedResultName": "SUB ARK-X DAY 10 Certification Project"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {}
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.3,
+      "position": [
+        1424,
+        -352
+      ],
+      "id": "1a8621db-63e9-451f-9442-7e9c22f0f344",
+      "name": "Call 'SUB ARK-X DAY 10 Certification Project'"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "Call 'SUB ARK-X DAY 10 Certification Project'",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "AI Agent": [
+      {
+        "json": {
+          "output": "```json\n{\n  \"id\": \"16\",\n  \"short_title\": \"Women's Faux Leather Moto Jacket with Removable Hood\",\n  \"bullets\": [\n    \"Achieve two distinct looks with the versatile removable hood design.\",\n    \"Crafted from soft, durable faux leather for classic biker style & comfort.\",\n    \"Features functional front pockets, stylish waist buttons, and detailed stitching.\"\n  ],\n  \"seo_keywords\": [\n    \"women's faux leather jacket\",\n    \"moto biker jacket\",\n    \"removable hood jacket\",\n    \"women's biker coat\",\n    \"stylish faux leather\"\n  ],\n  \"image_alt_text\": \"A woman models a black faux leather moto biker jacket with a removable grey hood.\",\n  \"long_description\": \"Elevate your wardrobe with the Lock and Love Women's Faux Leather Moto Biker Jacket, a versatile staple designed for modern style and comfort. This unique 2-For-One jacket features a convenient removable hood, allowing you to effortlessly switch between a classic moto look and a casual hooded denim-style vibe. Constructed from high-quality faux leather for a sleek finish and lined with soft polyester, it offers both durability and all-day wearability. Practical design elements include two front pockets, stylish button details on the waist, and intricate stitching at the sides, adding an edgy touch to any outfit. Keep this fashionable piece looking its best with hand wash care only.\"\n}\n```"
+        }
+      },
+      {
+        "json": {
+          "output": "```json\n{\n  \"id\": \"17\",\n  \"short_title\": \"Women's Lightweight Striped Rain Jacket Windbreaker\",\n  \"bullets\": [\n    \"Lightweight and versatile, perfect for travel, climbing, or casual wear.\",\n    \"Features an adjustable drawstring waist for a flattering, customized fit.\",\n    \"Secure button and zipper front closure with two spacious side pockets.\",\n    \"Stylish striped lining and a comfortable, adjustable cotton-lined hood.\",\n    \"Hip-length design offers excellent coverage and protection from the elements.\"\n  ],\n  \"seo_keywords\": [\n    \"Women's rain jacket\",\n    \"Lightweight windbreaker\",\n    \"Striped raincoat\",\n    \"Climbing jacket women\",\n    \"Waterproof outerwear\"\n  ],\n  \"image_alt_text\": \"A women's lightweight striped rain jacket in a stylish design with a hood and adjustable waist.\",\n  \"long_description\": \"Stay dry and stylish with this versatile women's rain jacket, perfect for everything from climbing adventures to daily casual wear. Designed for comfort, it features a lightweight construction with long sleeves, a comfortable hooded design, and an adjustable drawstring waist for a customized, flattering fit. The secure button and zipper front closure offers reliable protection, while the fully striped lining adds a touch of chic sophistication. Practicality is key with two generously sized side pockets to safely store your essentials, and the hip-length coverage provides ample protection against unexpected showers, making this raincoat a functional yet fashionable choice for any outing.\"\n}\n```"
+        }
+      },
+      {
+        "json": {
+          "output": "```json\n{\n  \"id\": \"18\",\n  \"short_title\": \"MBJ Women's Solid Short Sleeve Boat Neck Tee\",\n  \"bullets\": [\n    \"Luxurious blend of 95% Rayon and 5% Spandex for ultimate comfort.\",\n    \"Lightweight fabric with exceptional stretch ensures a perfect, flattering fit.\",\n    \"Features elegant ribbed details on the sleeves and neckline for added style.\",\n    \"Durable double stitching on the bottom hem provides lasting quality.\"\n  ],\n  \"seo_keywords\": [\n    \"women's short sleeve top\",\n    \"boat neck t-shirt\",\n    \"rayon spandex blend\",\n    \"comfortable stretch top\",\n    \"solid color tee\"\n  ],\n  \"image_alt_text\": \"A solid short sleeve boat neck t-shirt for women, crafted from a comfortable, stretchy fabric with ribbed details.\",\n  \"long_description\": \"Experience effortless style and ultimate comfort with the MBJ Women's Solid Short Sleeve Boat Neck Tee. Crafted from a luxurious and soft blend of 95% Rayon and 5% Spandex, this top offers a lightweight feel with exceptional stretch, ensuring a flattering fit for all-day wear. Designed with elegant ribbed detailing on the sleeves and neckline, and finished with a durable double-stitched bottom hem, it's a versatile piece perfect for any casual or dressed-up occasion. Easy to care for, simply avoid bleaching to maintain its vibrant color and soft texture.\"\n}\n```"
+        }
+      },
+      {
+        "json": {
+          "output": "```json\n{\n  \"id\": \"19\",\n  \"short_title\": \"Opna Women's Moisture-Wicking V-Neck Performance Tee\",\n  \"bullets\": [\n    \"Advanced moisture-wicking fabric keeps you dry and comfortable\",\n    \"Lightweight and highly breathable for optimal performance\",\n    \"Soft V-neck collar with a sleek, feminine slimmer fit\",\n    \"Pre-shrunk 100% polyester for a lasting, perfect fit\"\n  ],\n  \"seo_keywords\": [\n    \"women's moisture wicking shirt\",\n    \"performance t-shirt women\",\n    \"breathable short sleeve top\",\n    \"v-neck athletic shirt\",\n    \"women's workout apparel\"\n  ],\n  \"image_alt_text\": \"A woman models a sleek, V-neck, short-sleeve, moisture-wicking performance t-shirt in a flattering fit.\",\n  \"long_description\": \"Experience ultimate comfort and style with the Opna Women's Short Sleeve Moisture-Wicking Performance Tee. Crafted from 100% cationic polyester interlock, this pre-shrunk top is designed to deliver a great, lasting fit while actively keeping you dry and comfortable. Its lightweight and highly breathable fabric expertly wicks moisture away from your skin, making it the perfect choice for workouts, sports, or any active day. Featuring a soft, comfortable V-neck collar and a slimmer, more feminine silhouette, this shirt offers added comfort without sacrificing style, ensuring you look and feel your best.\"\n}\n```"
+        }
+      },
+      {
+        "json": {
+          "output": "```json\n{\n  \"id\": \"20\",\n  \"short_title\": \"Women's Soft Cotton Blend V-Neck Short Sleeve T-Shirt\",\n  \"bullets\": [\n    \"Premium 95% Cotton, 5% Spandex blend for ultimate softness and stretch.\",\n    \"Chic V-Neck and classic short sleeve design for effortless style.\",\n    \"Versatile wear: perfect for casual outings, office, beach, or home.\",\n    \"Breathable, all-season fabric ensures comfort year-round.\"\n  ],\n  \"seo_keywords\": [\n    \"Women's casual t-shirt\",\n    \"V-neck short sleeve top\",\n    \"Soft cotton blend tee\",\n    \"Stretchy women's shirt\",\n    \"Versatile everyday wear\"\n  ],\n  \"image_alt_text\": \"A casual V-neck short sleeve t-shirt for women, made from a soft and stretchy cotton blend.\",\n  \"long_description\": \"Elevate your everyday wardrobe with the DANVOUY Women's Casual Cotton Blend T-Shirt, designed for ultimate comfort and versatile style. Crafted from a premium blend of 95% cotton and 5% spandex, this tee offers a super soft feel with just the right amount of stretch, ensuring all-day comfort without compromising on fit. Featuring a chic V-neck and classic short sleeves, it's perfect for effortlessly transitioning from a relaxed day at home to a busy office environment, a sunny beach outing, or casual street style. Its durable and breathable fabric makes it an ideal choice for any season, allowing you to enjoy its fashionable appeal year-round.\"\n}\n```"
+        }
+      }
+    ]
+  },
+  "versionId": "0edbdd66-10eb-4520-b9b1-97b073a56f3d",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-29T09:06:46.665Z",
+      "createdAt": "2025-09-29T09:06:46.665Z",
+      "role": "workflow:owner",
+      "workflowId": "LDWmgdY1whtye0Ni",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
