@@ -1,0 +1,176 @@
+{
+  "updatedAt": "2025-08-14T19:44:46.000Z",
+  "createdAt": "2025-08-11T20:00:21.163Z",
+  "id": "Vmasuy7DgC2jnXu0",
+  "name": "Ark 2 The Fact Finder",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "15942e57-fbcb-4df8-af4e-2cae6a924fa4",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://bored-api.appbrewery.com/random",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "ba3f73d6-3018-4127-a87c-d01a4848c1e1",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "a622f3c6-9033-4e90-915f-44320fabfb26",
+              "leftValue": "={{ $json.type }}",
+              "rightValue": "education",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        384,
+        16
+      ],
+      "id": "d60eefc9-c3c1-4677-8376-3a4380f859b4",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "ff207cc0-90b1-405f-b456-45b41b804a2b",
+              "name": "Today's Activity: ",
+              "value": "={{ $json.activity }} ",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        608,
+        -96
+      ],
+      "id": "f7915b66-4ae4-49ab-902d-e1b26841acee",
+      "name": "set education Activity"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "30260b22-59d5-4faf-b6e6-372ab4dc849b",
+              "name": "activity",
+              "value": "={{ $json.type }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        608,
+        128
+      ],
+      "id": "de4a9b0e-e0e6-43bb-a9a0-134522cd86f1",
+      "name": "Other activity"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "set education Activity",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Other activity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "a8712ddd-b049-4902-b3cc-e0544a41b2d9",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-08-11T20:00:21.178Z",
+      "createdAt": "2025-08-11T20:00:21.178Z",
+      "role": "workflow:owner",
+      "workflowId": "Vmasuy7DgC2jnXu0",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
