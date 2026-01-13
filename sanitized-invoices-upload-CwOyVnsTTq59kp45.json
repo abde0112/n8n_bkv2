@@ -1,0 +1,99 @@
+{
+  "updatedAt": "2025-10-21T09:43:35.000Z",
+  "createdAt": "2025-10-21T09:42:51.954Z",
+  "id": "CwOyVnsTTq59kp45",
+  "name": "sanitized-invoices-upload",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "mailbox": "Invoices",
+        "format": "resolved",
+        "options": {
+          "customEmailConfig": "[\"ALL\"]"
+        }
+      },
+      "name": "IMAP Email",
+      "type": "n8n-nodes-base.emailReadImap",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "6a0902db-3230-4cc7-ba8e-51fb5646aa8a"
+    },
+    {
+      "parameters": {
+        "path": "=Documents/Invoices/{{$json[\"date\"]}}_{{$json[\"from\"]}}_{{$binary.file.fileName}}",
+        "binaryDataUpload": true,
+        "binaryPropertyName": "file"
+      },
+      "name": "Nextcloud",
+      "type": "n8n-nodes-base.nextCloud",
+      "position": [
+        704,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "5b8f65db-eb57-422b-a1d1-efb4d44b407e"
+    },
+    {
+      "parameters": {
+        "functionCode": "const _ = require('lodash')\n\nconst sanitize = str => _.chain(str)\n  .replace(/[^A-Za-z0-9&.-]/g, '-') // sanitise via whitelist of characters\n  .replace(/-(?=-)/g, '') // remove repeated dashes - https://regexr.com/6ag8h\n  .trim('-') // trim any leading/trailing dashes\n  .truncate({\n    length: 60,\n    omission: '-' // when the string ends with '-', you'll know it was truncated\n  })\n  .value()\n\nconst result = _.flatMap(items.map(item => {\n  //console.log({item})\n\n  // Maps each attachment to a separate item\n  return _.values(item.binary).map(file => {\n    console.log(\"Saving attachement:\", file.fileName, 'from:', ...item.json.from.value)\n    \n    // sanitize filename but exclude extension\n    const filename_parts = file.fileName.split('.')\n    const ext = _.slice(filename_parts, filename_parts.length-1)\n    const filename_main = _.join(_.dropRight(filename_parts), '.')\n    file.fileName = sanitize(filename_main) + '.' + ext\n    \n    return {\n      json: {\n        from: sanitize(item.json.from.value[0].name),\n        date: sanitize(new Date(item.json.date).toISOString().split(\"T\")[0]) // get date part \"2020-01-01\"\n      }, \n      binary: { file }\n    }\n  })\n}))\n\n//console.log(result)\nreturn result"
+      },
+      "name": "Map each attachment",
+      "type": "n8n-nodes-base.function",
+      "position": [
+        384,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "b778b053-7154-4f34-9341-5957f9f5f5e2"
+    }
+  ],
+  "connections": {
+    "IMAP Email": {
+      "main": [
+        [
+          {
+            "node": "Map each attachment",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map each attachment": {
+      "main": [
+        [
+          {
+            "node": "Nextcloud",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "01cd6638-3e9c-4795-b827-045ead9c3a79",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-21T09:42:51.967Z",
+      "createdAt": "2025-10-21T09:42:51.967Z",
+      "role": "workflow:owner",
+      "workflowId": "CwOyVnsTTq59kp45",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
