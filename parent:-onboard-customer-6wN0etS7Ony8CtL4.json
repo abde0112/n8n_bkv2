@@ -1,0 +1,377 @@
+{
+  "updatedAt": "2025-09-25T14:34:34.000Z",
+  "createdAt": "2025-09-25T09:23:30.825Z",
+  "id": "6wN0etS7Ony8CtL4",
+  "name": "Parent: Onboard Customer",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -48,
+        -64
+      ],
+      "id": "4c493cc3-0047-42ca-9d06-2ce4330a3ffb",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"raw_address\": \"123 main st, rabot, 20000, morocco\",\n  \"country_hint\": \"MA\"    \n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        160,
+        -64
+      ],
+      "id": "1b0605b4-d94b-428d-b251-8308d3a130b4",
+      "name": "Mock Customer Data"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "rng1zM2rPFrwLzf3",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/rng1zM2rPFrwLzf3",
+          "cachedResultName": "Skill: Clean Address"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        384,
+        -64
+      ],
+      "id": "9f69ed4c-2675-48c3-8750-f61a2ed3034a",
+      "name": "SKILL: Standardize Address (Child)"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5e14735d-5c04-4975-a707-4e0009b39c85",
+              "name": "Street",
+              "value": "={{ $json.street }}",
+              "type": "string"
+            },
+            {
+              "id": "9fa7bb04-d7b1-471e-aa26-f2eb66c0fb57",
+              "name": "City",
+              "value": "={{ $json.city }}",
+              "type": "string"
+            },
+            {
+              "id": "5447d05c-cf2a-4737-8e1c-f55885385a50",
+              "name": "Postal Code",
+              "value": "={{ $json.postal_code }}",
+              "type": "number"
+            },
+            {
+              "id": "de19f181-f57b-46a9-8f4f-7435e96136e5",
+              "name": "Country",
+              "value": "={{ $json.country }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        576,
+        -64
+      ],
+      "id": "663da4dc-58e8-413b-97c9-24b1acfb5b3f",
+      "name": "Map Cleaned Address"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "3fc60322-d921-4875-acf7-08a09581b7b4",
+              "leftValue": "street",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            },
+            {
+              "id": "2917066f-fe02-4d80-bec1-fd18c8e6b120",
+              "leftValue": "city",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1152,
+        -64
+      ],
+      "id": "5cd44fb5-093f-4abf-833f-dfb4c8a3b181",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1KWb-fh0xG0kB_t1Q2faoV3lEkV2B0z-urM-hx1agF4A/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "Sheet1",
+          "mode": "name"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1424,
+        -192
+      ],
+      "id": "924d8621-57ce-4009-a2b9-7886e3b06a5a",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "grIKBT6wTka2shuk",
+          "name": "Google Sheets account 4"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "content": "1-Manual Trigger / Set Node – Mock Customer Data\n“This is the starting point for onboarding a new customer. Create mock or real customer data here.”\n\n2-Execute Workflow Node – Call Skill\n“Calls the ‘Standardize Address’ skill. Passes raw_address field and waits for the result before continuing.”\n\n3-Set Node – Map Cleaned Address\n“Merge cleaned address from Skill with original customer info. Ensures final data is ready for storage or downstream workflows.”\n\n4-General Note on Workflow\n“Parent workflow handles onboarding logic. Skill workflows can be added or replaced without changing this workflow.”",
+        "height": 384,
+        "width": 560
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -80,
+        -464
+      ],
+      "typeVersion": 1,
+      "id": "add8a0bf-2196-4b0c-8e2d-879a034d1654",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "workflowId": {
+          "__rl": true,
+          "value": "1SAILcrk2UIzngZ2",
+          "mode": "list",
+          "cachedResultUrl": "/workflow/1SAILcrk2UIzngZ2",
+          "cachedResultName": "Get Weather (Child Workflow)"
+        },
+        "workflowInputs": {
+          "mappingMode": "defineBelow",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": true
+        },
+        "options": {
+          "waitForSubWorkflow": true
+        }
+      },
+      "type": "n8n-nodes-base.executeWorkflow",
+      "typeVersion": 1.2,
+      "position": [
+        768,
+        -64
+      ],
+      "id": "d81795d7-3db4-4e59-adf6-9fa2ce6f77cb",
+      "name": "SKILL: Standardize Address (Child)1"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "5e14735d-5c04-4975-a707-4e0009b39c85",
+              "name": "Street",
+              "value": "={{ $('Map Cleaned Address').item.json.Street }}",
+              "type": "string"
+            },
+            {
+              "id": "9fa7bb04-d7b1-471e-aa26-f2eb66c0fb57",
+              "name": "City",
+              "value": "={{ $('Map Cleaned Address').item.json.City }}",
+              "type": "string"
+            },
+            {
+              "id": "5447d05c-cf2a-4737-8e1c-f55885385a50",
+              "name": "Postal Code",
+              "value": "={{ $('Map Cleaned Address').item.json['Postal Code'] }}",
+              "type": "number"
+            },
+            {
+              "id": "de19f181-f57b-46a9-8f4f-7435e96136e5",
+              "name": "Country",
+              "value": "={{ $('Map Cleaned Address').item.json.Country }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        944,
+        -64
+      ],
+      "id": "d8bdc2e0-0175-47a2-bcd5-649dc85477a0",
+      "name": "Map Cleaned Address1"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Mock Customer Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mock Customer Data": {
+      "main": [
+        [
+          {
+            "node": "SKILL: Standardize Address (Child)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SKILL: Standardize Address (Child)": {
+      "main": [
+        [
+          {
+            "node": "Map Cleaned Address",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Cleaned Address": {
+      "main": [
+        [
+          {
+            "node": "SKILL: Standardize Address (Child)1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "SKILL: Standardize Address (Child)1": {
+      "main": [
+        [
+          {
+            "node": "Map Cleaned Address1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Map Cleaned Address1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "63afc310-6ec4-4403-8f92-c93d6b58d42a",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-25T09:23:30.857Z",
+      "createdAt": "2025-09-25T09:23:30.857Z",
+      "role": "workflow:owner",
+      "workflowId": "6wN0etS7Ony8CtL4",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
