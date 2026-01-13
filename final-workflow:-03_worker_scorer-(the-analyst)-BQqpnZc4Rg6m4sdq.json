@@ -1,0 +1,575 @@
+{
+  "updatedAt": "2025-12-30T13:29:23.875Z",
+  "createdAt": "2025-12-30T13:28:06.508Z",
+  "id": "BQqpnZc4Rg6m4sdq",
+  "name": "FINAL WORKFLOW: 03_WORKER_SCORER (The Analyst)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "url": "={{ $json.website_url || 'https://' + $json.domain }}",
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "timeout": 15000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        1120,
+        320
+      ],
+      "id": "c70b5703-fd7b-4e4b-ad56-965e9ba27b79",
+      "name": "Fetch Website",
+      "continueOnFail": true,
+      "onError": "continueErrorOutput"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "81c9d35b-fbf0-41b1-9bf7-46d156f6d0ab",
+              "leftValue": "={{ $json.website_url }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        720,
+        -32
+      ],
+      "id": "7c8631fe-9bb7-4a4e-b963-0da821ba4104",
+      "name": "Fetch Website6"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        496,
+        -48
+      ],
+      "id": "4d832cc7-ef97-426e-9cbb-19de3ba7a1ae",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "31e24eb0-c1d5-43ec-9a30-4f97a5e4b079",
+              "name": "business_name",
+              "value": "={{ $json.business_name }}",
+              "type": "string"
+            },
+            {
+              "id": "3ed29270-74f7-4756-8aa7-ec02f636713d",
+              "name": "address",
+              "value": "={{ $json.address }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1136,
+        -48
+      ],
+      "id": "a204d20a-cfc6-4b74-958b-ec9b7494d899",
+      "name": "Set data"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "leads",
+        "limit": 10,
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "raw"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        208,
+        -48
+      ],
+      "id": "dd24f21b-1a45-4f3b-81e0-e28e900b34b0",
+      "name": "Query Raw Leads",
+      "credentials": {
+        "supabaseApi": {
+          "id": "B3fV167ZWXhpJPxi",
+          "name": "IMAD LEAD GEN AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds",
+              "secondsInterval": 10
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -16,
+        -48
+      ],
+      "id": "75dec966-450a-4813-b524-7e691766a739",
+      "name": "Every 1 Minute1"
+    },
+    {
+      "parameters": {
+        "otherOptions": {}
+      },
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 2.4,
+      "position": [
+        1328,
+        432
+      ],
+      "id": "ea735c4a-3b15-4293-8cc6-73403cb5f251",
+      "name": "Send a message1",
+      "webhookId": "18d26c96-1fed-4483-99c6-47830367068a",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Clean the URL to remove tracking parameters and whitespace\nfor (const item of $input.all()) {\n  let url = item.json.website_url || \"\";\n  if (url) {\n    // Remove everything after '?' (UTM tags, etc)\n    url = url.split('?')[0]; \n    // Remove trailing slashes and whitespace\n    url = url.trim().replace(/\\/+$/, \"\"); \n  }\n  item.json.clean_url = url;\n}\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        864,
+        320
+      ],
+      "id": "e11a0b0e-0fb5-42b8-90cc-bb0f21e2decb",
+      "name": "URL Cleaning Logic1"
+    },
+    {
+      "parameters": {
+        "jsCode": "const items = $input.all();\nreturn items.map((item, index) => {\n  let originalLead = null;\n  try {\n    const scraped = $(\"Scarp from web site1\").all();\n    if (scraped[index]) originalLead = scraped[index].json;\n  } catch (e) {\n    try {\n      const manual = $(\"Set data1\").all();\n      if (manual[index]) originalLead = manual[index].json;\n    } catch (e2) {}\n  }\n\n  const analysis = JSON.parse(item.json.output.replace(/```json/g, '').replace(/```/g, '').trim());\n\n  return {\n    json: {\n      id: originalLead ? originalLead.id : \"missing_id\", // THIS IS THE CRITICAL LINE\n      business_name: originalLead ? originalLead.business_name : \"Unknown\",\n      fit_score: analysis.fit_score,\n      summary: analysis.summary,\n      is_high_ticket: analysis.is_high_ticket\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2160,
+        -48
+      ],
+      "id": "93f87434-c875-4f03-9e6a-2657a0f48038",
+      "name": "Clean AI Output2"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "leads",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "id",
+              "condition": "eq",
+              "keyValue": "={{ $('Loop Over Items').item.json.id }}"
+            }
+          ]
+        },
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "status",
+              "fieldValue": "=contacted"
+            },
+            {
+              "fieldId": "score_reasoning",
+              "fieldValue": "={{ $json.score_reasoning }}"
+            },
+            {
+              "fieldId": "email_draft",
+              "fieldValue": "={{ $json.raw_email_full }}"
+            },
+            {
+              "fieldId": "lead_email",
+              "fieldValue": "={{ $json.all_emails }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        2992,
+        -48
+      ],
+      "id": "3fce9e01-f706-401e-b6ec-78e65bf7c61b",
+      "name": "Save Score & Summary Draft2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "B3fV167ZWXhpJPxi",
+          "name": "IMAD LEAD GEN AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the drafts from the current input\nconst drafts = $input.all();\n\nreturn drafts.map((item, index) => {\n  let leadId = \"missing_id\";\n  let bizName = \"Unknown\";\n  let leadScore = 0;\n  let leadSummary = \"No reasoning available\";\n  let emailList = [];\n\n  // 2. Try to find the original lead data from ANY available previous node\n  try {\n    // Attempt to pull from Clean AI Output2 (The Analysis stage)\n    const analysisData = $(\"Clean AI Output2\").all()[index].json;\n    leadId = analysisData.id || leadId;\n    bizName = analysisData.business_name || analysisData.name || bizName;\n    leadScore = analysisData.fit_score || 0;\n    leadSummary = analysisData.summary || leadSummary;\n  } catch (e) {\n    try {\n      // Fallback: Attempt to pull directly from the Loop node\n      const loopData = $(\"Loop Over Items3\").all()[index].json;\n      leadId = loopData.id || leadId;\n      bizName = loopData.business_name || bizName;\n    } catch (e2) {}\n  }\n\n  // 3. Try to recover emails from the scraper path\n  try {\n    const scraped = $(\"Scarp from web site1\").all();\n    const match = scraped.find(s => s.json.id === leadId);\n    emailList = match ? (match.json.all_scraped_emails || []) : [];\n  } catch (e) {}\n\n  try {\n    // 4. Parse the AI Email output\n    let rawAiText = item.json.output || \"\";\n    let cleanedJson = rawAiText.replace(/```json/g, '').replace(/```/g, '').trim();\n    cleanedJson = cleanedJson.replace(/\\\\\"/g, '\"'); // Fix double-escaping\n    const emailData = JSON.parse(cleanedJson);\n\n    return {\n      json: {\n        id: leadId,\n        all_emails: emailList,\n        business_name: bizName,\n        fit_score: leadScore,\n        score_reasoning: leadSummary,\n        raw_email_full: rawAiText,\n        email_subject: emailData.subject,\n        email_body: emailData.body,\n        status: 'ready_for_outreach'\n      }\n    };\n  } catch (error) {\n    return {\n      json: {\n        id: leadId,\n        status: \"error\",\n        error_details: error.message,\n        raw_output: item.json.output\n      }\n    };\n  }\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2720,
+        -48
+      ],
+      "id": "8b910bec-bd71-47ed-ab83-771c4e32ba6b",
+      "name": "Final Scribe Parser1"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Analyze the following business to determine its fit for our services.\n\nCONTEXT PROVIDED:\n- Business Name: {{ $json.business_name || $json.name }}\n- Location: {{ $json.address }}\n\nWEBSITE CONTENT (If available): \n{{ $json.clean_text || \"NO WEBSITE CONTENT AVAILABLE\" }}\n\nINSTRUCTIONS:\n1. If \"WEBSITE CONTENT\" is available, perform a deep analysis of their services, tone, and quality.\n2. If \"WEBSITE CONTENT\" is NOT available, use your internal knowledge about this specific business name in {{ $json.address || 'Casablanca' }} to provide the best possible estimate.\n3. If the business is unknown to you and there is no website content, provide a generic but professional summary based on the name.\n\nReturn JSON ONLY:\n{\n  \"fit_score\": 0-100,\n  \"summary\": \"2 sentences max highlighting their specialty\",\n  \"is_high_ticket\": boolean\n}",
+        "needsFallback": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        1840,
+        -48
+      ],
+      "id": "0bd4f301-1419-4b9a-a9a7-3dbc6208fd20",
+      "name": "Analysis score & summary"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert B2B sales copywriter. Write a highly personalized 3-sentence cold email to the following business.\n\nBUSINESS DETAILS:\n- Name: {{ $json.business_name }}\n- Analysis: {{ $json.summary }}\n\nGOAL:\nAsk for a brief 5-minute chat next week to discuss how we can help them grow.\n\nREQUIREMENTS:\n1. Subject Line: Catchy, non-spammy, and mentions their name or location.\n2. Body: Max 3 sentences. \n3. Tone: Professional, warm, and conversational.\n4. No generic openers like \"I hope this finds you well.\"\n\nRETURN JSON ONLY:\n{\n  \"subject\": \"Subject line here\",\n  \"body\": \"Full email body here\"\n}",
+        "needsFallback": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        2368,
+        -48
+      ],
+      "id": "71b96ed1-329c-46e0-9cf8-12a16841ef54",
+      "name": "GN Full Email"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        1776,
+        208
+      ],
+      "id": "47d79ec8-6a46-40db-9d82-870648062188",
+      "name": "OpenAI Chat Model2",
+      "credentials": {
+        "openAiApi": {
+          "id": "KgsXR5Ga5dON4Aie",
+          "name": "SEO"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1984,
+        208
+      ],
+      "id": "96d48b7a-5c13-4fe9-9a3e-bbc2682e3e41",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "X9nsYy4x7QN9Tk9w",
+          "name": "New API Cha.Abde"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Node: ParseHTML\n// Purpose: Clean HTML and extract ALL unique emails before sending to LLM\n\nconst items = $input.all();\nreturn items.map(item => {\n  const html = item.json.data || \"\";\n\n  // 1. Clean the text for the LLM\n  let text = html.replace(/<script\\b[^>]*>([\\s\\S]*?)<\\/script>/gm, \"\");\n  text = text.replace(/<style\\b[^>]*>([\\s\\S]*?)<\\/style>/gm, \"\");\n  text = text.replace(/<[^>]+>/g, \" \"); \n  text = text.replace(/\\s+/g, \" \").trim();\n\n  // 2. Extract ALL Emails using Regex\n  const emailRegex = /([a-zA-Z0-9._-]+@[a-zA-Z0-9._-]+\\.[a-zA-Z0-9._-]+)/gi;\n  const foundEmails = html.match(emailRegex);\n\n  // 3. Remove duplicates and filter out image-based \"fake\" emails (e.g., info@site.com.png)\n  const uniqueEmails = foundEmails \n    ? [...new Set(foundEmails)].filter(e => !e.match(/\\.(png|jpg|jpeg|gif|svg|webp)$/i))\n    : [];\n\n  // 4. Output for LLM and Database\n  return {\n    json: {\n      ...item.json, // Keeps your original lead ID and data\n      clean_text: text.substring(0, 4000), \n      all_scraped_emails: uniqueEmails,\n      primary_email: uniqueEmails.length > 0 ? uniqueEmails[0] : \"No email found\"\n    }\n  };\n});"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1504,
+        304
+      ],
+      "id": "8c64b62e-78a7-4c51-a408-e2e77fef8e9e",
+      "name": "Scarp from web site"
+    }
+  ],
+  "connections": {
+    "Fetch Website": {
+      "main": [
+        [
+          {
+            "node": "Scarp from web site",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Website6": {
+      "main": [
+        [
+          {
+            "node": "Set data",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "URL Cleaning Logic1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Fetch Website6",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set data": {
+      "main": [
+        [
+          {
+            "node": "Analysis score & summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Raw Leads": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Every 1 Minute1": {
+      "main": [
+        [
+          {
+            "node": "Query Raw Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send a message1": {
+      "main": [
+        [
+          {
+            "node": "Analysis score & summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "URL Cleaning Logic1": {
+      "main": [
+        [
+          {
+            "node": "Fetch Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clean AI Output2": {
+      "main": [
+        [
+          {
+            "node": "GN Full Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Score & Summary Draft2": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Final Scribe Parser1": {
+      "main": [
+        [
+          {
+            "node": "Save Score & Summary Draft2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analysis score & summary": {
+      "main": [
+        [
+          {
+            "node": "Clean AI Output2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "GN Full Email": {
+      "main": [
+        [
+          {
+            "node": "Final Scribe Parser1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analysis score & summary",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "GN Full Email",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Analysis score & summary",
+            "type": "ai_languageModel",
+            "index": 1
+          },
+          {
+            "node": "GN Full Email",
+            "type": "ai_languageModel",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Scarp from web site": {
+      "main": [
+        [
+          {
+            "node": "Analysis score & summary",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": {
+    "node:Every 1 Minute1": {
+      "recurrenceRules": []
+    }
+  },
+  "meta": null,
+  "pinData": {},
+  "versionId": "dcc76fc9-2f75-43bb-912f-1963b99cb338",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-12-30T13:28:06.525Z",
+      "createdAt": "2025-12-30T13:28:06.525Z",
+      "role": "workflow:owner",
+      "workflowId": "BQqpnZc4Rg6m4sdq",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
