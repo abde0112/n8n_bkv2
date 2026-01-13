@@ -1,0 +1,234 @@
+{
+  "updatedAt": "2025-09-27T10:57:41.000Z",
+  "createdAt": "2025-09-09T10:47:47.954Z",
+  "id": "h8jq9wvMzYl0TIYq",
+  "name": "API Currency Exchange Alert",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "be03f5ff-09ed-42a4-90d0-1d57e5872efa",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://api.apilayer.com/currency_data/live?source=USD&currencies=MAD,EUR",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "8cc5fd6e-ee27-4946-89b4-c533f11d40b2",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "986b9ef1-4406-48ec-9d2e-376b8aa495b0",
+              "name": "USDMAD",
+              "value": "={{ $json.quotes.USDMAD }}",
+              "type": "string"
+            },
+            {
+              "id": "77c91ed6-660b-468a-b98c-c53bdc2e670d",
+              "name": "USDEUR",
+              "value": "={{ $json.quotes.USDEUR }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "11096330-ab84-4ad6-a9eb-488ddf2cb142",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "d07ee6f9-cbfe-48bc-96b8-c01b2a03d869",
+              "leftValue": "={{Number($json.USDMAD)}}",
+              "rightValue": "=11",
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        0
+      ],
+      "id": "af214f50-f7b8-4aed-b40f-326f8f358430",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "chatId": "1534111206",
+        "text": "=USDMAD is :{{ $('Edit Fields').item.json.USDMAD }}> 11",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        -96
+      ],
+      "id": "57b39dea-3508-41f8-85ce-cc6c791e2909",
+      "name": "Send a text message",
+      "webhookId": "0715b182-13d9-4fe4-9829-7ee678b05313",
+      "credentials": {
+        "telegramApi": {
+          "id": "2noq18qiYbMIFWNE",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "1534111206",
+        "text": "=USDMAD is :{{ $('Edit Fields').item.json.USDMAD }}< 11",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        832,
+        80
+      ],
+      "id": "4cc3ab43-5811-405b-83ed-a4b5462a4a9f",
+      "name": "Send a text message1",
+      "webhookId": "0715b182-13d9-4fe4-9829-7ee678b05313",
+      "credentials": {
+        "telegramApi": {
+          "id": "2noq18qiYbMIFWNE",
+          "name": "Telegram account 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "9046ce2f-1483-4096-8861-9aa15bf796c4",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-09T10:47:47.975Z",
+      "createdAt": "2025-09-09T10:47:47.975Z",
+      "role": "workflow:owner",
+      "workflowId": "h8jq9wvMzYl0TIYq",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
