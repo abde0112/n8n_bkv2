@@ -1,0 +1,187 @@
+{
+  "updatedAt": "2025-10-03T08:10:07.000Z",
+  "createdAt": "2025-10-01T23:18:31.925Z",
+  "id": "kkJ7DjLpD4vEuyTO",
+  "name": "ARK webhook",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "400",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        624,
+        80
+      ],
+      "id": "da772c84-738a-458f-bd7d-3377d4a61559",
+      "name": "401"
+    },
+    {
+      "parameters": {
+        "path": "udemy-test",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "a7be5e95-1c0d-4ef4-b2a4-16bf9bcce7ec",
+      "name": "Webhook",
+      "webhookId": "dc3e5df7-ef58-4f07-a3ca-3d1d05f90060"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "0749afdf-3d53-4d3d-98e6-6f393b527975",
+              "leftValue": "={{ $json.body.code }}",
+              "rightValue": "x14",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "9f23eda8-e7e5-4d98-b4ef-fcd96702c03e",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d464c082-f6da-4e01-b46c-7a12c3154890",
+              "name": "body.name",
+              "value": "={{ $json.body.name }}",
+              "type": "string"
+            },
+            {
+              "id": "a158af3d-d815-42c5-8b7f-58d6940a84e3",
+              "name": "body.test_name",
+              "value": "={{ $json.body.test_name }}",
+              "type": "string"
+            },
+            {
+              "id": "c784dc33-9ebb-4928-8e12-6032751ef804",
+              "name": "body.code",
+              "value": "={{ $json.body.code }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        208,
+        0
+      ],
+      "id": "676a6e80-d7d2-46f5-ab15-0b5c1b3a10f8",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"return\": \"400\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        624,
+        -96
+      ],
+      "id": "743bb414-8b55-4925-87ae-f5e5d763892d",
+      "name": "200 OK"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "200 OK",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "401",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "2c7e0782-459c-4c50-b402-01784a287eaf",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-10-01T23:18:31.942Z",
+      "createdAt": "2025-10-01T23:18:31.942Z",
+      "role": "workflow:owner",
+      "workflowId": "kkJ7DjLpD4vEuyTO",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
