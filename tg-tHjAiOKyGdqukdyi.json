@@ -1,0 +1,222 @@
+{
+  "updatedAt": "2025-10-03T16:48:43.000Z",
+  "createdAt": "2025-10-03T09:33:35.140Z",
+  "id": "tHjAiOKyGdqukdyi",
+  "name": "tg",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "*"
+        ],
+        "additionalFields": {}
+      },
+      "id": "d831f75e-0385-482c-b2d5-e8da58216f4c",
+      "name": "Telegram Trigger",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        480,
+        544
+      ],
+      "webhookId": "6021108f-f0e8-4d7a-918b-f49baa28ba85",
+      "typeVersion": 1.1,
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "text": "={{ $json.choices[0].message.content }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "id": "0fd97c36-3e3d-45a3-929d-975d17baf1fb",
+      "name": "Telegram send the text",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        1600,
+        544
+      ],
+      "typeVersion": 1.2,
+      "webhookId": "aa497708-c4d7-4d88-8472-e58c08de53a3",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "52a2f0d9-3137-4f6e-a2c1-8285694f6159",
+              "name": "choices[0].message.content",
+              "type": "string",
+              "value": "={{ $json.choices[0].message.content }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "bd39b29f-e128-4891-bc6a-3eb75de29182",
+      "name": "Get only the text",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        1360,
+        544
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.photo[0].file_id }}",
+        "additionalFields": {}
+      },
+      "id": "888397d6-4fd1-4e9b-852e-1731159df4f5",
+      "name": "Receive the File",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        688,
+        544
+      ],
+      "typeVersion": 1.2,
+      "webhookId": "3638fd24-a827-4b8f-aaa8-960734b7ca96",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input: text from OCR node\nconst text = $json[\"ParsedText\"]; \n// Split by newlines\nconst lines = text.split(\"\\n\").filter(l => l.trim() !== \"\");\n\n// Create structured rows\nreturn lines.map(line => {\n  const [name, time] = line.split(/\\s+/); \n  return { json: { Name: name, Time: time } };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        544
+      ],
+      "id": "29c00934-a5d6-460b-9f60-a60847438310",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.0-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.0-flash"
+        },
+        "text": "=You are an OCR extraction assistant. \nYour task is to carefully read the text inside an image and extract it into structured plain text.\n\nRules:\n- Ignore any extra symbols, noise, or headers in the image.\n- Each line should contain a person's name and the corresponding time.\n- Use the format: Name, Time (HH:MM).\n- Do not add explanations or extra words — only output clean text.\n\n",
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        896,
+        544
+      ],
+      "id": "23f5aaab-960d-438a-b75c-c04becd1fe7f",
+      "name": "Analyze an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Receive the File": {
+      "main": [
+        [
+          {
+            "node": "Analyze an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Receive the File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get only the text": {
+      "main": [
+        [
+          {
+            "node": "Telegram send the text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Get only the text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze an image": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {},
+  "staticData": null,
+  "meta": {
+    "templateId": "2437",
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "0226550d-a68e-4859-9c28-e5abcff4d723",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-03T09:33:35.151Z",
+      "createdAt": "2025-10-03T09:33:35.151Z",
+      "role": "workflow:owner",
+      "workflowId": "tHjAiOKyGdqukdyi",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
