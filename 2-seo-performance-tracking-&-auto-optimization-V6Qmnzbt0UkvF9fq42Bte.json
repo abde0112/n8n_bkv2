@@ -1,0 +1,395 @@
+{
+  "updatedAt": "2026-01-12T14:22:43.507Z",
+  "createdAt": "2026-01-12T10:39:58.594Z",
+  "id": "V6Qmnzbt0UkvF9fq42Bte",
+  "name": "2 SEO Performance Tracking & Auto-Optimization",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -304,
+        144
+      ],
+      "id": "22d6a85c-7489-4bfd-acfa-a3c3dcf0d3dd",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        96,
+        144
+      ],
+      "id": "21bc7945-9cc7-42ec-8fc4-2367489ff20e",
+      "name": "Get many posts",
+      "credentials": {
+        "wordpressApi": {
+          "id": "sr95ya8oSFF31OOK",
+          "name": "iptvs-subscription"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "config-201",
+              "name": "wordpress_url",
+              "value": "https://iptvs-subscription.com",
+              "type": "string"
+            },
+            {
+              "id": "config-202",
+              "name": "tracking_days",
+              "value": 30,
+              "type": "number"
+            },
+            {
+              "id": "config-203",
+              "name": "min_performance_score",
+              "value": 40,
+              "type": "number"
+            },
+            {
+              "id": "config-204",
+              "name": "auto_optimize_enabled",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "config-205",
+              "name": "gsc_property_url",
+              "value": "https://iptvs-subscription.com",
+              "type": "string"
+            },
+            {
+              "id": "config-206",
+              "name": "ga4_property_id",
+              "value": "REPLACE_WITH_GA4_ID",
+              "type": "string"
+            },
+            {
+              "id": "config-207",
+              "name": "notification_email",
+              "value": "your-email@example.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "440869a1-c3fa-4dd0-bc1b-a9f50e54e5d8",
+      "name": "Set Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        -112,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1. Get the posts from the previous node\nconst posts = $input.all().map(item => item.json);\n\n// 2. Get the settings from the \"Set Configuration\" node\n// We use a try-catch in case you didn't run that node yet\nlet config = {};\ntry {\n  config = $('Set Configuration').first().json;\n} catch (error) {\n  config = {\n    // Fallback defaults if config node fails\n    gsc_property_url: \"https://iptvs-subscription.com\", \n    ga4_property_id: \"REPLACE_WITH_YOUR_GA4_ID\" \n  };\n}\n\n// 3. Transform the data for Google APIs\nreturn posts.map(post => {\n  return {\n    json: {\n      post_id: post.id,\n      post_title: post.title.rendered,\n      post_url: post.link,  // Maps 'link' to 'post_url' for GSC\n      post_slug: post.slug,\n      post_date: post.date,\n      // Calculate how many days ago it was published\n      days_since_publish: Math.floor((new Date() - new Date(post.date)) / (1000 * 60 * 60 * 24)),\n      \n      // Pass the config down to the next nodes\n      gsc_property_url: config.gsc_property_url,\n      ga4_property_id: config.ga4_property_id\n    }\n  };\n});"
+      },
+      "id": "db50cdc0-38bb-4f82-aa8f-dae8c80b93ed",
+      "name": "Process Posts Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        272,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const post = $('Process Posts Data').item.json;\n\n// 1. Fake the Google Data (since we skipped those nodes)\nconst totalImpressions = 0;\nconst totalClicks = 0;\nconst avgPosition = 0;\nconst ctr = 0;\nconst topQueries = []; // We have no keywords from Google\nconst sessions = 0;\nconst bounceRate = 0;\n\n// 2. Simple Scoring Logic: Based ONLY on Age\n// If the post is older than 30 days, we say it needs optimization.\nlet performanceScore = 100;\n\nif (post.days_since_publish > 30) {\n  performanceScore = 30; // Force a low score so it triggers optimization\n} else {\n  performanceScore = 90; // It's new, leave it alone\n}\n\nconst needsOptimization = performanceScore < 40;\n\nconst issues = [];\nif (needsOptimization) {\n  issues.push('Article is old and needs a refresh');\n}\n\nreturn [{\n  json: {\n    post_id: post.post_id,\n    post_url: post.post_url,\n    post_title: post.post_title,\n    post_slug: post.post_slug,\n    days_since_publish: post.days_since_publish,\n    // Pass empty data so the next nodes don't break\n    search_console: {\n      impressions: 0,\n      clicks: 0,\n      ctr: 0,\n      average_position: 0,\n      top_queries: [] \n    },\n    analytics: {\n      sessions: 0,\n      users: 0,\n      bounce_rate: 0,\n      avg_session_duration: 0\n    },\n    performance_score: performanceScore,\n    needs_optimization: needsOptimization,\n    issues: issues,\n    status: needsOptimization ? 'poor' : 'excellent',\n    tracked_at: new Date().toISOString(),\n    wordpress_url: post.wordpress_url,\n    auto_optimize_enabled: post.auto_optimize_enabled\n  }\n}];"
+      },
+      "id": "1cf89670-d029-45bb-8781-03f318e7cf1b",
+      "name": "Calculate Performance Score1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        512,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 1
+          },
+          "conditions": [
+            {
+              "id": "needs-opt",
+              "leftValue": "={{ $json.needs_optimization }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "49d58b5e-9ba1-49db-a0ee-dd77de57fa82",
+      "name": "Needs Optimization?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        752,
+        144
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Authorization",
+              "value": "REDACTED_HEADER_VALUE"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-4o"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [{\"role\": \"system\", \"content\": \"You are an SEO expert.\"}, {\"role\": \"user\", \"content\": \"Analyze this article title and suggest a better, more click-worthy version.\\n\\nCurrent Title: \" + $json.post_title + \"\\n\\nReturn ONLY valid JSON: { \\\"optimized_title\\\": \\\"...\\\", \\\"optimized_meta\\\": \\\"...\\\" }\"}] }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "0be83ece-ef0e-490a-93e4-436f433d7d80",
+      "name": "Generate Optimization Plan",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const post = $input.first().json;\nconst aiResponse = $json;\n\nlet recommendations;\ntry {\n  const content = aiResponse.choices[0].message.content.replace(/```json\\n?/g, '').replace(/```/g, '').trim();\n  recommendations = JSON.parse(content);\n} catch (e) {\n  recommendations = {\n    optimized_title: post.post_title + \" (Updated)\",\n    optimized_meta: post.post_title\n  };\n}\n\nreturn [{\n  json: {\n    post_id: post.post_id,\n    optimized_title: recommendations.optimized_title,\n    optimized_meta: recommendations.optimized_meta\n  }\n}];"
+      },
+      "id": "66e658f0-b3fc-46cd-b450-ec089e3bd9a4",
+      "name": "Parse Recommendations",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1248,
+        16
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "postId": "={{ $('Calculate Performance Score1').item.json.post_id }}",
+        "updateFields": {
+          "title": "={{ $json.optimized_title }}"
+        }
+      },
+      "id": "8167be04-87c3-4677-887e-2e6209f9eed9",
+      "name": "Update WordPress",
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        1472,
+        16
+      ],
+      "credentials": {
+        "wordpressApi": {
+          "id": "sr95ya8oSFF31OOK",
+          "name": "iptvs-subscription"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendEmail"
+      },
+      "id": "29cc7067-6c9d-464c-a8bd-cc3888ec63a0",
+      "name": "Send Performance Report1",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1040,
+        384
+      ],
+      "webhookId": "e40b25d2-7f87-4744-9c70-8c38377afa15",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "n0jRxjNqZi2RTiU3",
+          "name": "TIZI 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const allResults = $input.all();\n\n// FIX: Make sure this name matches your actual config node name exactly\nconst config = $('Set Configuration').first().json;\n\nlet totalArticles = allResults.length;\nlet totalImpressions = 0;\nlet totalClicks = 0;\nlet avgPosition = 0;\nlet totalSessions = 0;\n\nconst topPerformers = [];\nconst needsAttention = [];\nconst optimizedToday = [];\n\nallResults.forEach(item => {\n  const data = item.json;\n  \n  // 1. Aggregate Search Console Data\n  if (data.search_console) {\n    totalImpressions += data.search_console.impressions || 0;\n    totalClicks += data.search_console.clicks || 0;\n    avgPosition += data.search_console.average_position || 0;\n  }\n  \n  // 2. Aggregate Analytics Data\n  if (data.analytics) {\n    totalSessions += data.analytics.sessions || 0;\n  }\n  \n  // 3. Categorize Articles by Score\n  if (data.performance_score >= 80) {\n    topPerformers.push({\n      title: data.post_title,\n      score: data.performance_score,\n      url: data.post_url\n    });\n  } else if (data.performance_score < 40) {\n    needsAttention.push({\n      title: data.post_title,\n      score: data.performance_score,\n      issues: data.issues,\n      url: data.post_url\n    });\n  }\n  \n  // 4. Track Optimizations (Only works if connected after optimization)\n  if (data.action_taken === 'title_meta_updated') {\n    optimizedToday.push({\n      title: data.post_title,\n      old_score: data.current_score,\n      url: data.post_url\n    });\n  }\n});\n\n// Calculate Average Position across all articles\navgPosition = totalArticles > 0 ? avgPosition / totalArticles : 0;\n\n// 5. Construct Final Report Object\nconst report = {\n  report_date: new Date().toISOString(),\n  summary: {\n    total_articles: totalArticles,\n    total_impressions: totalImpressions,\n    total_clicks: totalClicks,\n    overall_ctr: totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : 0,\n    avg_position: avgPosition.toFixed(1),\n    total_sessions: totalSessions,\n    top_performers_count: topPerformers.length,\n    needs_attention_count: needsAttention.length,\n    optimized_today_count: optimizedToday.length\n  },\n  top_performers: topPerformers.slice(0, 5),\n  needs_attention: needsAttention.slice(0, 10),\n  optimized_today: optimizedToday,\n  notification_email: config.notification_email\n};\n\nreturn [{json: report}];"
+      },
+      "id": "4bcd02e8-eb74-4eed-806a-b5c1268ede8b",
+      "name": "Generate Daily Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        384
+      ]
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Set Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many posts": {
+      "main": [
+        [
+          {
+            "node": "Process Posts Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Configuration": {
+      "main": [
+        [
+          {
+            "node": "Get many posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Process Posts Data": {
+      "main": [
+        [
+          {
+            "node": "Calculate Performance Score1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs Optimization?": {
+      "main": [
+        [
+          {
+            "node": "Generate Optimization Plan",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Generate Optimization Plan": {
+      "main": [
+        [
+          {
+            "node": "Parse Recommendations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Recommendations": {
+      "main": [
+        [
+          {
+            "node": "Update WordPress",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Performance Score1": {
+      "main": [
+        [
+          {
+            "node": "Needs Optimization?",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Daily Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Daily Report": {
+      "main": [
+        [
+          {
+            "node": "Send Performance Report1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "38970438-c14e-489e-a661-009ff4844558",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-12T10:39:58.612Z",
+      "createdAt": "2026-01-12T10:39:58.612Z",
+      "role": "workflow:owner",
+      "workflowId": "V6Qmnzbt0UkvF9fq42Bte",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
