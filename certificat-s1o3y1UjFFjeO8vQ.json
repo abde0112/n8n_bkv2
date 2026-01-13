@@ -1,0 +1,772 @@
+{
+  "updatedAt": "2026-01-08T13:52:44.795Z",
+  "createdAt": "2026-01-07T21:35:40.938Z",
+  "id": "s1o3y1UjFFjeO8vQ",
+  "name": "certificat",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "14c02v1FkTwvnIWDSUlgEzY6JJkIhr3wwPJJY-a7DRDk",
+          "mode": "list",
+          "cachedResultName": "certificat",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14c02v1FkTwvnIWDSUlgEzY6JJkIhr3wwPJJY-a7DRDk/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1217224502,
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/14c02v1FkTwvnIWDSUlgEzY6JJkIhr3wwPJJY-a7DRDk/edit#gid=1217224502"
+        },
+        "options": {}
+      },
+      "id": "e8f16a0c-f436-48a9-abf9-39505bd473b3",
+      "name": "Read Names from Sheet",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4,
+      "position": [
+        -272,
+        1008
+      ],
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "=https://res.cloudinary.com/dno4m9vbr/image/upload/l_text:Arial_60_bold:{{ $json['ABDESSAMAD HAMARRASS'] }},co_black/fl_layer_apply,g_center,y_-20/WhatsApp_Image_2026-01-04_at_20.51.31_r7xpde.jpg",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "15951661-ce96-479a-a1b7-5866ba0e8601",
+      "name": "Generate Arabic Certificate",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        784,
+        240
+      ],
+      "notes": "Replaces 'Name' with sheet data"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ $json.Email }}",
+        "subject": "شهادة المشاركة - مبادرة طارق بن زياد",
+        "message": "مرحبًا {{ $json.Name }}،\n\nتجدون رفقته شهادة المشاركة الخاصة بكم.\n\nشكرًا لكم.",
+        "options": {}
+      },
+      "id": "6ae34da2-55a8-4c22-bf0e-d7f6568e9f69",
+      "name": "Send Email1",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        992,
+        240
+      ],
+      "webhookId": "e0958143-0a02-4d8b-ae11-bdf2878a2e3c"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "586aaf13-5ff0-4f14-8285-723d8b57088f",
+              "name": "ABDESSAMAD HAMARRASS",
+              "value": "={{ $json['ABDESSAMAD HAMARRASS'] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        352,
+        224
+      ],
+      "id": "e9b8531b-1b4d-4491-92b8-e6b69d1d5175",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        560,
+        224
+      ],
+      "id": "5e778309-3ad8-42e3-b121-a7d148e723ce",
+      "name": "Loop Over Items"
+    },
+    {
+      "parameters": {},
+      "id": "431759e9-19ee-440b-a65a-fb852988daae",
+      "name": "When clicking 'Execute'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        -480,
+        1008
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "https://drive.google.com/file/d/1dRNAibKhQqaGl79E_LW0tSyVq0SyO5gL/view?usp=drive_link",
+          "mode": "url"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        176,
+        736
+      ],
+      "id": "cb76ad18-e31e-4c24-891d-06e0968cb1e9",
+      "name": "Download file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "HUgBuWJOD3ngv7CC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "text",
+        "text": "={{ $json['الاسم الكامل (كما ترغب في ظهوره في الشهادة)  '] }}",
+        "positionY": -30,
+        "options": {
+          "fileName": "={{ $json['الاسم الكامل (كما ترغب في ظهوره في الشهادة)  '] }}",
+          "font": "C:\\Windows\\Fonts\\CALIST.TTF"
+        }
+      },
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [
+        384,
+        736
+      ],
+      "id": "e4cac117-d39c-439e-badd-06ab317a90cb",
+      "name": "Edit Image"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "name-mapping",
+              "name": "Name",
+              "value": "= {{ $json[\"الاسم الكامل (كما ترغب في ظهوره في الشهادة)  \"].toString().replace(/\\//g, \"-\") }}",
+              "type": "string"
+            },
+            {
+              "id": "email-mapping",
+              "name": "Email",
+              "value": "={{ $json[\"البريد الإلكتروني\"] }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "148b16e9-f809-44bc-b644-a1c250ea2159",
+      "name": "Fix Column Names",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        1024
+      ],
+      "notes": "Maps Arabic Headers and Removes Slashes"
+    },
+    {
+      "parameters": {
+        "url": "=https://res.cloudinary.com/dno4m9vbr/image/upload/l_text:Arial_60_bold: {{ $json.Name }} ,co_black/fl_layer_apply,g_center,y_-50/v1767827097/WhatsApp_Image_2026-01-04_at_20.51.31_v8zkmo.jpg",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "={{ $json.Name }}"
+            }
+          }
+        }
+      },
+      "id": "d3f9ad81-cdf7-4908-9bf5-be9acde0bff5",
+      "name": "Generate Certificate1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        640,
+        1024
+      ],
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "inputDataFieldName": "={{ $json.Name }}",
+        "name": "={{ $json.Name }}",
+        "driveId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "My Drive"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "1Ihvj8p2NKQzLJNAzqIkllqDht6V3myys",
+          "mode": "list",
+          "cachedResultName": "TIZI",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1Ihvj8p2NKQzLJNAzqIkllqDht6V3myys"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        832,
+        1024
+      ],
+      "id": "5c723e69-400b-4498-9a38-f9c8e42ff92c",
+      "name": "Upload file",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "HUgBuWJOD3ngv7CC",
+          "name": "Google Drive account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        160,
+        1008
+      ],
+      "id": "458b38c1-fc4d-4eca-b668-41895610713e",
+      "name": "Loop Over Items1"
+    },
+    {
+      "parameters": {
+        "maxItems": 10
+      },
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -64,
+        1008
+      ],
+      "id": "83429cbe-3813-42b4-afda-d12e13ad125c",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "url": "=https://res.cloudinary.com/dno4m9vbr/image/upload/l_text:Arial_60_bold:{{ $json.Name }} ,co_black/fl_layer_apply,g_center,y_-50/v1767827097/WhatsApp_Image_2026-01-04_at_20.51.31_v8zkmo.JPG",
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file"
+            }
+          }
+        }
+      },
+      "id": "880e09b4-d623-4bfa-8d2d-29eabb34b007",
+      "name": "Generate PDF Certificate",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        672,
+        1360
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "html",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.convertToFile",
+      "typeVersion": 1.1,
+      "position": [
+        880,
+        1360
+      ],
+      "id": "0b2bee86-f281-4f1e-b9e8-c4a20e891915",
+      "name": "Convert to File"
+    }
+  ],
+  "connections": {
+    "Read Names from Sheet": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Arabic Certificate": {
+      "main": [
+        [
+          {
+            "node": "Send Email1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Generate Arabic Certificate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Email1": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking 'Execute'": {
+      "main": [
+        [
+          {
+            "node": "Read Names from Sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file": {
+      "main": [
+        [
+          {
+            "node": "Edit Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fix Column Names": {
+      "main": [
+        [
+          {
+            "node": "Generate PDF Certificate",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Certificate1": {
+      "main": [
+        [
+          {
+            "node": "Upload file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items1": {
+      "main": [
+        [],
+        [
+          {
+            "node": "Fix Column Names",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload file": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate PDF Certificate": {
+      "main": [
+        [
+          {
+            "node": "Convert to File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "Download file": [
+      {
+        "json": {
+          "row_number": 2,
+          "Horodateur": "1/4/2026 13:23:37",
+          "الاسم الكامل (كما ترغب في ظهوره في الشهادة)  ": "ABDESSAMAD HAMARRASS",
+          "البريد الإلكتروني": "hmralras@gmail.com",
+          "رقم الهاتف": "0616635140",
+          "الجنس": "ذكر",
+          "المدينة / الإقليم": "MOHAMMEDIA",
+          "  كم عدد الورشات التي تابعت في الأكاديمية الرقمية ؟ ": 6,
+          "ملاحظات أو اقتراحات ": "",
+          "  أصرّح بأن المعلومات المدخلة صحيحة، وأتحمل مسؤولية أي خطأ وارد بها.  ": "نعم"
+        },
+        "binary": {
+          "data": {
+            "mimeType": "image/jpeg",
+            "fileType": "image",
+            "fileExtension": "jpeg",
+            "data": "filesystem-v2",
+            "fileName": "WhatsApp Image 2026-01-04 at 20.51.31.jpeg",
+            "id": "filesystem-v2:workflows/s1o3y1UjFFjeO8vQ/executions/17586/binary_data/1d12d4f2-c58f-4e6e-81a2-f62160098085",
+            "fileSize": "76.3 kB"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      },
+      {
+        "json": {
+          "row_number": 3,
+          "Horodateur": "1/4/2026 13:23:52",
+          "الاسم الكامل (كما ترغب في ظهوره في الشهادة)  ": "Nawal Ennasihi ",
+          "البريد الإلكتروني": "nawalennasihi14@gmail.com",
+          "رقم الهاتف": "0660204759",
+          "الجنس": "أنثى",
+          "المدينة / الإقليم": "Guelmim ",
+          "  كم عدد الورشات التي تابعت في الأكاديمية الرقمية ؟ ": 6,
+          "ملاحظات أو اقتراحات ": "كلّ الورشات كانت مواضيعها مهمة ",
+          "  أصرّح بأن المعلومات المدخلة صحيحة، وأتحمل مسؤولية أي خطأ وارد بها.  ": "نعم"
+        },
+        "binary": {
+          "data": {
+            "mimeType": "image/jpeg",
+            "fileType": "image",
+            "fileExtension": "jpeg",
+            "data": "filesystem-v2",
+            "fileName": "WhatsApp Image 2026-01-04 at 20.51.31.jpeg",
+            "id": "filesystem-v2:workflows/s1o3y1UjFFjeO8vQ/executions/17586/binary_data/252210e6-d5a7-4387-9a60-159220d8d526",
+            "fileSize": "76.3 kB"
+          }
+        },
+        "pairedItem": {
+          "item": 1
+        }
+      },
+      {
+        "json": {
+          "row_number": 4,
+          "Horodateur": "1/4/2026 13:23:53",
+          "الاسم الكامل (كما ترغب في ظهوره في الشهادة)  ": "عدنان بندية",
+          "البريد الإلكتروني": "adnan.bendya@gmail.com",
+          "رقم الهاتف": "+33665093891",
+          "الجنس": "ذكر",
+          "المدينة / الإقليم": "Paris",
+          "  كم عدد الورشات التي تابعت في الأكاديمية الرقمية ؟ ": 6,
+          "ملاحظات أو اقتراحات ": "",
+          "  أصرّح بأن المعلومات المدخلة صحيحة، وأتحمل مسؤولية أي خطأ وارد بها.  ": "نعم"
+        },
+        "binary": {
+          "data": {
+            "mimeType": "image/jpeg",
+            "fileType": "image",
+            "fileExtension": "jpeg",
+            "data": "filesystem-v2",
+            "fileName": "WhatsApp Image 2026-01-04 at 20.51.31.jpeg",
+            "id": "filesystem-v2:workflows/s1o3y1UjFFjeO8vQ/executions/17586/binary_data/5f4c7e0b-0c8c-4575-8e33-cdb9e3f96e13",
+            "fileSize": "76.3 kB"
+          }
+        },
+        "pairedItem": {
+          "item": 2
+        }
+      },
+      {
+        "json": {
+          "row_number": 5,
+          "Horodateur": "1/4/2026 13:24:03",
+          "الاسم الكامل (كما ترغب في ظهوره في الشهادة)  ": "Ziad EL IDRISSI ",
+          "البريد الإلكتروني": "ziad.elidrissi@etu.uae.ac.ma",
+          "رقم الهاتف": "0610402895",
+          "الجنس": "ذكر",
+          "المدينة / الإقليم": "Rabat",
+          "  كم عدد الورشات التي تابعت في الأكاديمية الرقمية ؟ ": 6,
+          "ملاحظات أو اقتراحات ": "",
+          "  أصرّح بأن المعلومات المدخلة صحيحة، وأتحمل مسؤولية أي خطأ وارد بها.  ": "نعم"
+        },
+        "binary": {
+          "data": {
+            "mimeType": "image/jpeg",
+            "fileType": "image",
+            "fileExtension": "jpeg",
+            "data": "filesystem-v2",
+            "fileName": "WhatsApp Image 2026-01-04 at 20.51.31.jpeg",
+            "id": "filesystem-v2:workflows/s1o3y1UjFFjeO8vQ/executions/17586/binary_data/d5ae4441-7a82-4066-9b76-95ee75362e79",
+            "fileSize": "76.3 kB"
+          }
+        },
+        "pairedItem": {
+          "item": 3
+        }
+      },
+      {
+        "json": {
+          "row_number": 6,
+          "Horodateur": "1/4/2026 13:24:37",
+          "الاسم الكامل (كما ترغب في ظهوره في الشهادة)  ": "GOURMA YOUSSOUF ",
+          "البريد الإلكتروني": "gourmayoussouf@gmail.com",
+          "رقم الهاتف": "0776265769",
+          "الجنس": "ذكر",
+          "المدينة / الإقليم": "Casablanca ",
+          "  كم عدد الورشات التي تابعت في الأكاديمية الرقمية ؟ ": 6,
+          "ملاحظات أو اقتراحات ": "شكرا لكم على هذه المبادرات، أتمنى أن أكون حاضر في قادم الدورات.",
+          "  أصرّح بأن المعلومات المدخلة صحيحة، وأتحمل مسؤولية أي خطأ وارد بها.  ": "نعم"
+        },
+        "binary": {
+          "data": {
+            "mimeType": "image/jpeg",
+            "fileType": "image",
+            "fileExtension": "jpeg",
+            "data": "filesystem-v2",
+            "fileName": "WhatsApp Image 2026-01-04 at 20.51.31.jpeg",
+            "id": "filesystem-v2:workflows/s1o3y1UjFFjeO8vQ/executions/17586/binary_data/661d89dc-2511-490e-803c-65ac8d83f9b9",
+            "fileSize": "76.3 kB"
+          }
+        },
+        "pairedItem": {
+          "item": 4
+        }
+      },
+      {
+        "json": {
+          "row_number": 7,
+          "Horodateur": "1/4/2026 13:25:06",
+          "الاسم الكامل (كما ترغب في ظهوره في الشهادة)  ": "Manal bakkali",
+          "البريد الإلكتروني": "Bakkalimanal2004@gmail.com",
+          "رقم الهاتف": "0608403988",
+          "الجنس": "أنثى",
+          "المدينة / الإقليم": "الدار البيضاء ",
+          "  كم عدد الورشات التي تابعت في الأكاديمية الرقمية ؟ ": 6,
+          "ملاحظات أو اقتراحات ": "شكرا على مجهوداتكم المبذولة لهذه المبادرة ",
+          "  أصرّح بأن المعلومات المدخلة صحيحة، وأتحمل مسؤولية أي خطأ وارد بها.  ": "نعم"
+        },
+        "binary": {
+          "data": {
+            "mimeType": "image/jpeg",
+            "fileType": "image",
+            "fileExtension": "jpeg",
+            "data": "filesystem-v2",
+            "fileName": "WhatsApp Image 2026-01-04 at 20.51.31.jpeg",
+            "id": "filesystem-v2:workflows/s1o3y1UjFFjeO8vQ/executions/17586/binary_data/0f7f6400-51c6-41cd-9009-ba64486607b0",
+            "fileSize": "76.3 kB"
+          }
+        },
+        "pairedItem": {
+          "item": 5
+        }
+      },
+      {
+        "json": {
+          "row_number": 8,
+          "Horodateur": "1/4/2026 13:26:47",
+          "الاسم الكامل (كما ترغب في ظهوره في الشهادة)  ": "نضار المرابط/ Nodar EL MOURABET ",
+          "البريد الإلكتروني": "Nodar.elmourabet@gmail.com",
+          "رقم الهاتف": "0620110081",
+          "الجنس": "أنثى",
+          "المدينة / الإقليم": "الدار البيضاء ",
+          "  كم عدد الورشات التي تابعت في الأكاديمية الرقمية ؟ ": 6,
+          "ملاحظات أو اقتراحات ": "ليس لدي اي ملاحظة",
+          "  أصرّح بأن المعلومات المدخلة صحيحة، وأتحمل مسؤولية أي خطأ وارد بها.  ": "نعم"
+        },
+        "binary": {
+          "data": {
+            "mimeType": "image/jpeg",
+            "fileType": "image",
+            "fileExtension": "jpeg",
+            "data": "filesystem-v2",
+            "fileName": "WhatsApp Image 2026-01-04 at 20.51.31.jpeg",
+            "id": "filesystem-v2:workflows/s1o3y1UjFFjeO8vQ/executions/17586/binary_data/296dce55-2f54-467e-bc7c-d2aab034423e",
+            "fileSize": "76.3 kB"
+          }
+        },
+        "pairedItem": {
+          "item": 6
+        }
+      },
+      {
+        "json": {
+          "row_number": 9,
+          "Horodateur": "1/4/2026 13:28:03",
+          "الاسم الكامل (كما ترغب في ظهوره في الشهادة)  ": "محمد زويتن ",
+          "البريد الإلكتروني": "mohamedzouiten0401@gmail.com",
+          "رقم الهاتف": "0625872124",
+          "الجنس": "ذكر",
+          "المدينة / الإقليم": "فاس ",
+          "  كم عدد الورشات التي تابعت في الأكاديمية الرقمية ؟ ": 6,
+          "ملاحظات أو اقتراحات ": "",
+          "  أصرّح بأن المعلومات المدخلة صحيحة، وأتحمل مسؤولية أي خطأ وارد بها.  ": "نعم"
+        },
+        "binary": {
+          "data": {
+            "mimeType": "image/jpeg",
+            "fileType": "image",
+            "fileExtension": "jpeg",
+            "data": "filesystem-v2",
+            "fileName": "WhatsApp Image 2026-01-04 at 20.51.31.jpeg",
+            "id": "filesystem-v2:workflows/s1o3y1UjFFjeO8vQ/executions/17586/binary_data/fc9f0ea2-e4a7-48c1-8213-9ab05255ad2c",
+            "fileSize": "76.3 kB"
+          }
+        },
+        "pairedItem": {
+          "item": 7
+        }
+      },
+      {
+        "json": {
+          "row_number": 10,
+          "Horodateur": "1/4/2026 13:29:32",
+          "الاسم الكامل (كما ترغب في ظهوره في الشهادة)  ": "نجوى الداي",
+          "البريد الإلكتروني": "addaynajoua@outlook.fr",
+          "رقم الهاتف": "0767841234",
+          "الجنس": "أنثى",
+          "المدينة / الإقليم": "Rabat",
+          "  كم عدد الورشات التي تابعت في الأكاديمية الرقمية ؟ ": 6,
+          "ملاحظات أو اقتراحات ": "",
+          "  أصرّح بأن المعلومات المدخلة صحيحة، وأتحمل مسؤولية أي خطأ وارد بها.  ": "نعم"
+        },
+        "binary": {
+          "data": {
+            "mimeType": "image/jpeg",
+            "fileType": "image",
+            "fileExtension": "jpeg",
+            "data": "filesystem-v2",
+            "fileName": "WhatsApp Image 2026-01-04 at 20.51.31.jpeg",
+            "id": "filesystem-v2:workflows/s1o3y1UjFFjeO8vQ/executions/17586/binary_data/27a9f385-247d-4cae-9e49-341138c33826",
+            "fileSize": "76.3 kB"
+          }
+        },
+        "pairedItem": {
+          "item": 8
+        }
+      }
+    ],
+    "When clicking 'Execute'": [
+      {
+        "json": {},
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ],
+    "Generate Certificate1": [
+      {
+        "json": {
+          "Name": " ABDESSAMAD HAMARRASS",
+          "Email": "hmralras@gmail.com"
+        },
+        "binary": {
+          " ABDESSAMAD HAMARRASS": {
+            "mimeType": "image/jpeg",
+            "fileType": "image",
+            "fileExtension": "jpg",
+            "data": "filesystem-v2",
+            "directory": "https://res.cloudinary.com/dno4m9vbr/image/upload/l_text:Arial_60_bold:%20%20ABDESSAMAD%20HAMARRASS%20,co_black/fl_layer_apply,g_center,y_-50/v1767827097/WhatsApp_Image_2026-01-04_at_20.51.31_v8zkmo.jpg",
+            "fileName": "WhatsApp_Image_2026-01-04_at_20.51.31_v8zkmo.jpg",
+            "id": "filesystem-v2:workflows/s1o3y1UjFFjeO8vQ/executions/17630/binary_data/a416f0b5-b1c5-4072-bc00-3185291c952e",
+            "fileSize": "85.4 kB"
+          }
+        },
+        "pairedItem": {
+          "item": 0
+        }
+      }
+    ]
+  },
+  "versionId": "4e0455a9-5829-4098-a268-201bbd206384",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-07T21:35:40.956Z",
+      "createdAt": "2026-01-07T21:35:40.956Z",
+      "role": "workflow:owner",
+      "workflowId": "s1o3y1UjFFjeO8vQ",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
