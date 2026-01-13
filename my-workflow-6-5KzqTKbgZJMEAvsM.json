@@ -1,0 +1,105 @@
+{
+  "updatedAt": "2025-09-09T08:00:01.000Z",
+  "createdAt": "2025-09-01T19:11:16.455Z",
+  "id": "5KzqTKbgZJMEAvsM",
+  "name": "My workflow 6",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e5f9c654-34b5-4671-9650-757cb07122f0",
+      "name": "When chat message received",
+      "webhookId": "23bc7e55-e5a0-4969-80f8-9656e13d816f"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "speak with me",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "349c18ad-93fe-4aab-928e-ff7f377ec9b2",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": "openai/codex-mini",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "3a4afb60-7953-4c79-83ea-8bc05511fc8b",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Jz6x9n4WM0Sxuntt",
+          "name": "OpenRouter account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "778996c8-50d9-4f66-a505-ec966f814372",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-01T19:11:16.479Z",
+      "createdAt": "2025-09-01T19:11:16.479Z",
+      "role": "workflow:owner",
+      "workflowId": "5KzqTKbgZJMEAvsM",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
