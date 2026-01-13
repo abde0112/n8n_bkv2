@@ -1,0 +1,288 @@
+{
+  "updatedAt": "2025-11-10T11:47:43.000Z",
+  "createdAt": "2025-11-10T11:24:39.895Z",
+  "id": "rRfy4U9cdizTjIoa",
+  "name": "Redis (Sessions + Temporary Memory)",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "redis",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "ab68a53e-1606-4904-94c2-0560fb0d9200",
+      "name": "Webhook",
+      "webhookId": "43c67b6a-8eff-4bc9-bde7-f94edb558854"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "b01e0ad6-a714-4229-9fa9-911af2e0bf93",
+              "leftValue": "={{ $json.propertyName }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "2d37fcfc-fb00-49b4-97e1-1ec95d5fe590",
+      "name": "If session exist?"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ $json.body.userId }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "48909484-4b64-40e1-94f1-c48bec5bd733",
+      "name": "Get Session",
+      "credentials": {
+        "redis": {
+          "id": "xuIhZM4B9ekzet7a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// 1️⃣ Get JSON input from Webhook\nconst userId = $('Webhook').first().json.body.userId;\nconst message = $('Webhook').first().json.body.message;\n\n// 2️⃣ Get session from Redis node\n// If session doesn’t exist, default to null\nconst redisData = $('Get Session').first().json.data || null;\n\n// 3️⃣ Parse Redis data (if exists)\nlet session;\nif (redisData) {\n  // Redis GET returns a string → must parse\n  session = JSON.parse(redisData);\n} else {\n  // No session → initialize fallback\n  session = {\n    userId: userId,\n    step: 1,\n    history: []\n  };\n}\n\n// 4️⃣ Update session\nsession.history.push({\n  userMessage: message,\n  timestamp: new Date().toISOString()\n});\n\nsession.step += 1;\n\n// 5️⃣ Return updated session to next node (Redis SET)\nreturn [\n  { json: session }\n];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        -96
+      ],
+      "id": "5ea23d0e-58d0-4e8f-b1de-d7b28f5e5710",
+      "name": "Update Session (add new message)"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Access the incoming userId from the Webhook node\nconst userId = $('Webhook').first().json.body.userId;\n\n// Create a new session structure\nreturn [\n  {\n    json: {\n      userId: userId,\n      step: 1,\n      history: []\n    }\n  }\n];\n\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        624,
+        -96
+      ],
+      "id": "ee6e4384-f692-45ad-b661-330c8d6e4b4f",
+      "name": "Initialize Session (if not exist)"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ $json.userId }}",
+        "value": "={{ $json.history[0].userMessage }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        -96
+      ],
+      "id": "b227019c-cff2-49fc-9e18-2d40008bce78",
+      "name": "Save Session",
+      "credentials": {
+        "redis": {
+          "id": "xuIhZM4B9ekzet7a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "{\n  \"message\": \"Session updated!\",\n  \"step\": \"{{$json.step}}\",\n  \"history_count\": \"{{$json.history.length}}\"\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1216,
+        -96
+      ],
+      "id": "5894e196-aed2-4196-b56f-884cae6495d4",
+      "name": "Respond to User"
+    },
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "={{ $('Webhook').item.json.body.userId }}",
+        "value": "={{ $('Get Session').item.json.propertyName }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        624,
+        96
+      ],
+      "id": "089ce56c-be32-48d8-b4c2-a0c01c7e8b7e",
+      "name": "Update Session",
+      "credentials": {
+        "redis": {
+          "id": "xuIhZM4B9ekzet7a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"message\": \"Session updated!\",\n  \"step\": \" {{ $json.propertyName }}\"\n \n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        848,
+        96
+      ],
+      "id": "1b74320b-4afe-4606-8783-9149b414f35b",
+      "name": "Respond to User1"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Get Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Session": {
+      "main": [
+        [
+          {
+            "node": "If session exist?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If session exist?": {
+      "main": [
+        [
+          {
+            "node": "Initialize Session (if not exist)",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Update Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Initialize Session (if not exist)": {
+      "main": [
+        [
+          {
+            "node": "Update Session (add new message)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Session (add new message)": {
+      "main": [
+        [
+          {
+            "node": "Save Session",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Save Session": {
+      "main": [
+        [
+          {
+            "node": "Respond to User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Session": {
+      "main": [
+        [
+          {
+            "node": "Respond to User1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "ab75df35-eec4-4600-b6f7-1ea15af09a95",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-11-10T11:24:39.906Z",
+      "createdAt": "2025-11-10T11:24:39.906Z",
+      "role": "workflow:owner",
+      "workflowId": "rRfy4U9cdizTjIoa",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
