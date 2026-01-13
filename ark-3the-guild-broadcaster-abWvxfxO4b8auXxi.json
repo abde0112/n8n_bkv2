@@ -1,0 +1,103 @@
+{
+  "updatedAt": "2025-08-14T19:44:44.000Z",
+  "createdAt": "2025-08-11T20:51:55.559Z",
+  "id": "abWvxfxO4b8auXxi",
+  "name": "Ark 3The Guild Broadcaster",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "e568b6d4-4b45-4299-9bb8-24001c78f855",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://dummyjson.com/quotes",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "279c0cd6-5f54-4dd9-80fc-061bb017fb8c",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=Quote of the Day for the Guild :{{ $json.quotes[0].quote }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "3b46bc06-99ed-43df-bbd5-b353771d7ad1",
+      "name": "Discord",
+      "webhookId": "b2f50ee1-d060-4d1f-8e64-95ed2d259f3d",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "WkF81BQ4ghWqwHjW",
+          "name": "Discord Webhook account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Discord",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "9aab1013-e995-45a0-a4bd-855e2f4b7726",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-08-11T20:51:55.566Z",
+      "createdAt": "2025-08-11T20:51:55.566Z",
+      "role": "workflow:owner",
+      "workflowId": "abWvxfxO4b8auXxi",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
