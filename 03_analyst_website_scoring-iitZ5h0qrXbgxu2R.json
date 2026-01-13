@@ -1,0 +1,603 @@
+{
+  "updatedAt": "2025-12-25T01:31:56.743Z",
+  "createdAt": "2025-12-24T12:13:53.194Z",
+  "id": "iitZ5h0qrXbgxu2R",
+  "name": "03_ANALYST_Website_Scoring",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes",
+              "minutesInterval": 1
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -2336,
+        64
+      ],
+      "id": "2686e786-4c0b-48be-b5ee-ff3ca4076bf3",
+      "name": "Every 1 Minute",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "leads",
+        "limit": 5,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "status",
+              "condition": "eq",
+              "keyValue": "raw"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -2128,
+        64
+      ],
+      "id": "20c755ec-bf8f-4edd-a89e-19ff206c211f",
+      "name": "Query Raw Leads",
+      "credentials": {
+        "supabaseApi": {
+          "id": "BHmRvBY35o1BUBtE",
+          "name": "last one"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "check-leads-exist",
+              "leftValue": "={{ $json.length }}",
+              "rightValue": "",
+              "operator": {
+                "type": "number",
+                "operation": "notEmpty"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        -1936,
+        64
+      ],
+      "id": "0cf44872-c9da-4ecf-adfd-e7917fe0ab47",
+      "name": "Leads Exist?"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "leads"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1728,
+        -48
+      ],
+      "id": "7453ddfc-6e5d-4c46-b3b0-1dd59b2cd516",
+      "name": "Mark as Enriching",
+      "credentials": {
+        "supabaseApi": {
+          "id": "BHmRvBY35o1BUBtE",
+          "name": "last one"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{ 'https://' + $json.domain }}",
+        "options": {
+          "allowUnauthorizedCerts": true,
+          "redirect": {
+            "redirect": {
+              "maxRedirects": 3
+            }
+          },
+          "timeout": 10000
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -1536,
+        -48
+      ],
+      "id": "1156d29a-47cb-41e3-8dd5-d6abd23dfea7",
+      "name": "Fetch Website"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the HTML response and lead data\nconst html = $input.first().json || '';\nconst lead = $('Query Raw Leads').item.json;\n\n// Function to clean HTML\nfunction cleanHTML(html) {\n  if (typeof html !== 'string') {\n    return '';\n  }\n  \n  // Remove script tags and content\n  let cleaned = html.replace(/<script\\b[^<]*(?:(?!<\\/script>)<[^<]*)*<\\/script>/gi, '');\n  \n  // Remove style tags and content\n  cleaned = cleaned.replace(/<style\\b[^<]*(?:(?!<\\/style>)<[^<]*)*<\\/style>/gi, '');\n  \n  // Remove HTML tags\n  cleaned = cleaned.replace(/<[^>]+>/g, ' ');\n  \n  // Decode common HTML entities\n  cleaned = cleaned\n    .replace(/&nbsp;/g, ' ')\n    .replace(/&amp;/g, '&')\n    .replace(/&lt;/g, '<')\n    .replace(/&gt;/g, '>')\n    .replace(/&quot;/g, '\"')\n    .replace(/&#39;/g, \"'\");\n  \n  // Remove extra whitespace\n  cleaned = cleaned.replace(/\\s+/g, ' ').trim();\n  \n  return cleaned;\n}\n\n// Function to extract metadata\nfunction extractMetadata(html) {\n  const metadata = {\n    title: '',\n    description: '',\n    keywords: []\n  };\n  \n  if (typeof html !== 'string') {\n    return metadata;\n  }\n  \n  // Extract title\n  const titleMatch = html.match(/<title[^>]*>([^<]+)<\\/title>/i);\n  if (titleMatch) {\n    metadata.title = titleMatch[1].trim();\n  }\n  \n  // Extract meta description\n  const descMatch = html.match(/<meta[^>]*name=[\"']description[\"'][^>]*content=[\"']([^\"']+)[\"']/i);\n  if (descMatch) {\n    metadata.description = descMatch[1].trim();\n  }\n  \n  // Extract keywords\n  const keywordsMatch = html.match(/<meta[^>]*name=[\"']keywords[\"'][^>]*content=[\"']([^\"']+)[\"']/i);\n  if (keywordsMatch) {\n    metadata.keywords = keywordsMatch[1].split(',').map(k => k.trim()).filter(Boolean);\n  }\n  \n  return metadata;\n}\n\n// Process the HTML\nconst htmlContent = html.body || html.data || html.toString() || '';\nconst metadata = extractMetadata(htmlContent);\nconst cleanedText = cleanHTML(htmlContent);\n\n// Truncate content to avoid token limits (first 3000 chars)\nconst truncatedText = cleanedText.substring(0, 3000);\n\nconsole.log(`Processed ${lead.domain}: ${cleanedText.length} chars cleaned, ${truncatedText.length} used`);\n\nreturn [{\n  json: {\n    lead_id: lead.id,\n    batch_id: lead.batch_id,\n    user_id: lead.user_id,\n    domain: lead.domain,\n    name: lead.name || 'Unknown',\n    \n    // Metadata\n    title: metadata.title || lead.name || 'No title',\n    description: metadata.description || 'No description',\n    keywords: metadata.keywords,\n    \n    // Content for analysis\n    content: truncatedText,\n    content_length: cleanedText.length,\n    \n    // Original lead data\n    original_lead: lead\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1328,
+        -48
+      ],
+      "id": "33a27e5d-6ee2-4e08-846b-b39685161507",
+      "name": "Extract & Clean Content"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.anthropic.com/v1/messages",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "anthropic-version",
+              "value": "2023-06-01"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"model\": \"claude-3-5-sonnet-20241022\",\n  \"max_tokens\": 1024,\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Analyze this business website and provide a fit score (0-100) based on the following criteria:\\n\\n**Business Information:**\\n- Name: {{ $json.name }}\\n- Domain: {{ $json.domain }}\\n- Website Title: {{ $json.title }}\\n- Description: {{ $json.description }}\\n\\n**Website Content (first 3000 chars):**\\n{{ $json.content }}\\n\\n**Scoring Criteria:**\\n1. Business Legitimacy (0-25): Is this a real, active business?\\n2. Website Quality (0-25): Professional design, updated content?\\n3. Service Relevance (0-25): Do they offer relevant services?\\n4. Contact Information (0-25): Easy to reach, multiple contact methods?\\n\\n**Response Format (JSON only, no markdown):**\\n{\\n  \\\"fit_score\\\": <0-100>,\\n  \\\"legitimacy_score\\\": <0-25>,\\n  \\\"quality_score\\\": <0-25>,\\n  \\\"relevance_score\\\": <0-25>,\\n  \\\"contact_score\\\": <0-25>,\\n  \\\"summary\\\": \\\"<2-3 sentence summary>\\\",\\n  \\\"pros\\\": [\\\"<key strength 1>\\\", \\\"<key strength 2>\\\"],\\n  \\\"cons\\\": [\\\"<potential issue 1>\\\", \\\"<potential issue 2>\\\"],\\n  \\\"recommended_action\\\": \\\"contact|research_more|skip\\\"\\n}\"\n    }\n  ]\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [
+        -768,
+        -32
+      ],
+      "id": "a2afb20f-742c-4c04-8d71-68cb7151e85a",
+      "name": "Claude Analysis",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HzP0Nadiej98ORU7",
+          "name": "kie.ai"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get the LLM response and lead data\nconst llmResponse = $input.first().json;\nconst leadData = $('Extract & Clean Content').item.json;\n\n// Extract content from Claude response\nlet analysisText = '';\nif (llmResponse.content && Array.isArray(llmResponse.content)) {\n  analysisText = llmResponse.content\n    .filter(block => block.type === 'text')\n    .map(block => block.text)\n    .join('\\n');\n} else if (typeof llmResponse === 'string') {\n  analysisText = llmResponse;\n}\n\nconsole.log('LLM Response:', analysisText.substring(0, 200));\n\n// Parse JSON from response\nlet analysis;\ntry {\n  // Remove markdown code blocks if present\n  let cleanedText = analysisText.replace(/```json\\n?/g, '').replace(/```\\n?/g, '');\n  \n  // Find JSON object\n  const jsonMatch = cleanedText.match(/\\{[\\s\\S]*\\}/);\n  if (jsonMatch) {\n    analysis = JSON.parse(jsonMatch[0]);\n  } else {\n    throw new Error('No JSON found in response');\n  }\n} catch (e) {\n  console.error('Failed to parse LLM response:', e.message);\n  \n  // Fallback: extract score from text\n  const scoreMatch = analysisText.match(/fit[_\\s]*score[:\\s]*(\\d+)/i);\n  const score = scoreMatch ? parseInt(scoreMatch[1]) : 50;\n  \n  analysis = {\n    fit_score: score,\n    summary: analysisText.substring(0, 500) || 'Analysis failed - using default score',\n    pros: ['Unable to extract detailed analysis'],\n    cons: ['LLM response parsing failed'],\n    recommended_action: 'research_more',\n    legitimacy_score: Math.round(score * 0.25),\n    quality_score: Math.round(score * 0.25),\n    relevance_score: Math.round(score * 0.25),\n    contact_score: Math.round(score * 0.25)\n  };\n}\n\n// Ensure score is valid (0-100)\nconst fitScore = Math.max(0, Math.min(100, parseInt(analysis.fit_score) || 50));\n\nconsole.log(`Scored ${leadData.domain}: ${fitScore}/100`);\n\nreturn [{\n  json: {\n    lead_id: leadData.lead_id,\n    batch_id: leadData.batch_id,\n    domain: leadData.domain,\n    \n    // Scoring\n    fit_score: fitScore,\n    legitimacy_score: analysis.legitimacy_score || null,\n    quality_score: analysis.quality_score || null,\n    relevance_score: analysis.relevance_score || null,\n    contact_score: analysis.contact_score || null,\n    \n    // Analysis\n    summary: (analysis.summary || 'No summary available').substring(0, 1000),\n    pros: Array.isArray(analysis.pros) ? analysis.pros.slice(0, 5) : [],\n    cons: Array.isArray(analysis.cons) ? analysis.cons.slice(0, 5) : [],\n    recommended_action: analysis.recommended_action || 'research_more',\n    \n    // Metadata\n    analyzed_at: new Date().toISOString(),\n    llm_model: llmResponse.model || 'claude-3-5-sonnet',\n    \n    // Store full analysis\n    full_analysis: analysis\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -560,
+        -32
+      ],
+      "id": "18303080-9a11-466c-a41d-97b1c2bb94f1",
+      "name": "Parse Analysis"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "leads"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -368,
+        -32
+      ],
+      "id": "c53a042d-b2e8-4b77-9484-611c1de814d1",
+      "name": "Update Lead (Scored)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "B3fV167ZWXhpJPxi",
+          "name": "IMAD LEAD GEN AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get batch_id from processed lead\nconst batchId = $json.batch_id;\n\nif (!batchId) {\n  console.log('No batch_id found, skipping batch check');\n  return [];\n}\n\nconsole.log(`Checking completion for batch: ${batchId}`);\n\nreturn [{\n  json: {\n    batch_id: batchId\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -160,
+        -32
+      ],
+      "id": "38d827ed-4be3-4d5d-863d-4386b92bc54e",
+      "name": "Check Batch"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "tableId": "leads",
+        "returnAll": true,
+        "matchType": "allFilters",
+        "filters": {
+          "conditions": [
+            {
+              "keyName": "batch_id",
+              "keyValue": "={{ $json.batch_id }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        32,
+        -32
+      ],
+      "id": "1f0a9838-63bc-4bed-a12c-2712fc2aad45",
+      "name": "Query Batch Leads",
+      "credentials": {
+        "supabaseApi": {
+          "id": "B3fV167ZWXhpJPxi",
+          "name": "IMAD LEAD GEN AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Get all leads in batch\nconst allLeads = $input.all().map(item => item.json);\nconst batchId = $('Check Batch').item.json.batch_id;\n\nif (allLeads.length === 0) {\n  console.log('No leads found in batch');\n  return [{ json: { complete: false, skip: true } }];\n}\n\n// Count leads by status\nconst statusCounts = {\n  raw: 0,\n  enriching: 0,\n  scored: 0,\n  scraping_failed: 0\n};\n\nallLeads.forEach(lead => {\n  const status = lead.status || 'unknown';\n  if (statusCounts.hasOwnProperty(status)) {\n    statusCounts[status]++;\n  }\n});\n\n// Batch is complete if no raw or enriching leads remain\nconst isComplete = (statusCounts.raw + statusCounts.enriching) === 0;\n\n// Calculate stats\nconst totalLeads = allLeads.length;\nconst scoredLeads = statusCounts.scored;\n\n// Calculate average score (only for scored leads with valid scores)\nconst scoredLeadsWithScores = allLeads.filter(\n  l => l.status === 'scored' && l.fit_score !== null && !isNaN(l.fit_score)\n);\n\nconst avgScore = scoredLeadsWithScores.length > 0\n  ? Math.round(\n      scoredLeadsWithScores.reduce((sum, l) => sum + parseFloat(l.fit_score), 0) / \n      scoredLeadsWithScores.length\n    )\n  : 0;\n\nconsole.log(`Batch ${batchId}: ${isComplete ? 'COMPLETE' : 'PENDING'}`);\nconsole.log(`Status: Raw=${statusCounts.raw}, Enriching=${statusCounts.enriching}, Scored=${statusCounts.scored}, Failed=${statusCounts.scraping_failed}`);\nconsole.log(`Average score: ${avgScore}`);\n\nreturn [{\n  json: {\n    batch_id: batchId,\n    complete: isComplete,\n    total_leads: totalLeads,\n    scored_leads: scoredLeads,\n    failed_leads: statusCounts.scraping_failed,\n    pending_leads: statusCounts.raw + statusCounts.enriching,\n    average_score: avgScore,\n    status_breakdown: statusCounts\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        -32
+      ],
+      "id": "5384364f-e88e-4ea7-847c-64203923496a",
+      "name": "Calculate Completion"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": false,
+            "leftValue": "",
+            "typeValidation": "strict"
+          },
+          "conditions": [
+            {
+              "id": "batch-complete-check",
+              "leftValue": "={{ $json.complete }}",
+              "rightValue": "true",
+              "operator": {
+                "type": "boolean",
+                "operation": "equals",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        448,
+        -32
+      ],
+      "id": "fa695184-8ade-4f63-902e-a5c74b1dde54",
+      "name": "Batch Complete?"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "batches"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        480,
+        -192
+      ],
+      "id": "29cd57ff-b91b-49e4-a769-04c011735877",
+      "name": "Update Batch (Complete)",
+      "credentials": {
+        "supabaseApi": {
+          "id": "B3fV167ZWXhpJPxi",
+          "name": "IMAD LEAD GEN AI"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.errorTrigger",
+      "typeVersion": 1,
+      "position": [
+        -2336,
+        304
+      ],
+      "id": "8ff643ac-adb6-4f40-83c2-9b55a5004935",
+      "name": "Error Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Handle scraping errors\nconst error = $input.first().json.error || {};\nconst errorNode = error.node || 'unknown';\nconst errorMessage = error.message || 'Unknown error';\n\n// Try to get lead_id from context\nlet leadId = null;\nlet batchId = null;\n\ntry {\n  const queryResult = $('Query Raw Leads').item;\n  if (queryResult) {\n    leadId = queryResult.json.id;\n    batchId = queryResult.json.batch_id;\n  }\n} catch (e) {\n  console.warn('Could not retrieve lead_id from context');\n}\n\nconsole.error('Workflow error:', {\n  node: errorNode,\n  message: errorMessage,\n  lead_id: leadId\n});\n\nreturn [{\n  json: {\n    lead_id: leadId,\n    batch_id: batchId,\n    error_node: errorNode,\n    error_message: errorMessage.substring(0, 500),\n    error_stack: error.stack ? error.stack.substring(0, 1000) : null,\n    timestamp: new Date().toISOString()\n  }\n}];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -2128,
+        304
+      ],
+      "id": "ac897795-ed5b-4b5f-944c-49e6db00de77",
+      "name": "Log Error"
+    },
+    {
+      "parameters": {
+        "operation": "update",
+        "tableId": "leads"
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        -1936,
+        304
+      ],
+      "id": "02ab7e30-15a7-4dde-bdd4-cdd1d18949e2",
+      "name": "Mark Lead Failed",
+      "credentials": {
+        "supabaseApi": {
+          "id": "B3fV167ZWXhpJPxi",
+          "name": "IMAD LEAD GEN AI"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Analyze this business website and provide a fit score (0-100) based on the following criteria:\\n\\n**Business Information:**\\n- Name: {{ $json.name }}\\n- Domain: {{ $json.domain }}\\n- Website Title: {{ $json.title }}\\n- Description: {{ $json.description }}\\n\\n**Website Content (first 3000 chars):**\\n{{ $json.content }}\\n\\n**Scoring Criteria:**\\n1. Business Legitimacy (0-25): Is this a real, active business?\\n2. Website Quality (0-25): Professional design, updated content?\\n3. Service Relevance (0-25): Do they offer relevant services?\\n4. Contact Information (0-25): Easy to reach, multiple contact methods?\\n\\n**Response Format (JSON only, no markdown):**\\n{\\n  \\\"fit_score\\\": <0-100>,\\n  \\\"legitimacy_score\\\": <0-25>,\\n  \\\"quality_score\\\": <0-25>,\\n  \\\"relevance_score\\\": <0-25>,\\n  \\\"contact_score\\\": <0-25>,\\n  \\\"summary\\\": \\\"<2-3 sentence summary>\\\",\\n  \\\"pros\\\": [\\\"<key strength 1>\\\", \\\"<key strength 2>\\\"],\\n  \\\"cons\\\": [\\\"<potential issue 1>\\\", \\\"<potential issue 2>\\\"],\\n  \\\"recommended_action\\\": \\\"contact|research_more|skip\\\"\\n"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1152,
+        -48
+      ],
+      "id": "636f6354-deb8-4a08-b9ee-6d691cad5274",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "X9nsYy4x7QN9Tk9w",
+          "name": "New API Cha.Abde"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Every 1 Minute": {
+      "main": [
+        [
+          {
+            "node": "Query Raw Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Raw Leads": {
+      "main": [
+        [
+          {
+            "node": "Leads Exist?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Leads Exist?": {
+      "main": [
+        [
+          {
+            "node": "Mark as Enriching",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark as Enriching": {
+      "main": [
+        [
+          {
+            "node": "Fetch Website",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Website": {
+      "main": [
+        [
+          {
+            "node": "Extract & Clean Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract & Clean Content": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Claude Analysis": {
+      "main": [
+        [
+          {
+            "node": "Parse Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Analysis": {
+      "main": [
+        [
+          {
+            "node": "Update Lead (Scored)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Lead (Scored)": {
+      "main": [
+        [
+          {
+            "node": "Check Batch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Batch": {
+      "main": [
+        [
+          {
+            "node": "Query Batch Leads",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Query Batch Leads": {
+      "main": [
+        [
+          {
+            "node": "Calculate Completion",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Completion": {
+      "main": [
+        [
+          {
+            "node": "Batch Complete?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Batch Complete?": {
+      "main": [
+        [
+          {
+            "node": "Update Batch (Complete)",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Error Trigger": {
+      "main": [
+        [
+          {
+            "node": "Log Error",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Log Error": {
+      "main": [
+        [
+          {
+            "node": "Mark Lead Failed",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Message a model": {
+      "main": [
+        [
+          {
+            "node": "Claude Analysis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "282f42ca-8ae3-4622-9f5c-b9b9eb8e55c5",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-24T12:13:53.216Z",
+      "createdAt": "2025-12-24T12:13:53.216Z",
+      "role": "workflow:owner",
+      "workflowId": "iitZ5h0qrXbgxu2R",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
