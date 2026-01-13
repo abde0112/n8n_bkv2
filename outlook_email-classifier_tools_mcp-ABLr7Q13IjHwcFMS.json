@@ -1,0 +1,1006 @@
+{
+  "updatedAt": "2025-11-30T13:31:18.000Z",
+  "createdAt": "2025-11-30T12:27:15.521Z",
+  "id": "ABLr7Q13IjHwcFMS",
+  "name": "Outlook_Email Classifier_Tools_MCP",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "# Implementation Status\n##  Multi-Agent MCP System\n### ✅ Telegram Integration Active\n\n## ✅ COMPLETED (32 nodes)\n- ✅ Multi-Agent Architecture (Orchestrator + 2 Sub-Agents)\n- ✅ Telegram Bot (Trigger + Response)\n- ✅ Email Operations (Send, Reply, Draft, Delete, Get, Folder)\n- ✅ Calendar Operations (Create, Update, Delete, Get Events)\n- ✅ Folder Management (Create, Move, Get Folders)\n- ✅ Memory per Agent (Parent, Emails, Calendar) - 50 msg context\n- ✅ GPT-4o-mini models (all 3 agents)\n- ✅ MCP Servers (Emails + Calendar endpoints)\n- ✅ Session-based memory (Telegram chat ID)\n\n",
+        "height": 448,
+        "width": 496
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        64,
+        832
+      ],
+      "typeVersion": 1,
+      "id": "b937e4de-bfcc-42fa-b9b5-1a0da1d713d5",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "toolDescription": "AI Agent can Call this tool if you want to do something with E-mails.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=## Role\nExecute Outlook email operations using MCP tools. Current date/time: {{ $now.toString() }}\n\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        1056,
+        496
+      ],
+      "id": "34677753-5ce8-4309-b9b8-864f541c5f9d",
+      "name": "E-mails Agent"
+    },
+    {
+      "parameters": {
+        "toolDescription": "AI Agent can Call this tool if you want to do something with calendar.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=## Role\nExecute Outlook calendar operations using available MCP tools. Current date/time: {{ $now.toString() }}\n\n## Critical Workflows\n\n**Create Event Workflow**:\n1. Parse user's natural language date/time\n2. Convert to ISO 8601 format (YYYY-MM-DDTHH:MM:SS)\n3. If end time not specified, default to 1 hour after start\n4. Use Create Event tool with Title, Start, End\n\n**Update Event Workflow**:\n1. Get Events to retrieve all events\n2. Find target event by matching title, date, or description\n3. Extract event ID\n4. Use Update Events tool with Event (ID), Title, Start, End (only include fields being changed)\n\n**Delete Event Workflow**:\n1. Get Events to retrieve all events\n2. Find target event by matching title, date, or description\n3. Extract event ID\n4. Use Delete Events tool with title (the event ID)\n\n**Check Calendar Workflow**:\n1. Get Events to retrieve all events\n2. Filter results by user's requested time frame (today, tomorrow, this week, etc.)\n3. Group by day and present chronologically\n4. Summarize: \"You have X events: [list]\"\n\n## Date/Time Parsing (CRITICAL)\n\n**ISO 8601 Format Required**: YYYY-MM-DDTHH:MM:SS\n\n**Natural Language Examples**:\n- \"tomorrow at 2pm\" → {{ $now.plus({days:1}).set({hour:14,minute:0,second:0}).toISO() }}\n- \"today at 3:30pm\" → {{ $now.set({hour:15,minute:30,second:0}).toISO() }}\n- \"next Monday 10am\" → Calculate next Monday's date, set hour to 10\n- \"in 2 hours\" → {{ $now.plus({hours:2}).toISO() }}\n- \"Friday at noon\" → Find next/this Friday, set hour to 12\n\n**Time Defaults**:\n- No end time specified → Add 1 hour to start time\n- No time specified → Default to 9:00 AM\n- Relative dates → Calculate from {{ $now.toString() }}\n\n**Examples**:\n- User: \"Schedule meeting tomorrow at 2pm\"\n  - Start: {{ $now.plus({days:1}).set({hour:14,minute:0,second:0}).toISO() }}\n  - End: {{ $now.plus({days:1}).set({hour:15,minute:0,second:0}).toISO() }}\n\n- User: \"Book 30 minutes with Sarah at 3pm today\"\n  - Start: {{ $now.set({hour:15,minute:0,second:0}).toISO() }}\n  - End: {{ $now.set({hour:15,minute:30,second:0}).toISO() }}\n\n## Response Format\n- **Confirmations**: \"Event created: [Title] on [Date] at [Time]\"\n- **Updates**: \"Updated [Title]: moved from [Old Time] to [New Time]\"\n- **Summaries**: Group multi-day schedules by day, show chronologically\n- **Availability**: \"You're free from X-Y\" or \"Calendar is clear on [date]\"\n- **Conflicts**: \"Warning: This overlaps with [existing event]\"\n\n## Key Rules\n- Always get event ID before updating/deleting\n- Check for time conflicts when creating events\n- Use 24-hour format internally, 12-hour format in responses\n- Confirm date/time/duration clearly in user-friendly format\n- Offer coordination: \"Should I send an email about this event?\"\n- If event not found, list similar events to help user identify it\n\n## Tool Parameters Quick Reference\n\n**Create Event**: Title, Start (ISO 8601), End (ISO 8601)\n**Update Events**: Event (ID from Get Events), Title (optional), Start (optional), End (optional)\n**Delete Events**: title (the event ID from Get Events)\n**Get Events**: No parameters - returns all events\n\n## Event Matching Logic\nWhen finding events to update/delete:\n1. Match by exact title first\n2. Match by date/time if title ambiguous\n3. If multiple matches, ask user to clarify which event\n4. Provide event details to help user identify: \"Which meeting: 2pm Team Standup or 4pm Client Call?\""
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        1168,
+        928
+      ],
+      "id": "c58bb93a-353e-4078-8fc0-35ff66409e6c",
+      "name": "Calendar Agent"
+    },
+    {
+      "parameters": {
+        "content": "# E-mails Agent\n\n\n",
+        "height": 560,
+        "width": 1328,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        992,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "f60a3ab5-a5f0-47a0-8a4d-aab6ba46685e",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# Calendar Agent\n\n\n",
+        "height": 448,
+        "width": 1328,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        992,
+        832
+      ],
+      "typeVersion": 1,
+      "id": "1575cc0b-717f-42dd-978c-acf63f9b946a",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "operation": "create",
+        "calendarId": {
+          "__rl": true,
+          "value": "AQMkADAwATMwMAExLWExMmYtZTc5Ny0wMAItMDAKAEYAAAOIj73tiVROR6HUN4DCpapZBwDZshAjW8K3T4FKKBllF9DhAAACAQYAAADZshAjW8K3T4FKKBllF9DhAAACOh8AAAA=",
+          "mode": "list",
+          "cachedResultName": "Calendar"
+        },
+        "subject": "={{ $fromAI('Title') }}",
+        "startDateTime": "={{ $fromAI('Start') }}",
+        "endDateTime": "={{ $fromAI('End')}}",
+        "additionalFields": {
+          "timeZone": "Africa/Casablanca"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTool",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        1040
+      ],
+      "id": "9a7eb6df-7640-4bdf-a133-4e6f62ff2664",
+      "name": "Create Event",
+      "webhookId": "ac962866-030d-40dd-8a92-64972ccf8c15",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "UMGmzj5Pc6rxO76z",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "operation": "delete",
+        "calendarId": {
+          "__rl": true,
+          "value": "AQMkADAwATMwMAExLWExMmYtZTc5Ny0wMAItMDAKAEYAAAOIj73tiVROR6HUN4DCpapZBwDZshAjW8K3T4FKKBllF9DhAAACAQYAAADZshAjW8K3T4FKKBllF9DhAAACOh8AAAA=",
+          "mode": "list",
+          "cachedResultName": "Calendar"
+        },
+        "eventId": {
+          "__rl": true,
+          "value": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Event', `the id that matches the events id`, 'string') }}",
+          "mode": "id",
+          "cachedResultName": "",
+          "cachedResultUrl": ""
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTool",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        1120
+      ],
+      "id": "2a84f850-aa30-4f91-a627-bdcc38d71639",
+      "name": "Delete Events",
+      "webhookId": "ac962866-030d-40dd-8a92-64972ccf8c15",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "UMGmzj5Pc6rxO76z",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "fromAllCalendars": false,
+        "calendarId": {
+          "__rl": true,
+          "value": "AQMkADAwATMwMAExLWExMmYtZTc5Ny0wMAItMDAKAEYAAAOIj73tiVROR6HUN4DCpapZBwDZshAjW8K3T4FKKBllF9DhAAACAQYAAADZshAjW8K3T4FKKBllF9DhAAACOh8AAAA=",
+          "mode": "list",
+          "cachedResultName": "Calendar"
+        },
+        "filters": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTool",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        1120
+      ],
+      "id": "961ecaa6-30da-4a32-926e-7594f5cdb67a",
+      "name": "Get Events",
+      "webhookId": "ac962866-030d-40dd-8a92-64972ccf8c15",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "UMGmzj5Pc6rxO76z",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "event",
+        "operation": "update",
+        "calendarId": {
+          "__rl": true,
+          "value": "AQMkADAwATMwMAExLWExMmYtZTc5Ny0wMAItMDAKAEYAAAOIj73tiVROR6HUN4DCpapZBwDZshAjW8K3T4FKKBllF9DhAAACAQYAAADZshAjW8K3T4FKKBllF9DhAAACOh8AAAA=",
+          "mode": "list",
+          "cachedResultName": "Calendar"
+        },
+        "eventId": {
+          "__rl": true,
+          "value": "{{ $fromAI('Event', 'The id that matches events id') }}",
+          "mode": "id"
+        },
+        "additionalFields": {
+          "end": "={{ $fromAI('End')}}",
+          "start": "={{ $fromAI('Start')}}",
+          "subject": "={{ $fromAI('Title') }}"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTool",
+      "typeVersion": 2,
+      "position": [
+        2064,
+        1040
+      ],
+      "id": "ab26e46f-746c-4a15-b8fb-faebc02cf567",
+      "name": "Update Events",
+      "webhookId": "ac962866-030d-40dd-8a92-64972ccf8c15",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "UMGmzj5Pc6rxO76z",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "toRecipients": "={{ $fromAI('emailReciever') }}",
+        "subject": "={{ $fromAI('Subject') }}",
+        "bodyContent": "={{ $fromAI('emailBody') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTool",
+      "typeVersion": 2,
+      "position": [
+        1344,
+        464
+      ],
+      "id": "3ff846ad-503e-4e84-b9ef-bfa08963becc",
+      "name": "Send Emails",
+      "webhookId": "7fae4524-240b-4287-9be3-8f091b5dabb5",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "UMGmzj5Pc6rxO76z",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": {
+          "__rl": true,
+          "value": "={{ $fromAI('Message_ID')}} ",
+          "mode": "id"
+        },
+        "message": "={{ $fromAI('emailBody') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTool",
+      "typeVersion": 2,
+      "position": [
+        1440,
+        576
+      ],
+      "id": "18e01cb9-145b-49f8-919f-4d79815c05af",
+      "name": "Reply Emails",
+      "webhookId": "7fae4524-240b-4287-9be3-8f091b5dabb5",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "UMGmzj5Pc6rxO76z",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "draft",
+        "subject": "={{ $fromAI('Subject')}}",
+        "bodyContent": "={{ $fromAI('emailBody') }}",
+        "additionalFields": {
+          "bodyContentType": "Text",
+          "toRecipients": "={{ $fromAI('emailReciever') }}"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTool",
+      "typeVersion": 2,
+      "position": [
+        1552,
+        656
+      ],
+      "id": "bc52f393-45c9-414e-bfb7-5d3f69ecdc26",
+      "name": "Create Draft Emails",
+      "webhookId": "7fae4524-240b-4287-9be3-8f091b5dabb5",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "UMGmzj5Pc6rxO76z",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "delete",
+        "messageId": {
+          "__rl": true,
+          "value": "={{ $fromAI('Message_ID') }}",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTool",
+      "typeVersion": 2,
+      "position": [
+        1696,
+        656
+      ],
+      "id": "7256d0d0-35fb-4e7b-8dd0-789c3c858d33",
+      "name": "Delete Emails",
+      "webhookId": "7fae4524-240b-4287-9be3-8f091b5dabb5",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "UMGmzj5Pc6rxO76z",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 25,
+        "filtersUI": {
+          "values": {
+            "filters": {
+              "receivedAfter": "={{ $fromAI('Received_After') }}",
+              "receivedBefore": "={{ $fromAI('Received_Before') }}",
+              "sender": "={{ $fromAI('emailSearch') }}"
+            }
+          }
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTool",
+      "typeVersion": 2,
+      "position": [
+        1824,
+        656
+      ],
+      "id": "52d759d2-eb6e-43ec-a2a0-92d9a158e930",
+      "name": "Get Emails",
+      "webhookId": "7fae4524-240b-4287-9be3-8f091b5dabb5",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "UMGmzj5Pc6rxO76z",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "displayName": "={{ $fromAI('labelName') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTool",
+      "typeVersion": 2,
+      "position": [
+        2096,
+        400
+      ],
+      "id": "af2e7a52-8641-4feb-9897-b76eed760eb6",
+      "name": "Create Folders",
+      "webhookId": "7fae4524-240b-4287-9be3-8f091b5dabb5",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "UMGmzj5Pc6rxO76z",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "folder",
+        "operation": "getAll",
+        "returnAll": true,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTool",
+      "typeVersion": 2,
+      "position": [
+        2032,
+        528
+      ],
+      "id": "1c36d2c7-95c2-47ee-a094-4d634ee2458d",
+      "name": "Get Folders",
+      "webhookId": "7fae4524-240b-4287-9be3-8f091b5dabb5",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "UMGmzj5Pc6rxO76z",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('Telegram Trigger1').item.json.message.text }}",
+        "options": {
+          "systemMessage": "=## Role\nYou are the Email & Calendar Orchestrator Agent. Your job is to intelligently route user requests to specialized sub-agents and coordinate their responses. Current date/time: {{ $now.toString() }}\n\n## Available Sub-Agents\n- **E-mails Agent**: Handles all email operations (send, reply, draft, delete, search, organize)\n- **Calendar Agent**: Handles all calendar operations (create, update, delete, retrieve events)\n\n## Core Responsibilities\n1. **Analyze Intent**: Determine whether the user's request relates to emails, calendar, or both\n2. **Route Efficiently**: Delegate tasks to the appropriate sub-agent(s)\n3. **Coordinate Responses**: If multiple agents are needed, orchestrate their work in logical order\n4. **Maintain Context**: Keep track of conversation flow and previous actions\n5. **Confirm Actions**: Always summarize what was done and the outcome\n\n## Routing Logic\n- **Email keywords**: send, reply, draft, delete, inbox, folder, organize, email, message, forward\n- **Calendar keywords**: schedule, meeting, event, appointment, calendar, availability, reschedule, cancel\n- **Ambiguous requests**: Ask clarifying questions before routing\n- **Multi-step requests**: Break down into sub-tasks and coordinate agents sequentially\n\n## Response Format\n- Keep responses conversational and concise\n- Confirm actions clearly: \"I've sent the email to [recipient]\" or \"Added event to your calendar\"\n- For searches/retrievals: Summarize key information without overwhelming details\n- For errors: Explain what went wrong and suggest alternatives\n\n## Examples\n\n**Example 1: Simple Email**\nUser: \"Send an email to john@example.com about tomorrow's meeting\"\nAction: Route to E-mails Agent → Confirm: \"Email sent to john@example.com with subject: Tomorrow's Meeting\"\n\n**Example 2: Calendar Query**\nUser: \"What's on my calendar for next week?\"\nAction: Route to Calendar Agent → Summarize: \"You have 5 events next week: [brief list]\"\n\n**Example 3: Multi-Agent Task**\nUser: \"Schedule a meeting with Sarah tomorrow at 2pm and send her an email about it\"\nAction: \n1. Calendar Agent: Create event\n2. E-mails Agent: Send notification email\nResponse: \"Meeting scheduled for tomorrow at 2pm and confirmation email sent to Sarah\"\n\n**Example 4: Ambiguous Request**\nUser: \"I need to organize things for the project\"\nAction: Ask: \"Would you like me to organize emails related to the project, or schedule project meetings on your calendar?\"\n\n## Guidelines\n- Never expose technical details (node names, MCP servers, internal processes)\n- Don't ask for information the sub-agents can retrieve (e.g., calendar events, email threads)\n- Be proactive: If you send an email about a meeting, offer to add it to the calendar\n- Handle errors gracefully: If an agent fails, explain and offer alternatives\n- Stay in context: Remember what was discussed earlier in the conversation"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        432,
+        320
+      ],
+      "id": "119b3d4a-04da-43ee-9485-c9c69a0dd3c2",
+      "name": "Orchestrator Agent"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2f35809b-3889-4ef7-a8d5-a4d934842631",
+              "name": "Text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        256,
+        368
+      ],
+      "id": "46ffc34e-c82e-413e-b0f5-a7deceac45dc",
+      "name": "Text"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        112,
+        368
+      ],
+      "id": "23d329a7-3b3e-4def-b2e9-adc53e93ab6e",
+      "name": "Telegram Trigger1",
+      "webhookId": "29baba86-48b1-4f93-af3b-2a96e7cd47b1",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        736,
+        320
+      ],
+      "id": "13f82716-8ee2-40cd-ade0-0f3952c408a3",
+      "name": "Send a text message",
+      "webhookId": "e4bed5dc-7fed-4211-992c-df8039755f26",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://unthanked-kenya-vowelly.ngrok-free.dev/mcp/emails",
+        "serverTransport": "httpStreamable",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        1344,
+        672
+      ],
+      "id": "c3ee24bf-fba2-4146-a06b-d43b4cecd70a",
+      "name": "MCP Emails Client"
+    },
+    {
+      "parameters": {
+        "path": "emails"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        1552,
+        288
+      ],
+      "id": "f58f937f-0f41-4721-b6b5-35e272106539",
+      "name": "MCP Emails Server Trigger",
+      "webhookId": "cd249f55-d930-4d5c-a562-8dcca4403bf7"
+    },
+    {
+      "parameters": {
+        "path": "calendar"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        1776,
+        880
+      ],
+      "id": "cd829920-b588-495f-8627-fe94b244e99a",
+      "name": "MCP Calendar Server Trigger",
+      "webhookId": "cd249f55-d930-4d5c-a562-8dcca4403bf7"
+    },
+    {
+      "parameters": {
+        "endpointUrl": "https://unthanked-kenya-vowelly.ngrok-free.dev/mcp/calendar",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpClientTool",
+      "typeVersion": 1.1,
+      "position": [
+        1408,
+        1136
+      ],
+      "id": "08dbbacc-a04f-4b34-900d-21de9dde6b48",
+      "name": "MCP Calendar Client"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        592
+      ],
+      "id": "aef696ea-1829-4bf3-9d1e-b7a74182df2e",
+      "name": "Parent Memory"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1168,
+        672
+      ],
+      "id": "5b6ffec9-043f-449d-8d6d-269f10a46691",
+      "name": "Emails Memory"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger1').item.json.message.chat.id }}",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        1232,
+        1136
+      ],
+      "id": "268810cb-464e-44b0-b5ab-e2f7f42f5f8e",
+      "name": "Calendar Memory"
+    },
+    {
+      "parameters": {
+        "content": "# Inputs\n",
+        "height": 560,
+        "width": 896
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        64,
+        240
+      ],
+      "typeVersion": 1,
+      "id": "e3233374-9d42-4276-ae86-1de9f73e51bc",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "\n## 🔨 TO-DO\n- ⏳ Email Classifier (auto-categorize/smart routing)\n- ⏳ Upgrade to Zep Memory (replace Buffer Window)\n- ⏳ Voice message support via Telegram\n- ⏳ Email automation workflows\n- ⏳ Fix \"latest email\" sorting (needs date filter)\n- ⏳ Add email templates\n- ⏳ Calendar reminders/notifications\n\n## 📝 Technical Notes\n- MCP endpoints: /mcp/emails, /mcp/calendar\n- Memory: 50-message window per chat ID\n- ISO 8601 dates required for calendar\n- Always get Message_ID before reply/delete/move\n- Get folder IDs before organizing emails\n- Telegram pinned test data in workflow",
+        "height": 448,
+        "width": 384
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        576,
+        832
+      ],
+      "typeVersion": 1,
+      "id": "8187aa81-ce21-44cd-aa29-37a2f6097d77",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "operation": "move",
+        "messageId": {
+          "__rl": true,
+          "value": "={{ $fromAI('Message_ID') }}",
+          "mode": "id"
+        },
+        "folderId": {
+          "__rl": true,
+          "value": "={{ $fromAI('Parent_Folder_ID') }}",
+          "mode": "id"
+        }
+      },
+      "type": "n8n-nodes-base.microsoftOutlookTool",
+      "typeVersion": 2,
+      "position": [
+        1936,
+        624
+      ],
+      "id": "0721c17b-68ba-493b-b4fe-945ad9fca39b",
+      "name": "Move Emails to Folders",
+      "webhookId": "7fae4524-240b-4287-9be3-8f091b5dabb5",
+      "credentials": {
+        "microsoftOutlookOAuth2Api": {
+          "id": "UMGmzj5Pc6rxO76z",
+          "name": "Microsoft Outlook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        928,
+        704
+      ],
+      "id": "dd517000-4c44-45dd-b1d5-f1938d50e646",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        1040,
+        1136
+      ],
+      "id": "f20fe21a-57d7-49a0-b064-8aa5b48562a5",
+      "name": "Google Gemini Chat Model1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        400,
+        528
+      ],
+      "id": "8e093785-076d-4c6d-80a1-cc0b0ef538ff",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "E-mails Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Event": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Calendar Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Events": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Calendar Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Events": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Calendar Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Events": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Calendar Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Emails": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Emails Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply Emails": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Emails Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Draft Emails": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Emails Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete Emails": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Emails Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Emails": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Emails Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Folders": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Emails Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Folders": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Emails Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Text",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orchestrator Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Emails Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "E-mails Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "MCP Calendar Client": {
+      "ai_tool": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parent Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Emails Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "E-mails Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calendar Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Move Emails to Folders": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Emails Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "E-mails Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model1": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Calendar Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "a6830ed5-7e93-4691-8ae3-b29ee547916e",
+  "activeVersionId": null,
+  "triggerCount": 3,
+  "shared": [
+    {
+      "updatedAt": "2025-11-30T12:27:15.563Z",
+      "createdAt": "2025-11-30T12:27:15.563Z",
+      "role": "workflow:owner",
+      "workflowId": "ABLr7Q13IjHwcFMS",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
