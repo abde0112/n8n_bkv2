@@ -1,0 +1,325 @@
+{
+  "updatedAt": "2025-09-27T10:47:40.000Z",
+  "createdAt": "2025-09-18T08:21:28.992Z",
+  "id": "gEowwJU26qoBo6OM",
+  "name": "ARK-X generate team",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        64,
+        144
+      ],
+      "id": "40ca7419-d3e8-4b7c-bc87-3935a563a74b",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1-Jvj0pTdKLAmQaFO4V8gOFm1TZEL28CJ1btsPbSOqxg",
+          "mode": "list",
+          "cachedResultName": "ARK-x team",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-Jvj0pTdKLAmQaFO4V8gOFm1TZEL28CJ1btsPbSOqxg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-Jvj0pTdKLAmQaFO4V8gOFm1TZEL28CJ1btsPbSOqxg/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        256,
+        0
+      ],
+      "id": "8da540f8-a05e-41ba-ae03-52ca144fcec9",
+      "name": "Get row(s) in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input 0 = Set node\nconst setInput = $input.all()[0];\nlet numGroups = $('Edit Fields').first().json.NumberOfTeams; // default\nif (setInput && setInput[0]) {\n    numGroups = parseInt(setInput[0].json.NumberOfTeams) || 3;\n}\n\n// Input 1 = Google Sheets node (Names)\nconst namesInputRaw = $input.all();\n\n// Ensure we have an array of items\nlet names = [];\nif (Array.isArray(namesInputRaw)) {\n    names = namesInputRaw.flatMap(item => item.json.Name ? [item.json.Name] : []);\n} else if (namesInputRaw && namesInputRaw.json && namesInputRaw.json.Name) {\n    names = [namesInputRaw.json.Name];\n}\n\n// Shuffle names\nfor (let i = names.length - 1; i > 0; i--) {\n    const j = Math.floor(Math.random() * (i + 1));\n    [names[i], names[j]] = [names[j], names[i]];\n}\n\n// Create empty teams\nlet teams = Array.from({ length: numGroups }, () => []);\n\n// Distribute names\nnames.forEach((name, idx) => {\n    teams[idx % numGroups].push(name);\n});\n\n// Prepare output for Google Sheets\nlet output = [];\nteams.forEach((team, i) => {\n    team.forEach(member => {\n        output.push({\n            json: {\n                Team: `Team ${i + 1}`,\n                Member: member\n            }\n        });\n    });\n});\n\nreturn output;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        688,
+        0
+      ],
+      "id": "a2f59a9e-1258-48bd-8b5b-a7df3b9e8fd1",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"NumberOfTeams\": 5\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "b7f9097a-551f-44f2-9881-aae4b8c1dbab",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "3693178d-c758-4069-99c7-674335b5c7bf",
+              "name": "Name",
+              "value": "={{ $('Get row(s) in sheet').item.json.Name }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        544,
+        0
+      ],
+      "id": "4a75d51f-dc12-4d4e-a27c-3e3fc85073b8",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1-Jvj0pTdKLAmQaFO4V8gOFm1TZEL28CJ1btsPbSOqxg",
+          "mode": "list",
+          "cachedResultName": "ARK-x team",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-Jvj0pTdKLAmQaFO4V8gOFm1TZEL28CJ1btsPbSOqxg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1335248058,
+          "mode": "list",
+          "cachedResultName": "team",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-Jvj0pTdKLAmQaFO4V8gOFm1TZEL28CJ1btsPbSOqxg/edit#gid=1335248058"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Team",
+              "displayName": "Team",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Member",
+              "displayName": "Member",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1040,
+        0
+      ],
+      "id": "6892de3e-2d9e-4bbf-8dfe-917f6af267e5",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "clear",
+        "documentId": {
+          "__rl": true,
+          "value": "1-Jvj0pTdKLAmQaFO4V8gOFm1TZEL28CJ1btsPbSOqxg",
+          "mode": "list",
+          "cachedResultName": "ARK-x team",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-Jvj0pTdKLAmQaFO4V8gOFm1TZEL28CJ1btsPbSOqxg/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1335248058,
+          "mode": "list",
+          "cachedResultName": "team",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1-Jvj0pTdKLAmQaFO4V8gOFm1TZEL28CJ1btsPbSOqxg/edit#gid=1335248058"
+        }
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        848,
+        0
+      ],
+      "id": "31941ed2-009a-47aa-9da4-197e0747fe20",
+      "name": "Clear sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "Name",
+        "formDescription": "give me names",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "name"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        -16
+      ],
+      "id": "89d7636b-8c47-4a7e-af93-0d18efc5d7d9",
+      "name": "On form submission",
+      "webhookId": "fb78b761-dcab-499a-ae68-72ba947bd1ce"
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Clear sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Clear sheet": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "a20a85f5-dd2e-4f0d-a68e-a1acebb3562e",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-18T08:21:29.009Z",
+      "createdAt": "2025-09-18T08:21:29.009Z",
+      "role": "workflow:owner",
+      "workflowId": "gEowwJU26qoBo6OM",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
