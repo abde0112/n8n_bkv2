@@ -1,0 +1,1348 @@
+{
+  "updatedAt": "2025-11-23T17:41:55.000Z",
+  "createdAt": "2025-11-23T17:21:59.669Z",
+  "id": "UOML1h6l9na0qhhp",
+  "name": "test GR",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        496,
+        320
+      ],
+      "id": "9280db3c-8c90-4d95-9220-3620e1d01ffe",
+      "name": "Send a message",
+      "webhookId": "bb7a5919-6824-4026-8720-4dc83b7f247e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "abdellahkr13"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "simple": false,
+        "filters": {},
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        656,
+        320
+      ],
+      "id": "e2dbdac6-31c7-4246-97a6-e45c466c808e",
+      "name": "Get many e-mails",
+      "webhookId": "bb7a5919-6824-4026-8720-4dc83b7f247e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "abdellahkr13"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        816,
+        320
+      ],
+      "id": "431367cc-49ef-428e-88d3-26399bdc66ac",
+      "name": "Mark as read",
+      "webhookId": "bb7a5919-6824-4026-8720-4dc83b7f247e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "abdellahkr13"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "markAsUnread",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}"
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1024,
+        320
+      ],
+      "id": "08df4379-3e78-4080-9e32-d0b0132c6f6f",
+      "name": "Mark as unread",
+      "webhookId": "bb7a5919-6824-4026-8720-4dc83b7f247e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "abdellahkr13"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message_ID', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        1232,
+        320
+      ],
+      "id": "0da11073-6720-476b-8a09-3df4fce805ed",
+      "name": "Reply to e-mail",
+      "webhookId": "bb7a5919-6824-4026-8720-4dc83b7f247e",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "abdellahkr13"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "content": "# E-Mail Agent\n\n\n",
+        "height": 496,
+        "width": 1520,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "f9af1f00-9204-47bd-94c1-64582fe3d154",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        272,
+        320
+      ],
+      "id": "21a8a9f6-39fb-40b5-aac0-d3220127cbde",
+      "name": "Simple Memory1"
+    },
+    {
+      "parameters": {
+        "toolDescription": "AI Agent can Call this tool if you want to do something with E-mails.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "=You are a helpful assistant, The current date and time is {{ $now.toString() }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        240,
+        112
+      ],
+      "id": "6a18d215-6bb2-4b0d-91c8-50211c72e829",
+      "name": "E-Mail Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        96,
+        320
+      ],
+      "id": "460c3356-5f4b-46e7-87cc-39c3c5a1148c",
+      "name": "Google Gemini Chat Model2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.message.text }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "string",
+                      "operation": "exists",
+                      "singleValue": true
+                    },
+                    "id": "35588a02-6475-400d-b869-da05d7ed0f3a"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Text"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "83b9e800-99d0-4e31-8032-ae81aebe86d1",
+                    "leftValue": "={{ $json.message.voice }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Audio"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "3ab7184b-65ec-4ca5-a250-667667999220",
+                    "leftValue": "={{ $json.message.photo[0] }}",
+                    "rightValue": "",
+                    "operator": {
+                      "type": "object",
+                      "operation": "exists",
+                      "singleValue": true
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Image"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -1472,
+        -560
+      ],
+      "id": "f2532786-bc4f-432a-8bfe-6fcbaa7b98ae",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2f35809b-3889-4ef7-a8d5-a4d934842631",
+              "name": "Text",
+              "value": "={{ $json.message.text }}",
+              "type": "string"
+            },
+            {
+              "id": "20b39541-487e-4ce9-9596-67ec3978cc0e",
+              "name": "message.chat.id",
+              "value": "ID",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -928,
+        -720
+      ],
+      "id": "8e98c059-5555-4664-a964-8b573746ff7a",
+      "name": "Text"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "2f35809b-3889-4ef7-a8d5-a4d934842631",
+              "name": "Text",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -432,
+        -544
+      ],
+      "id": "1ed1d5fe-9cc5-4b72-baa6-60e477bac475",
+      "name": "Voice"
+    },
+    {
+      "parameters": {
+        "content": "# Text\n",
+        "height": 176,
+        "width": 1024,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1264,
+        -752
+      ],
+      "typeVersion": 1,
+      "id": "ca4e19cb-24c2-4c12-873c-a98e175f369d",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "# Voice\n",
+        "height": 176,
+        "width": 1024,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1264,
+        -560
+      ],
+      "typeVersion": 1,
+      "id": "267a7ccd-5020-4281-a5db-5a5e2aa47a3d",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "# Image\n",
+        "height": 272,
+        "width": 1024,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1264,
+        -352
+      ],
+      "typeVersion": 1,
+      "id": "e7c90522-c6e6-4846-aa59-05b6fd4ff094",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "# Inputs\n",
+        "height": 720,
+        "width": 1520
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1680,
+        -768
+      ],
+      "typeVersion": 1,
+      "id": "0192ad11-5749-4bf7-a756-1cd4ff4ed46f",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.Text }}",
+        "options": {
+          "systemMessage": "=Time included: {{ $now.toString() }}\nNo extra explanations.\n\nParent Orchestrator Agent Prompt\n\nYou are the Parent Orchestrator Agent. Your task is to route all incoming messages to the correct sub-agent.\n\nThe current date and time is {{ $now.toString() }}.\n\nTools:\n\nThink → Analyze intent and decide which agent should handle the request.\n\nE-Mails Agent → Send, reply, read, mark as read/unread.\n\nCalendar Agent → Create, update, delete, or retrieve events.\n\nWeb Search Agent → Search online using Google Search, Wikipedia, or Hacker News.\n\nSocial Media Agent → Create or manage posts.\n\nRules:\n\n• Route each message to the correct agent.\n• Use Think when unsure.\n• Respond in simple plain text only.\n• Confirm every completed action.\n• Keep responses short and natural.\n\nCalendar Rules:\n\n• Match events by title and approximate date/time.\n• Automatically fetch Event IDs using Get Many Events.\n• Do not ask the user for Event ID.\n• If user changes date/time, delete/replace old event automatically.\n• Confirm actions clearly.\n\nInstructions:\n\nReceive the user message.\n\nAnalyze the intent using Think.\n\nRoute to the correct agent.\n\nFor calendar tasks:\n– Get Event IDs\n– Delete/update automatically\n– Create new events if needed\n\nReturn final confirmation in plain text."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.1,
+      "position": [
+        80,
+        -608
+      ],
+      "id": "75eabecf-cef8-43db-9b66-7d20b58bfa82",
+      "name": "Orchestrator Agent",
+      "retryOnFail": false
+    },
+    {
+      "parameters": {
+        "content": "# Text\n\n",
+        "height": 176,
+        "width": 576,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        752,
+        -608
+      ],
+      "typeVersion": 1,
+      "id": "103b4988-edce-49b1-89d4-c8b38b9ab77f",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "# Text\n\n",
+        "height": 176,
+        "width": 576,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        752,
+        -400
+      ],
+      "typeVersion": 1,
+      "id": "48bd2285-3244-404b-abe7-81d11b98f11f",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "# Output\n",
+        "height": 720,
+        "width": 800
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        608,
+        -768
+      ],
+      "typeVersion": 1,
+      "id": "f9576686-002e-4991-a5cb-6373aa04d78f",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "# Orchestrator Agent\n\n",
+        "height": 720,
+        "width": 736,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -144,
+        -768
+      ],
+      "typeVersion": 1,
+      "id": "be68628a-5fd3-4b5e-b6bc-69113fdbaf03",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1648,
+        -544
+      ],
+      "id": "1397e179-19e1-4aa2-bcd3-999587550a97",
+      "name": "Telegram Trigger",
+      "webhookId": "29baba86-48b1-4f93-af3b-2a96e7cd47b1",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        928,
+        -592
+      ],
+      "id": "8fd1c2ed-fd9d-4d13-a3b1-b770c322bfb3",
+      "name": "Send a text message",
+      "webhookId": "e4bed5dc-7fed-4211-992c-df8039755f26",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "sendAudio",
+        "chatId": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "binaryData": true,
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1200,
+        -384
+      ],
+      "id": "18e46703-6435-4519-8d91-f90cf11a7bb4",
+      "name": "Send an audio file",
+      "webhookId": "f395ebe1-6b08-4000-ad8a-cec809b89e39",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.photo[2].file_id }}",
+        "additionalFields": {
+          "mimeType": "image/jpeg"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1040,
+        -272
+      ],
+      "id": "fd9a49a6-af69-4871-a975-6375b7cd8175",
+      "name": "Get an Image",
+      "webhookId": "5f1ee6fd-86f9-431d-8a90-1dc0e9c9eb65",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -1136,
+        -544
+      ],
+      "id": "5f403f57-35c0-4ee6-84ff-7455fb26943f",
+      "name": "Get a Voice",
+      "webhookId": "5f1ee6fd-86f9-431d-8a90-1dc0e9c9eb65",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "48ce1a29-e1a9-45b2-874b-e83fbf804787",
+              "leftValue": "={{ $('Telegram Trigger').item.json.message.text }}",
+              "rightValue": "",
+              "operator": {
+                "type": "string",
+                "operation": "exists",
+                "singleValue": true
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        432,
+        -608
+      ],
+      "id": "155d8af7-5f21-4c5c-bf15-9a2145209a6f",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "02b044cf-399d-4d80-b0b5-e7102670bdc5",
+              "name": "Text",
+              "value": "={{ $json.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -432,
+        -272
+      ],
+      "id": "98f5afb4-8e97-42fd-80be-a82fb29904e4",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "inputType": "base64",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -832,
+        -272
+      ],
+      "id": "524c29b0-8173-4807-9a08-ac667c74a70f",
+      "name": "Analyze image",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        -928,
+        -544
+      ],
+      "id": "06e96bdf-dc9c-4c7d-8bad-87823f3b4715",
+      "name": "Transcribe a recording",
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "input": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        864,
+        -384
+      ],
+      "id": "686aea27-f47a-410b-82fc-8b23429a0f6c",
+      "name": "Generate audio",
+      "credentials": {
+        "openAiApi": {
+          "id": "KgsXR5Ga5dON4Aie",
+          "name": "OpenAi account 2"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        -272
+      ],
+      "id": "31b26f4b-1c88-4733-960d-0320604e67a5",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "http://api.voicerss.org",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "key",
+              "value": "e529ed32530e461ca82de116a6919fa8"
+            },
+            {
+              "name": "hl",
+              "value": "en-us"
+            },
+            {
+              "name": "src",
+              "value": "={{ $json.output }}"
+            },
+            {
+              "name": "c",
+              "value": "mp3"
+            },
+            {
+              "name": "f",
+              "value": "44khz_16bit_stereo"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "file",
+              "outputPropertyName": "data.mp3"
+            }
+          }
+        }
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1040,
+        -384
+      ],
+      "id": "2641ac5e-dbe4-4966-addd-9f649c48a21c",
+      "name": "voicerss.org"
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -720,
+        -544
+      ],
+      "id": "1e33fe35-8a94-4657-ab2f-7175806fea17",
+      "name": "Transcribe a recording1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "operation": "analyze",
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "inputType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        -272
+      ],
+      "id": "1d383db2-de85-4820-bd9c-272df90bfd2e",
+      "name": "Analyze an image",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        144,
+        -288
+      ],
+      "id": "0c53e354-5024-45b2-9665-1224e9248620",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolSerpApi",
+      "typeVersion": 1,
+      "position": [
+        -256,
+        336
+      ],
+      "id": "52de58f3-a5af-43f1-b5d0-3138fc73c32d",
+      "name": "Google Search",
+      "credentials": {
+        "serpApi": {
+          "id": "SrvSDfq8k1ngqvWj",
+          "name": "SerpAPI account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        320
+      ],
+      "id": "f1219ddc-25b5-41c4-a116-252be606bfc8",
+      "name": "Wikipedia"
+    },
+    {
+      "parameters": {
+        "articleId": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Article_ID', ``, 'string') }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.hackerNewsTool",
+      "typeVersion": 1,
+      "position": [
+        -816,
+        304
+      ],
+      "id": "ff7a4b10-391a-46aa-9f48-e765a2a0bc27",
+      "name": "Get an article in Hacker News"
+    },
+    {
+      "parameters": {
+        "content": "# Web Search Agent\n\n",
+        "height": 496,
+        "width": 1520,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1536,
+        0
+      ],
+      "typeVersion": 1,
+      "id": "4e137563-c3b5-4567-8904-41bb95510c8f",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $('Telegram Trigger').item.json.message.chat.id }}",
+        "contextWindowLength": 50
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -1200,
+        320
+      ],
+      "id": "32dc1d3c-5110-4c85-9a8f-39fd6aac6482",
+      "name": "Simple Memory3"
+    },
+    {
+      "parameters": {
+        "toolDescription": "AI Agent can Call this tool if you want to do something with E-mails.",
+        "text": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Prompt__User_Message_', ``, 'string') }}",
+        "options": {
+          "systemMessage": "You are a helpful assistant, The current date and time is {{ $now.toString() }}"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agentTool",
+      "typeVersion": 2.2,
+      "position": [
+        -960,
+        80
+      ],
+      "id": "dc33543c-27ef-43e0-b52e-b98444dc5a67",
+      "name": "Web Search Agent",
+      "notesInFlow": false,
+      "notes": "efdre"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1376,
+        320
+      ],
+      "id": "be839bb5-1014-471f-b53f-c33fb1197b61",
+      "name": "Google Gemini Chat Model3",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Send a message": {
+      "ai_tool": [
+        [
+          {
+            "node": "E-Mail Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many e-mails": {
+      "ai_tool": [
+        [
+          {
+            "node": "E-Mail Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark as read": {
+      "ai_tool": [
+        [
+          {
+            "node": "E-Mail Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark as unread": {
+      "ai_tool": [
+        [
+          {
+            "node": "E-Mail Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to e-mail": {
+      "ai_tool": [
+        [
+          {
+            "node": "E-Mail Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory1": {
+      "ai_memory": [
+        [
+          {
+            "node": "E-Mail Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "E-Mail Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Text",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get a Voice",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get an Image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voice": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Orchestrator Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get an Image": {
+      "main": [
+        [
+          {
+            "node": "Analyze image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a Voice": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Generate audio",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze image": {
+      "main": [
+        [
+          {
+            "node": "Analyze an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording": {
+      "main": [
+        [
+          {
+            "node": "Transcribe a recording1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate audio": {
+      "main": [
+        [
+          {
+            "node": "voicerss.org",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "voicerss.org": {
+      "main": [
+        [
+          {
+            "node": "Send an audio file",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Transcribe a recording1": {
+      "main": [
+        [
+          {
+            "node": "Voice",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Analyze an image": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Search": {
+      "ai_tool": [
+        [
+          {
+            "node": "Web Search Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "Web Search Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get an article in Hacker News": {
+      "ai_tool": [
+        [
+          {
+            "node": "Web Search Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory3": {
+      "ai_memory": [
+        [
+          {
+            "node": "Web Search Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model3": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Web Search Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "E-Mail Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Web Search Agent": {
+      "ai_tool": [
+        [
+          {
+            "node": "Orchestrator Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "f8af2ae9-4c0b-4e8e-a939-6eb54f51d4c3",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-11-23T17:21:59.693Z",
+      "createdAt": "2025-11-23T17:21:59.693Z",
+      "role": "workflow:owner",
+      "workflowId": "UOML1h6l9na0qhhp",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
