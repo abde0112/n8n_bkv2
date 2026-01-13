@@ -1,0 +1,729 @@
+{
+  "updatedAt": "2025-10-03T10:23:09.000Z",
+  "createdAt": "2025-10-03T08:24:26.497Z",
+  "id": "N2WUbNvRVDBJqWHO",
+  "name": "Schedule Call AI Concierge",
+  "active": true,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "inputSource": "passthrough"
+      },
+      "type": "n8n-nodes-base.executeWorkflowTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -144,
+        -48
+      ],
+      "id": "a308821c-a86a-448a-a29c-f9697a3d2c3e",
+      "name": "When Executed by Another Workflow"
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "timeMax": "={{ $now.plus(48, 'hour') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        416,
+        -48
+      ],
+      "id": "7fd8d61d-b2ac-4acf-80ee-c655bcb5ec3a",
+      "name": "Get availability in a calendar",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "jsCode": "// Generate 30-min slots from 9 AM to 5 PM next 2 days\nconst slots = [];\nconst now = new Date();\nconst end = new Date(now.getTime() + 48*60*60*1000); // +48 hours\n\n// loop day by day\nfor (let day = new Date(now); day <= end; day.setDate(day.getDate() + 1)) {\n  for (let h = 9; h < 17; h++) { // 9am–5pm\n    for (let m of [0, 30]) {\n      const slotStart = new Date(day);\n      slotStart.setHours(h, m, 0, 0);\n      const slotEnd = new Date(slotStart.getTime() + 30*60000);\n\n      slots.push({\n        start: slotStart.toISOString(),\n        end: slotEnd.toISOString()\n      });\n    }\n  }\n}\n\n// Return slots in n8n format\nreturn slots.map(s => ({ json: s }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        608,
+        -48
+      ],
+      "id": "a84a0fa3-b0cf-4b84-b0e0-4f353238a1e1",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Slots come from the previous Function node (via input 1)\n// Busy events come from the Google Calendar node (via input 2)\n\n// Get slots from input 1\nconst slots = $items(0, 0).map(i => i.json);\n\n// Get busy events from input 2 (Google Calendar node)\nconst busyEvents = $items(1, 0).map(ev => ({\n  start: new Date(ev.json.start.dateTime || ev.json.start),\n  end: new Date(ev.json.end.dateTime || ev.json.end)\n}));\n\n// Overlap helper\nfunction overlap(a, b) {\n  return (a.start < b.end && a.end > b.start);\n}\n\n// Filter free slots\nconst freeSlots = slots.filter(slot => {\n  const slotRange = { start: new Date(slot.start), end: new Date(slot.end) };\n  return !busyEvents.some(event => overlap(slotRange, event));\n});\n\n// Keep first 3 free slots\nconst selected = freeSlots.slice(0, 3);\n\n// Return in n8n format\nreturn selected.map(s => ({ json: s }));\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        816,
+        -48
+      ],
+      "id": "7140d461-f995-442d-ba2e-d1f5bb0fd7f2",
+      "name": "Code in JavaScript1"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are a Calendar Command Router and Event Helper.\n\nYour job is to classify the user’s request into one of these actions:\n\n- \"CreateEvent\" → when the user wants to add a new event or meeting.\n- \"DeleteEvent\" → when the user wants to cancel or remove an event.\n- \"UpdateEvent\" → when the user wants to change an existing event (time, title, details).\n- \"GetEvents\" → when the user wants to see their upcoming events or availability.\n- \"GetFreeSlots\" → when the user wants to check available times (e.g., \"find me free time slots\").\n- \"Unknown\" → if the request is not related to calendar.\n\n⚡ Special rule for CreateEvent:\nIf the user does not specify a date or time, default to:\n- Start: 1 hour from now\n- Duration: 30 minutes\n- Title: \"Untitled Event\"\n\nAlways respond with JSON:\n{\n  \"action\": \"CreateEvent\" | \"DeleteEvent\" | \"UpdateEvent\" | \"GetEvents\" | \"GetFreeSlots\" | \"Unknown\",\n  \"title\": \"...\",\n  \"dateTime\": \"...\",\n  \"duration\": \"...\"\n}\nInclude \"dateTime\" and \"duration\" only when relevant.\nIf missing in user message, apply the default rule above.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        -48
+      ],
+      "id": "2083371c-0bc3-4237-9d71-5867806087e6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        160
+      ],
+      "id": "42b13df4-b94e-431a-8680-120d511497fc",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        16,
+        272
+      ],
+      "id": "da28157c-26fd-4769-ad0d-01d6004ea07e",
+      "name": "Create",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        272
+      ],
+      "id": "2a436f68-2067-435c-802c-09562398d53c",
+      "name": "Delete",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        272
+      ],
+      "id": "bb3c9ba8-a296-4dc7-85b5-5fb39dde4eb6",
+      "name": "Get",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        272
+      ],
+      "id": "e83853de-6f68-487b-acd4-7fea23e37bf6",
+      "name": "Get Many",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "calendar",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendarTool",
+      "typeVersion": 1.3,
+      "position": [
+        400,
+        272
+      ],
+      "id": "db273334-a1c5-4e04-9b4b-44dbf0d3b888",
+      "name": "Update",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When Executed by Another Workflow": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get availability in a calendar": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Get availability in a calendar",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Many": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Delete": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "59ec9dbd-5e59-463d-95da-1d9433bfef49",
+  "activeVersionId": "59ec9dbd-5e59-463d-95da-1d9433bfef49",
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-03T08:24:26.512Z",
+      "createdAt": "2025-10-03T08:24:26.512Z",
+      "role": "workflow:owner",
+      "workflowId": "N2WUbNvRVDBJqWHO",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": {
+    "updatedAt": "2025-12-10T11:59:59.034Z",
+    "createdAt": "2025-12-10T11:59:59.034Z",
+    "versionId": "59ec9dbd-5e59-463d-95da-1d9433bfef49",
+    "workflowId": "N2WUbNvRVDBJqWHO",
+    "nodes": [
+      {
+        "parameters": {
+          "inputSource": "passthrough"
+        },
+        "type": "n8n-nodes-base.executeWorkflowTrigger",
+        "typeVersion": 1.1,
+        "position": [
+          -144,
+          -48
+        ],
+        "id": "a308821c-a86a-448a-a29c-f9697a3d2c3e",
+        "name": "When Executed by Another Workflow"
+      },
+      {
+        "parameters": {
+          "resource": "calendar",
+          "calendar": {
+            "__rl": true,
+            "value": "abdellahkrimo13@gmail.com",
+            "mode": "list",
+            "cachedResultName": "abdellahkrimo13@gmail.com"
+          },
+          "timeMax": "={{ $now.plus(48, 'hour') }}",
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleCalendar",
+        "typeVersion": 1.3,
+        "position": [
+          416,
+          -48
+        ],
+        "id": "7fd8d61d-b2ac-4acf-80ee-c655bcb5ec3a",
+        "name": "Get availability in a calendar",
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "8HX6F1LWhek8AoYJ",
+            "name": "Google Calendar account"
+          }
+        },
+        "disabled": true
+      },
+      {
+        "parameters": {
+          "jsCode": "// Generate 30-min slots from 9 AM to 5 PM next 2 days\nconst slots = [];\nconst now = new Date();\nconst end = new Date(now.getTime() + 48*60*60*1000); // +48 hours\n\n// loop day by day\nfor (let day = new Date(now); day <= end; day.setDate(day.getDate() + 1)) {\n  for (let h = 9; h < 17; h++) { // 9am–5pm\n    for (let m of [0, 30]) {\n      const slotStart = new Date(day);\n      slotStart.setHours(h, m, 0, 0);\n      const slotEnd = new Date(slotStart.getTime() + 30*60000);\n\n      slots.push({\n        start: slotStart.toISOString(),\n        end: slotEnd.toISOString()\n      });\n    }\n  }\n}\n\n// Return slots in n8n format\nreturn slots.map(s => ({ json: s }));\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          608,
+          -48
+        ],
+        "id": "a84a0fa3-b0cf-4b84-b0e0-4f353238a1e1",
+        "name": "Code in JavaScript"
+      },
+      {
+        "parameters": {
+          "jsCode": "// Slots come from the previous Function node (via input 1)\n// Busy events come from the Google Calendar node (via input 2)\n\n// Get slots from input 1\nconst slots = $items(0, 0).map(i => i.json);\n\n// Get busy events from input 2 (Google Calendar node)\nconst busyEvents = $items(1, 0).map(ev => ({\n  start: new Date(ev.json.start.dateTime || ev.json.start),\n  end: new Date(ev.json.end.dateTime || ev.json.end)\n}));\n\n// Overlap helper\nfunction overlap(a, b) {\n  return (a.start < b.end && a.end > b.start);\n}\n\n// Filter free slots\nconst freeSlots = slots.filter(slot => {\n  const slotRange = { start: new Date(slot.start), end: new Date(slot.end) };\n  return !busyEvents.some(event => overlap(slotRange, event));\n});\n\n// Keep first 3 free slots\nconst selected = freeSlots.slice(0, 3);\n\n// Return in n8n format\nreturn selected.map(s => ({ json: s }));\n"
+        },
+        "type": "n8n-nodes-base.code",
+        "typeVersion": 2,
+        "position": [
+          816,
+          -48
+        ],
+        "id": "7140d461-f995-442d-ba2e-d1f5bb0fd7f2",
+        "name": "Code in JavaScript1"
+      },
+      {
+        "parameters": {
+          "options": {
+            "systemMessage": "You are a Calendar Command Router and Event Helper.\n\nYour job is to classify the user’s request into one of these actions:\n\n- \"CreateEvent\" → when the user wants to add a new event or meeting.\n- \"DeleteEvent\" → when the user wants to cancel or remove an event.\n- \"UpdateEvent\" → when the user wants to change an existing event (time, title, details).\n- \"GetEvents\" → when the user wants to see their upcoming events or availability.\n- \"GetFreeSlots\" → when the user wants to check available times (e.g., \"find me free time slots\").\n- \"Unknown\" → if the request is not related to calendar.\n\n⚡ Special rule for CreateEvent:\nIf the user does not specify a date or time, default to:\n- Start: 1 hour from now\n- Duration: 30 minutes\n- Title: \"Untitled Event\"\n\nAlways respond with JSON:\n{\n  \"action\": \"CreateEvent\" | \"DeleteEvent\" | \"UpdateEvent\" | \"GetEvents\" | \"GetFreeSlots\" | \"Unknown\",\n  \"title\": \"...\",\n  \"dateTime\": \"...\",\n  \"duration\": \"...\"\n}\nInclude \"dateTime\" and \"duration\" only when relevant.\nIf missing in user message, apply the default rule above.\n"
+          }
+        },
+        "type": "@n8n/n8n-nodes-langchain.agent",
+        "typeVersion": 2.2,
+        "position": [
+          64,
+          -48
+        ],
+        "id": "2083371c-0bc3-4237-9d71-5867806087e6",
+        "name": "AI Agent"
+      },
+      {
+        "parameters": {
+          "options": {}
+        },
+        "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+        "typeVersion": 1,
+        "position": [
+          -80,
+          160
+        ],
+        "id": "42b13df4-b94e-431a-8680-120d511497fc",
+        "name": "Google Gemini Chat Model",
+        "credentials": {
+          "googlePalmApi": {
+            "id": "SX4TgzNyXd9nY9M1",
+            "name": "Google Gemini(PaLM) Api account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "calendar",
+          "calendar": {
+            "__rl": true,
+            "value": "abdellahkrimo13@gmail.com",
+            "mode": "list",
+            "cachedResultName": "abdellahkrimo13@gmail.com"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleCalendarTool",
+        "typeVersion": 1.3,
+        "position": [
+          16,
+          272
+        ],
+        "id": "da28157c-26fd-4769-ad0d-01d6004ea07e",
+        "name": "Create",
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "8HX6F1LWhek8AoYJ",
+            "name": "Google Calendar account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "calendar",
+          "calendar": {
+            "__rl": true,
+            "value": "abdellahkrimo13@gmail.com",
+            "mode": "list",
+            "cachedResultName": "abdellahkrimo13@gmail.com"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleCalendarTool",
+        "typeVersion": 1.3,
+        "position": [
+          112,
+          272
+        ],
+        "id": "2a436f68-2067-435c-802c-09562398d53c",
+        "name": "Delete",
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "8HX6F1LWhek8AoYJ",
+            "name": "Google Calendar account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "calendar",
+          "calendar": {
+            "__rl": true,
+            "value": "abdellahkrimo13@gmail.com",
+            "mode": "list",
+            "cachedResultName": "abdellahkrimo13@gmail.com"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleCalendarTool",
+        "typeVersion": 1.3,
+        "position": [
+          208,
+          272
+        ],
+        "id": "bb3c9ba8-a296-4dc7-85b5-5fb39dde4eb6",
+        "name": "Get",
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "8HX6F1LWhek8AoYJ",
+            "name": "Google Calendar account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "calendar",
+          "calendar": {
+            "__rl": true,
+            "value": "abdellahkrimo13@gmail.com",
+            "mode": "list",
+            "cachedResultName": "abdellahkrimo13@gmail.com"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleCalendarTool",
+        "typeVersion": 1.3,
+        "position": [
+          304,
+          272
+        ],
+        "id": "e83853de-6f68-487b-acd4-7fea23e37bf6",
+        "name": "Get Many",
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "8HX6F1LWhek8AoYJ",
+            "name": "Google Calendar account"
+          }
+        }
+      },
+      {
+        "parameters": {
+          "resource": "calendar",
+          "calendar": {
+            "__rl": true,
+            "value": "abdellahkrimo13@gmail.com",
+            "mode": "list",
+            "cachedResultName": "abdellahkrimo13@gmail.com"
+          },
+          "options": {}
+        },
+        "type": "n8n-nodes-base.googleCalendarTool",
+        "typeVersion": 1.3,
+        "position": [
+          400,
+          272
+        ],
+        "id": "db273334-a1c5-4e04-9b4b-44dbf0d3b888",
+        "name": "Update",
+        "credentials": {
+          "googleCalendarOAuth2Api": {
+            "id": "8HX6F1LWhek8AoYJ",
+            "name": "Google Calendar account"
+          }
+        }
+      }
+    ],
+    "connections": {
+      "When Executed by Another Workflow": {
+        "main": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get availability in a calendar": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Code in JavaScript": {
+        "main": [
+          [
+            {
+              "node": "Code in JavaScript1",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "AI Agent": {
+        "main": [
+          [
+            {
+              "node": "Get availability in a calendar",
+              "type": "main",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Google Gemini Chat Model": {
+        "ai_languageModel": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_languageModel",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Update": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get Many": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Get": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Delete": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      },
+      "Create": {
+        "ai_tool": [
+          [
+            {
+              "node": "AI Agent",
+              "type": "ai_tool",
+              "index": 0
+            }
+          ]
+        ]
+      }
+    },
+    "authors": "system migration",
+    "name": null,
+    "description": null,
+    "autosaved": false
+  },
+  "tags": []
+}
