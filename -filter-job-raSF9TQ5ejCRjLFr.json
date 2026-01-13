@@ -1,0 +1,494 @@
+{
+  "updatedAt": "2025-09-27T10:41:42.000Z",
+  "createdAt": "2025-08-25T09:30:21.285Z",
+  "id": "raSF9TQ5ejCRjLFr",
+  "name": "CV Extracction / filter job",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {},
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmailTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        144,
+        -16
+      ],
+      "id": "1c08b551-5460-4255-8eda-ac604477729d",
+      "name": "Gmail Trigger",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "brQ4jykQKynzJlTp",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "pdf",
+        "binaryPropertyName": "attachment_0",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.extractFromFile",
+      "typeVersion": 1,
+      "position": [
+        400,
+        -16
+      ],
+      "id": "d4c0ebf6-6ffd-42f8-9f5b-b882d4124b40",
+      "name": "Extract from File"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "445d90cd-7832-4312-a128-ae0f5cbc5712",
+              "name": "text",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        592,
+        -16
+      ],
+      "id": "56cd51dc-6578-462c-ba9b-a23274a163bb",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=you are an HR expert , you are given a detailed CV text\nextract\nName\nEmail\nTelephone\nExperience\nSkills\nEducation\nthis is CV text  {{ $json.text }}",
+        "hasOutputParser": true,
+        "batching": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.7,
+      "position": [
+        800,
+        -16
+      ],
+      "id": "4361379e-1b7b-4213-9273-80c288926858",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "model": "google/gemma-3n-e4b-it:free",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenRouter",
+      "typeVersion": 1,
+      "position": [
+        768,
+        208
+      ],
+      "id": "f33ef795-d9d2-41e0-bfba-afcc2c7732cf",
+      "name": "OpenRouter Chat Model",
+      "credentials": {
+        "openRouterApi": {
+          "id": "Jz6x9n4WM0Sxuntt",
+          "name": "OpenRouter account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n\"Name\": \"Firstname Lastname\",\n\"Telephone\": \"01788798797\",\n\"Email\": \"a@b.com\",\n\"Education\": [\"University 1\", \"University 2\"],\n\"Skill\": [\"Skill 1\", \"Skill 2\", \"Skill 3\"],\n\"Experience\": [\"Job 1\", \"job 2\", \"job 3\"]\n}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        976,
+        224
+      ],
+      "id": "70f2f076-3a6a-4cd6-ae1b-f2abd7db9635",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://jnvlpgcwsyunllozdyso.supabase.co/rest/v1/cvs",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "apikey",
+              "value": "REDACTED_HEADER_VALUE"
+            },
+            {
+              "name": "Authorization",
+              "value": "REDACTED_HEADER_VALUE"
+            },
+            {
+              "name": "Prefer",
+              "value": "return=representation"
+            }
+          ]
+        },
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "name",
+              "value": "={{ $json.output.Name }}"
+            },
+            {
+              "name": "telephone",
+              "value": "={{ $json.output.Telephone }}"
+            },
+            {
+              "name": "email",
+              "value": "={{ $json.output.Email }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1136,
+        -16
+      ],
+      "id": "d4c81ef5-24b5-42d9-b4da-da55e53a618d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "tableId": "Experiences",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "id_cvs",
+              "fieldValue": "={{ $('HTTP Request').item.json.id }}"
+            },
+            {
+              "fieldId": "education",
+              "fieldValue": "={{ $('Basic LLM Chain').item.json.output.Experience }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        -16
+      ],
+      "id": "1bc7ae26-7179-4781-b9da-1e6a3f11cae6",
+      "name": "Create a row",
+      "credentials": {
+        "supabaseApi": {
+          "id": "RqB5Lk9bS2goqRc3",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "110fad98-bc4d-4d40-ab08-4feca69a72fe",
+              "name": "exp",
+              "value": "={{ $('Basic LLM Chain').item.json.output.Experience }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1328,
+        -16
+      ],
+      "id": "570f6359-caab-4edb-9eed-c9cc90c101ad",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "exp",
+        "include": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        -16
+      ],
+      "id": "3bc28e67-6525-452b-b2d8-ca9abea8768c",
+      "name": "Split Out"
+    },
+    {
+      "parameters": {
+        "tableId": "Experiences",
+        "fieldsUi": {
+          "fieldValues": [
+            {
+              "fieldId": "id_cvs",
+              "fieldValue": "={{ $('HTTP Request').item.json.id }}"
+            },
+            {
+              "fieldId": "education",
+              "fieldValue": "={{ $('Basic LLM Chain').item.json.output.Experience }}"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.supabase",
+      "typeVersion": 1,
+      "position": [
+        1760,
+        144
+      ],
+      "id": "135b6f88-7ff0-4f83-87f7-49ef8b731de4",
+      "name": "Create a row1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "RqB5Lk9bS2goqRc3",
+          "name": "Supabase account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "110fad98-bc4d-4d40-ab08-4feca69a72fe",
+              "name": "exp",
+              "value": "={{ $('Basic LLM Chain').item.json.output.Experience }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1328,
+        144
+      ],
+      "id": "fd85b65e-458f-4651-907f-904b79d26ecd",
+      "name": "Edit Fields2"
+    },
+    {
+      "parameters": {
+        "fieldToSplitOut": "exp",
+        "include": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitOut",
+      "typeVersion": 1,
+      "position": [
+        1536,
+        144
+      ],
+      "id": "6426218c-20e9-45ee-a627-c7d25c9de76d",
+      "name": "Split Out1"
+    }
+  ],
+  "connections": {
+    "Gmail Trigger": {
+      "main": [
+        [
+          {
+            "node": "Extract from File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract from File": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenRouter Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "Split Out",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out": {
+      "main": [
+        [
+          {
+            "node": "Create a row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields2": {
+      "main": [
+        [
+          {
+            "node": "Split Out1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Split Out1": {
+      "main": [
+        [
+          {
+            "node": "Create a row1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Extract from File": [
+      {
+        "json": {
+          "numpages": 2,
+          "numrender": 2,
+          "info": {
+            "PDFFormatVersion": "1.7",
+            "Language": "en-US",
+            "EncryptFilterName": null,
+            "IsLinearized": false,
+            "IsAcroFormPresent": false,
+            "IsXFAPresent": false,
+            "IsCollectionPresent": false,
+            "IsSignaturesPresent": false,
+            "ModDate": "D:20250625143102Z",
+            "Producer": "Pdftools SDK"
+          },
+          "text": "Dear Jobseeker,\nWe would like to express our gratitude for downloading our resume template. We believe that this template\nwill help you create an outstanding resume that will catch the attention of potential employers. We\nunderstand how challenging it can be to write a resume, and that's why we're committed to providing you\nwith the best resources to make the process easier.\nWe have curated a list of additional resume writing resources for you. Please check out the following links to\nget started:\n- Resume Builder: Our easy-to-use resume builder allows you to create a professional-looking resume in\nminutes, without any design skills required. Add pre-written, job-specific content written by experts to target\nyour resume to the role to which you’re applying.\n- Resume Templates: Choose from our collection of professionally designed resume templates to make your\nresume stand out. Our templates are designed with applicant tracking systems in mind. This means that, no\nmatter what role you apply for, the resume filtering software they use will be able to read your resume (and\nnot automatically rejected).\n- Resume Examples: Browse our collection of resume samples to get inspiration for your own resume. We\nhave examples for many industries and job positions, written by our resume writing experts, to show how\nprofessionals in your industry highlight their skills, achievements, and experience.\n- How to Write a Resume: Our comprehensive guide covers everything you need to know about writing a\nsuccessful resume, from choosing the right format to highlighting your accomplishments and skills.\n- Resume Formats: Learn about the different resume formats and choose the one that best suits your career\ngoals and experience.\nWe hope that these resources will be helpful to you in crafting a compelling and effective resume. If you have\nany questions or concerns, please don't hesitate to reach out to us.\nThank you again for downloading our resume template. We wish you all the best in your job search.\nSincerely,\nThe MyPerfectResume Team\n\nEVA PARK\nBrooklyn, NY 11005 • Home: (555) 555-5555 • Cell: (555) 555-5555 • example@example.com\nProfessional Summary\nIn 2-3 sentences, explain why you're the right person for the job. Emphasize top sales skills such as following-up\nwith leads and marketing exclusive listings to qualified buyers, or important traits such as excellent interpersonal\nand communication skills. Feature a notable work experience that matches what the potential job needs, such as\nconverting buyer lead appointments into active clients, or overseeing the entire process from listing to closing. For\nmore summary writing tips, see How to Write the Perfect Summary Section.\nSkills\n• Review the job posting and pick out key skills (such\nas self-motivation and drive).\n• Feature skills of your own that match these key\nskills.\n• Your resume format determines how large your\nskills section is — functional resumes will feature\nseveral skill categories, while other formats feature\nless.\n• Feature skills that are valuable in your profession,\nsuch as excellent communication, negotiation and\nnetworking skills.\n• Present a combination of hard skills (skills that you\ntrain on) and soft skills (intangible skills).\n• For recommendations on top skills and how to use\nthem in your resume, visit our Best Skills page.\nWork History\nPosition, 06/2018 to Current\nCompany – Company City, Company State\n• Work backward, with your current or most recent job first.\n• Focus on major responsibilities and work achievements rather than daily tasks.\n• Example: “Marketed properties on various channels to produce 1-5 qualifying buyers per open house.”\nPosition, 06/2015 to 05/2018\nCompany – Company City, Company State\n• Highlight skills and tasks that relate to the job you're applying to.\n• Use action verbs that give your achievements more power (e.g., “Consulted with 5-10 buyer and seller clients\nto close deals on a weekly basis ” instead of “Was responsible for consulting with 5-10 buyers and seller\nclients”).\n• Give your accomplishments more weight by using numbers and metrics (e.g., “Created relationships with\nclients that led to a 60% successful closing rate”).\nPosition, 07/2012 to 06/2015\nCompany – Company City, Company State\n• If you're switching career fields, emphasize “transferable skills” that make sense in the new job (for instance, if\nyou previously worked selling products door-to-door or in a retail environment, highlight your sales\naccomplishments if you're seeking a real estate agent job).\n• Unless you're applying to a job that requires extensive experience, limit your work history to the last ten years\nof your career.\n• For more tips on writing the perfect work history section, visit our page Resume Work History Writing Tips.\nEducation\nDegree Obtained: Field of Study\nSchool Name - City And State Where The School Is Located\nCertifications\nCertification or Additional Training: Field of Study\nSchool Name – City and state where the school is located",
+          "version": "5.3.31"
+        }
+      }
+    ],
+    "Edit Fields": [
+      {
+        "json": {
+          "text": "Dear Jobseeker,\nWe would like to express our gratitude for downloading our resume template. We believe that this template\nwill help you create an outstanding resume that will catch the attention of potential employers. We\nunderstand how challenging it can be to write a resume, and that's why we're committed to providing you\nwith the best resources to make the process easier.\nWe have curated a list of additional resume writing resources for you. Please check out the following links to\nget started:\n- Resume Builder: Our easy-to-use resume builder allows you to create a professional-looking resume in\nminutes, without any design skills required. Add pre-written, job-specific content written by experts to target\nyour resume to the role to which you’re applying.\n- Resume Templates: Choose from our collection of professionally designed resume templates to make your\nresume stand out. Our templates are designed with applicant tracking systems in mind. This means that, no\nmatter what role you apply for, the resume filtering software they use will be able to read your resume (and\nnot automatically rejected).\n- Resume Examples: Browse our collection of resume samples to get inspiration for your own resume. We\nhave examples for many industries and job positions, written by our resume writing experts, to show how\nprofessionals in your industry highlight their skills, achievements, and experience.\n- How to Write a Resume: Our comprehensive guide covers everything you need to know about writing a\nsuccessful resume, from choosing the right format to highlighting your accomplishments and skills.\n- Resume Formats: Learn about the different resume formats and choose the one that best suits your career\ngoals and experience.\nWe hope that these resources will be helpful to you in crafting a compelling and effective resume. If you have\nany questions or concerns, please don't hesitate to reach out to us.\nThank you again for downloading our resume template. We wish you all the best in your job search.\nSincerely,\nThe MyPerfectResume Team\n\nEVA PARK\nBrooklyn, NY 11005 • Home: (555) 555-5555 • Cell: (555) 555-5555 • example@example.com\nProfessional Summary\nIn 2-3 sentences, explain why you're the right person for the job. Emphasize top sales skills such as following-up\nwith leads and marketing exclusive listings to qualified buyers, or important traits such as excellent interpersonal\nand communication skills. Feature a notable work experience that matches what the potential job needs, such as\nconverting buyer lead appointments into active clients, or overseeing the entire process from listing to closing. For\nmore summary writing tips, see How to Write the Perfect Summary Section.\nSkills\n• Review the job posting and pick out key skills (such\nas self-motivation and drive).\n• Feature skills of your own that match these key\nskills.\n• Your resume format determines how large your\nskills section is — functional resumes will feature\nseveral skill categories, while other formats feature\nless.\n• Feature skills that are valuable in your profession,\nsuch as excellent communication, negotiation and\nnetworking skills.\n• Present a combination of hard skills (skills that you\ntrain on) and soft skills (intangible skills).\n• For recommendations on top skills and how to use\nthem in your resume, visit our Best Skills page.\nWork History\nPosition, 06/2018 to Current\nCompany – Company City, Company State\n• Work backward, with your current or most recent job first.\n• Focus on major responsibilities and work achievements rather than daily tasks.\n• Example: “Marketed properties on various channels to produce 1-5 qualifying buyers per open house.”\nPosition, 06/2015 to 05/2018\nCompany – Company City, Company State\n• Highlight skills and tasks that relate to the job you're applying to.\n• Use action verbs that give your achievements more power (e.g., “Consulted with 5-10 buyer and seller clients\nto close deals on a weekly basis ” instead of “Was responsible for consulting with 5-10 buyers and seller\nclients”).\n• Give your accomplishments more weight by using numbers and metrics (e.g., “Created relationships with\nclients that led to a 60% successful closing rate”).\nPosition, 07/2012 to 06/2015\nCompany – Company City, Company State\n• If you're switching career fields, emphasize “transferable skills” that make sense in the new job (for instance, if\nyou previously worked selling products door-to-door or in a retail environment, highlight your sales\naccomplishments if you're seeking a real estate agent job).\n• Unless you're applying to a job that requires extensive experience, limit your work history to the last ten years\nof your career.\n• For more tips on writing the perfect work history section, visit our page Resume Work History Writing Tips.\nEducation\nDegree Obtained: Field of Study\nSchool Name - City And State Where The School Is Located\nCertifications\nCertification or Additional Training: Field of Study\nSchool Name – City and state where the school is located"
+        }
+      }
+    ]
+  },
+  "versionId": "b9225a59-581d-4c3d-9031-2e8daa93bce3",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-08-25T09:30:21.306Z",
+      "createdAt": "2025-08-25T09:30:21.306Z",
+      "role": "workflow:owner",
+      "workflowId": "raSF9TQ5ejCRjLFr",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
