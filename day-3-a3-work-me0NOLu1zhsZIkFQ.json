@@ -1,0 +1,659 @@
+{
+  "updatedAt": "2025-09-11T15:39:29.000Z",
+  "createdAt": "2025-09-10T15:50:41.517Z",
+  "id": "me0NOLu1zhsZIkFQ",
+  "name": "DAY 3 A3 WORK",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -448,
+        256
+      ],
+      "id": "f6e4dbc3-9ade-4002-9d7e-f2e6d4898531",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "mode": "raw",
+        "jsonOutput": "{\n  \"redFlags\": [\n    \"laptop\",\n    \"Engagement\",\n    \"slave\",\n    \"blacklist\",\n    \"whitelist\",\n    \"ordinateur\",\n    \"\\\\b\\\\d{10}\\\\b\",\n    \"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\\\.[A-Za-z]{2,}\"\n  ]\n}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -32,
+        256
+      ],
+      "id": "2f85a348-be8e-40a4-8888-e1d958e65511",
+      "name": "Define Red Flags"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d9955361-17d5-4b73-8927-6e06af19fee8",
+              "name": "id",
+              "value": "={{ $('HTTP Request').item.json.id }}",
+              "type": "number"
+            },
+            {
+              "id": "427ef7a9-21ae-4ca7-9cd7-2d2734d0313c",
+              "name": "title",
+              "value": "={{ $('HTTP Request').item.json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "16134a06-9388-46c2-97d2-63e90850d1c1",
+              "name": "price",
+              "value": "={{ $('HTTP Request').item.json.price }}",
+              "type": "number"
+            },
+            {
+              "id": "b0fae6dc-273b-417c-b145-3738ee5b7315",
+              "name": "description",
+              "value": "={{ $('HTTP Request').item.json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "a0ad04bf-a488-4201-802d-0ff27578dcd9",
+              "name": "category",
+              "value": "={{ $('HTTP Request').item.json.category }}",
+              "type": "string"
+            },
+            {
+              "id": "e6a2fd1c-be7a-4c4d-ace1-9ef70f2da585",
+              "name": "image",
+              "value": "={{ $('HTTP Request').item.json.image }}",
+              "type": "string"
+            },
+            {
+              "id": "0bf189a3-16e3-4ba3-b068-a78fc6109b73",
+              "name": "rating.rate",
+              "value": "={{ $('HTTP Request').item.json.rating.rate }}",
+              "type": "number"
+            },
+            {
+              "id": "13984c29-e895-4e1e-8871-75207f0f1b91",
+              "name": "rating.count",
+              "value": "={{ $('HTTP Request').item.json.rating.count }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        176,
+        256
+      ],
+      "id": "e432ab89-7c7b-4ad5-9b28-1780246d1915",
+      "name": "Test Product (only for manual testing). For production, replace with your real trigger node"
+    },
+    {
+      "parameters": {
+        "mode": "runOnceForEachItem",
+        "jsCode": "// 'item' is already the current item\nconst redFlags = item.json.redFlags || [\n    \"laptop\",\n    \"Engagement\",\n    \"slave\",\n    \"blacklist\",\n    \"whitelist\",\n    \"ordinateur\",\n    \"\\\\b\\\\d{10}\\\\b\", // phone number\n    \"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\\\.[A-Za-z]{2,}\" // email\n];\n\nconst description = item.json.description || \"\";\nconst regexHits = [];\n\nfor (const pattern of redFlags) {\n    const regex = new RegExp(pattern, \"gi\");\n    if (regex.test(description)) {\n        regexHits.push(pattern);\n    }\n}\n\nitem.json.regexHits = regexHits;\nitem.json.regexFlag = regexHits.length > 0;\n\nreturn item;\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        384,
+        256
+      ],
+      "id": "fff40232-3b93-456e-b053-622c1ba2371a",
+      "name": "Regex Check"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a structured JSON generator.\n\nAnalyze the following product description for biased, offensive, or sensitive content.\n\nReturn ONLY a JSON object in this exact format, with no explanation, no markdown, no extra keys:\n\n{\n  \"productid\":\"id\"\n  \"flagged\": true/false,\n  \"categories\": [ \"list of reasons\" ],\n  \"cleaned_description\": \"cleaned version of description\",\n  \"cleaned_title\": \"cleaned version of title\"\n}\n\nHere is the product data:\nid:{{ $('HTTP Request').item.json.id }}\nTitle: {{ $('HTTP Request').item.json.title }}\nPrice: {{ $('HTTP Request').item.json.price }}\nCategory: {{ $('HTTP Request').item.json.category }}\nImage URL: {{ $('HTTP Request').item.json.image }}\nRating:{{ $('HTTP Request').item.json.rating.rate }} \nnumber rating:{{ $('HTTP Request').item.json.rating.count }} \nRegex Hits: {{ $json.regexHits }}\nRegex Flag: {{ $json.regexFlag }}\nDescription: {{ $json.description }}\n\n",
+        "hasOutputParser": true,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        592,
+        256
+      ],
+      "id": "07ffaa00-650f-4a64-8739-9fb8c6a3c4f6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        464,
+        464
+      ],
+      "id": "96b5c47c-ca9c-4d49-87f7-9c899f1972d0",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Y5EZ7nONrSFTfDWw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.riskLevel }}",
+                    "rightValue": "✅ Pass",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "bca9a093-da25-4a72-a231-ff2804a9b48f"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "7bcd8290-d77a-4efb-88a6-bf6196c54ab2",
+                    "leftValue": "={{ $json.riskLevel }}",
+                    "rightValue": "⚠️ Review Needed",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "698ece33-e7e2-4cee-aa4c-7aaa54f52e0c",
+                    "leftValue": "={{ $json.riskLevel }}",
+                    "rightValue": "🚨 High-Risk",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        1456,
+        240
+      ],
+      "id": "97a94ed3-0022-403c-ba9f-2387c6ecb7c1",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1D8izuwak_aPKbqXIHzE1WxQDssMV3BrWONcoq7rgGQc",
+          "mode": "list",
+          "cachedResultName": "DAY 3 A3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1D8izuwak_aPKbqXIHzE1WxQDssMV3BrWONcoq7rgGQc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 176553306,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1D8izuwak_aPKbqXIHzE1WxQDssMV3BrWONcoq7rgGQc/edit#gid=176553306"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "aiFlag",
+              "displayName": "aiFlag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "aiCategories",
+              "displayName": "aiCategories",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "biasScore",
+              "displayName": "biasScore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "riskLevel",
+              "displayName": "riskLevel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1760,
+        96
+      ],
+      "id": "27136d23-83a7-486d-a7a7-24c6f65b953a",
+      "name": "Append or update row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1D8izuwak_aPKbqXIHzE1WxQDssMV3BrWONcoq7rgGQc",
+          "mode": "list",
+          "cachedResultName": "DAY 3 A3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1D8izuwak_aPKbqXIHzE1WxQDssMV3BrWONcoq7rgGQc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 176553306,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1D8izuwak_aPKbqXIHzE1WxQDssMV3BrWONcoq7rgGQc/edit#gid=176553306"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "output",
+              "displayName": "output",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "aiFlag",
+              "displayName": "aiFlag",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "aiCategories",
+              "displayName": "aiCategories",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "biasScore",
+              "displayName": "biasScore",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "riskLevel",
+              "displayName": "riskLevel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1840,
+        272
+      ],
+      "id": "93612759-0d8b-4ca5-8cc8-ea4474944d5b",
+      "name": "Append or update row in sheet1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const regexFlag = item.json.regexFlag || false;\n  const aiFlag = item.json.aiFlag || false;\n\n  // Assign scores\n  let score = 0;\n  if (regexFlag) score += 30;\n  if (aiFlag) score += 50;\n\n  // Determine risk level\n  let riskLevel = \"✅ Pass\";\n  if (score > 40 && score <= 70) riskLevel = \"⚠️ Review Needed\";\n  if (score > 70) riskLevel = \"🚨 High-Risk\";\n\n  return {\n    json: {\n      ...item.json,\n      biasScore: score,\n      riskLevel: riskLevel\n    }\n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1264,
+        256
+      ],
+      "id": "7fd0c885-b91a-4ab1-bc62-6e2d9ca2fdcd",
+      "name": "riskLevel code"
+    },
+    {
+      "parameters": {
+        "jsCode": "return items.map(item => {\n  const aiOutput = item.json.output; // the JSON string from AI Agent\n  let flagged = false;\n  let categories = [];\n\n  try {\n    const parsed = JSON.parse(aiOutput);\n    flagged = parsed.flagged || false;\n    categories = parsed.categories || [];\n  } catch (err) {\n    flagged = false;\n    categories = [];\n  }\n\n  // add to item for next step (Bias Scorer)\n  return { \n    json: { \n      ...item.json, \n      aiFlag: flagged, \n      aiCategories: categories \n    } \n  };\n});\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        992,
+        256
+      ],
+      "id": "308fc071-b0dc-4f69-bf64-ad84001488b6",
+      "name": "parsed and return items"
+    },
+    {
+      "parameters": {
+        "url": "https://fakestoreapi.com/products",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -240,
+        256
+      ],
+      "id": "a08d7b2b-0e1b-4628-a23d-3678a5fefefb",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1D8izuwak_aPKbqXIHzE1WxQDssMV3BrWONcoq7rgGQc",
+          "mode": "list",
+          "cachedResultName": "DAY 3 A3",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1D8izuwak_aPKbqXIHzE1WxQDssMV3BrWONcoq7rgGQc/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 176553306,
+          "mode": "list",
+          "cachedResultName": "Sheet2",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1D8izuwak_aPKbqXIHzE1WxQDssMV3BrWONcoq7rgGQc/edit#gid=176553306"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": null,
+          "matchingColumns": [],
+          "schema": [],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1664,
+        448
+      ],
+      "id": "0751865f-6c18-40dd-9121-bb549b5ce99d",
+      "name": "Append or update row in sheet2",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Define Red Flags": {
+      "main": [
+        [
+          {
+            "node": "Test Product (only for manual testing). For production, replace with your real trigger node",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Test Product (only for manual testing). For production, replace with your real trigger node": {
+      "main": [
+        [
+          {
+            "node": "Regex Check",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Regex Check": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "parsed and return items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "Append or update row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Append or update row in sheet2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "riskLevel code": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "parsed and return items": {
+      "main": [
+        [
+          {
+            "node": "riskLevel code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Define Red Flags",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "bfd9e554-23ca-4b78-9b4e-0ddda37ff9c4",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-10T15:50:41.534Z",
+      "createdAt": "2025-09-10T15:50:41.534Z",
+      "role": "workflow:owner",
+      "workflowId": "me0NOLu1zhsZIkFQ",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
