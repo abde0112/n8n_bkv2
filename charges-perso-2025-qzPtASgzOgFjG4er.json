@@ -1,0 +1,219 @@
+{
+  "updatedAt": "2025-09-22T15:26:33.000Z",
+  "createdAt": "2025-09-22T08:50:52.996Z",
+  "id": "qzPtASgzOgFjG4er",
+  "name": "CHARGES PERSO 2025",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $now }}",
+        "format": "custom",
+        "customFormat": "MMMM",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        528,
+        0
+      ],
+      "id": "a74d449b-9f32-4cd8-b570-944a7ac623e9",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "52cea75e-025c-4c3d-b12b-9337dc80b19c",
+      "name": "Telegram Trigger",
+      "webhookId": "20972b1e-c86f-4c68-add9-f221428ccdca",
+      "credentials": {
+        "telegramApi": {
+          "id": "2noq18qiYbMIFWNE",
+          "name": "Telegram account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1SDFp0b-l1ahgZEss9Yj2PMcCT1h39VV_aR8wu9vblwI",
+          "mode": "list",
+          "cachedResultName": "CHARGES PERSO 2025",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SDFp0b-l1ahgZEss9Yj2PMcCT1h39VV_aR8wu9vblwI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $json.formattedDate }}",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Date",
+              "lookupValue": "={{ $('Date & Time1').item.json.formattedDate }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        688,
+        0
+      ],
+      "id": "c0f3ea30-6dc3-4d64-87a4-ab188440e80c",
+      "name": "Charges Perso",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $today }}",
+        "format": "yyyy-MM-dd",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        368,
+        0
+      ],
+      "id": "202976ba-203a-4762-9d11-6914b3635b2c",
+      "name": "Date & Time1"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        896,
+        0
+      ],
+      "id": "9191a1f7-812c-47c0-b5d3-6a75809d4797",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        768,
+        208
+      ],
+      "id": "c07ae6c0-6b0e-4fd8-b36d-db6e310ec9cf",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Charges Perso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Date & Time1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Charges Perso": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time1": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "a201862d-0de1-4546-8298-b4cc95f09c50",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-22T08:50:53.010Z",
+      "createdAt": "2025-09-22T08:50:53.010Z",
+      "role": "workflow:owner",
+      "workflowId": "qzPtASgzOgFjG4er",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
