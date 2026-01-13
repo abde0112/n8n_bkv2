@@ -1,0 +1,827 @@
+{
+  "updatedAt": "2025-11-12T10:37:30.000Z",
+  "createdAt": "2025-10-21T09:23:07.538Z",
+  "id": "vveQgfktjVuiW4u5",
+  "name": "Effortless Email Management with AI",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "b4df1afe-0827-4197-9f60-d63b89586b6b",
+      "name": "Email Trigger (IMAP)",
+      "type": "n8n-nodes-base.emailReadImap",
+      "position": [
+        -1280,
+        1344
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "html": "={{ $json.textHtml }}",
+        "options": {}
+      },
+      "id": "b9b1ef17-5e77-43ed-b6e9-709d8c7ce658",
+      "name": "Markdown",
+      "type": "n8n-nodes-base.markdown",
+      "position": [
+        -1008,
+        1344
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "fromEmail": "={{ $('Email Trigger (IMAP)').item.json.to }}",
+        "toEmail": "={{ $('Email Trigger (IMAP)').item.json.from }}",
+        "subject": "=Re: {{ $('Email Trigger (IMAP)').item.json.subject }}",
+        "html": "={{ $('Edit Fields').item.json.email }}",
+        "options": {}
+      },
+      "id": "a2b462a7-c548-4cf0-b428-64e1d2410747",
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "position": [
+        1136,
+        1200
+      ],
+      "webhookId": "a79ae1b4-648c-4cb4-b6cd-04ea3c1d9314",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolName": "company_knowladge_base",
+        "toolDescription": "Extracts information regarding the request made.",
+        "qdrantCollection": {
+          "__rl": true,
+          "mode": "id",
+          "value": "=COLLECTION"
+        },
+        "includeDocumentMetadata": false,
+        "options": {}
+      },
+      "id": "7e7fa8e0-c97e-4ba3-9cda-cb131d079f41",
+      "name": "Qdrant Vector Store",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "position": [
+        416,
+        2128
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "be43e19f-b815-4e26-9785-81bd4fa6dcca",
+      "name": "Embeddings OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "position": [
+        288,
+        2320
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "operationMode": "nodeInputBinary",
+        "options": {
+          "binaryDataKey": "={{ $json.data }}",
+          "summarizationMethodAndPrompts": {
+            "values": {
+              "combineMapPrompt": "=Write a concise summary of the following in max 100 words:\n\n\"{{ $json.data }}\"\n\nDo not enter the total number of words used.",
+              "prompt": "=Write a concise summary of the following in max 100 words:\n\n\"{{ $json.data }}\"\n\nDo not enter the total number of words used."
+            }
+          }
+        }
+      },
+      "id": "989a1ae4-5674-42ce-abdd-470df887cfcf",
+      "name": "Email Summarization Chain",
+      "type": "@n8n/n8n-nodes-langchain.chainSummarization",
+      "position": [
+        -752,
+        1344
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Write the text to reply to the following email:\n\n{{ $json.response.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an expert at answering emails. You need to answer them professionally based on the information you have. This is a business email. Be concise and never exceed 100 words. Only the body of the email, not create the subject"
+        }
+      },
+      "id": "61007628-ab9b-44cf-a011-af8b5396dd56",
+      "name": "Write email",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -320,
+        1344
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "6ed1d7b6-7d9f-46d5-a3b4-41174da24f9f",
+      "name": "OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        560,
+        1808
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "operation": "sendAndWait",
+        "sendTo": "info@n3w.it",
+        "subject": "=[Approval Required] {{ $('Email Trigger (IMAP)').item.json.subject }}",
+        "message": "=<h3>MESSAGE</h3>\n{{ $('Email Trigger (IMAP)').item.json.textHtml }}\n\n<h3>AI RESPONSE</h3>\n{{ $json.email }}",
+        "responseType": "freeText",
+        "options": {}
+      },
+      "id": "b45b2612-5194-4671-abef-a5f5d501c051",
+      "name": "Gmail",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        432,
+        1344
+      ],
+      "webhookId": "d6dd2e7c-90ea-4b65-9c64-523d2541a054",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.data.text }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "Approved",
+              "description": "The email has been reviewed and accepted as-is. The human explicitly or implicity express approva, indicating that no changes ar needed.\n\nExample:\n\"Ok\",\n\"Approvato\",\n\"Invia\""
+            },
+            {
+              "category": "Declined",
+              "description": "The email has been reviewd, but the human request modifications before it sent link tweaks, removing parts, rewording etc... This could include suggested edits, rewording or major revision."
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "Please classify the text provided by the user into one of the following categories: {categories}, and use the provided formatting instructions below. Don't explain, and only output the json."
+        }
+      },
+      "id": "130636e6-2c92-4a5d-9298-2eb5aaa218c7",
+      "name": "Text Classifier",
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "position": [
+        672,
+        1344
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "35d7c303-42f4-4dd1-b41e-6eb087c23c3d",
+              "name": "email",
+              "type": "string",
+              "value": "={{ $json.output }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "d38c52e6-a9a9-40f4-b46f-a0f708caf013",
+      "name": "Edit Fields",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        160,
+        1344
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {},
+      "id": "2f49f8ce-d8f5-4267-a668-88ebc8238c9c",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -608,
+        224
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://QDRANTURL/collections/COLLECTION",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n \"filter\": {}\n}",
+        "options": {}
+      },
+      "id": "2d41751a-53c4-4874-b2d3-95eaf8720b16",
+      "name": "Create collection",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -320,
+        80
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://QDRANTURL/collections/COLLECTION/points/delete",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Content-Type",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "{\n \"filter\": {}\n}",
+        "options": {}
+      },
+      "id": "193c179c-3088-43a5-a6d4-7573e230fc97",
+      "name": "Refresh collection",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        -320,
+        336
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "resource": "fileFolder",
+        "filter": {
+          "driveId": {
+            "__rl": true,
+            "mode": "list",
+            "value": "My Drive",
+            "cachedResultUrl": "https://drive.google.com/drive/my-drive",
+            "cachedResultName": "My Drive"
+          },
+          "folderId": {
+            "__rl": true,
+            "mode": "id",
+            "value": "=test-whatsapp"
+          }
+        },
+        "options": {}
+      },
+      "id": "2e648211-f244-4504-bf40-01205b6194e3",
+      "name": "Get folder",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        -96,
+        336
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "mode": "id",
+          "value": "={{ $json.id }}"
+        },
+        "options": {
+          "googleFileConversion": {
+            "conversion": {
+              "docsToFormat": "text/plain"
+            }
+          }
+        }
+      },
+      "id": "a0e9b515-7516-4bf2-a367-9800f33b7037",
+      "name": "Download Files",
+      "type": "n8n-nodes-base.googleDrive",
+      "position": [
+        128,
+        336
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "id": "d050aabf-88d7-44c2-a0e1-0e5a0898b9a2",
+      "name": "Default Data Loader",
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "position": [
+        528,
+        544
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "chunkSize": 300,
+        "chunkOverlap": 30
+      },
+      "id": "24e090d0-58ab-490c-943e-d2ff018641b1",
+      "name": "Token Splitter",
+      "type": "@n8n/n8n-nodes-langchain.textSplitterTokenSplitter",
+      "position": [
+        496,
+        704
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# STEP 1\n\n## Create Qdrant Collection\nChange:\n- QDRANTURL\n- COLLECTION",
+        "height": 220,
+        "width": 880,
+        "color": 6
+      },
+      "id": "37a4737d-a6c7-487f-8123-0d913435ac21",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -112,
+        16
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# STEP 2\n\n\n\n\n\n\n\n\n\n\n\n\n## Documents vectorization with Qdrant and Google Drive\nChange:\n- QDRANTURL\n- COLLECTION",
+        "height": 400,
+        "width": 620,
+        "color": 4
+      },
+      "id": "5a4fe039-a831-405a-9881-1ae3163ff69c",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -336,
+        288
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "qdrantCollection": {
+          "__rl": true,
+          "mode": "id",
+          "value": "=COLLECTION"
+        },
+        "options": {}
+      },
+      "id": "3f2bf7e1-e27a-43ff-87bf-7b4cfc07a58f",
+      "name": "Qdrant Vector Store1",
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreQdrant",
+      "position": [
+        368,
+        336
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "e04e0dd9-6254-4e79-bece-e2ecd835e58a",
+      "name": "Embeddings OpenAI1",
+      "type": "@n8n/n8n-nodes-langchain.embeddingsOpenAi",
+      "position": [
+        352,
+        544
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "content": "# STEP 3 - MAIN FLOW\n\n\n## How it works\nThis workflow automates the handling of incoming emails, summarizes their content, generates appropriate responses using a retrieval-augmented generation (RAG) approach, and obtains approval or suggestions before sending replies. \n\nYou can quickly integrate Gmail and Outlook via the appropriate trigger nodes",
+        "height": 260,
+        "width": 580,
+        "color": 3
+      },
+      "id": "e15a04ef-f9a0-44cf-ad42-94dd3fa1cc6b",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1296,
+        928
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "f0c228a6-b60b-4e4f-bb5a-6cea23802f08",
+      "name": "DeepSeek Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatDeepSeek",
+      "position": [
+        -832,
+        1568
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Chain that summarizes the received email",
+        "height": 240,
+        "width": 320
+      },
+      "id": "45851d69-e74b-47de-91b7-7550cb112189",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -768,
+        1264
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Agent that retrieves business information from a vector database and processes the response",
+        "height": 240,
+        "width": 340
+      },
+      "id": "c2d5c6da-723c-4b5a-a430-8275161ab72a",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -336,
+        1264
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Convert email to Markdown format for better understanding of LLM models",
+        "height": 240
+      },
+      "id": "74f7b4c7-a854-4e9a-8ac1-b089a9679cfb",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -1072,
+        1264
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## IMPORTANT\n\nFor the \"Send Draft\" node, you need to send the draft email to a Gmail address because it is the only one that allows the \"Send and wait for response\" function.",
+        "height": 360,
+        "color": 4
+      },
+      "id": "ea765bd3-f32c-417d-a2e6-9088a31f621d",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        352,
+        1136
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "Based on the suggestion received, the text classifier can understand whether the feedback received approves the generated email or not.",
+        "height": 240,
+        "width": 360
+      },
+      "id": "61216504-e0f2-4008-a8e3-903e1493f43a",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        1264
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Review at the following email:\n{{ $('Edit Fields').item.json.email }}\n\nFeedback from human:\n{{ $json.data.text }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "If you are an expert in reviewing emails before sending them. You need to review and structure them in such a way that you can send them. It must be in HTML format and you can insert (if you think it is appropriate) only HTML characters such as <br>, <b>, <i>, <p> where necessary. Be concise and never exceed 100 words. Only the body of the email"
+        }
+      },
+      "id": "bb55abbf-4e74-4f6f-a91d-4c06a96f28a6",
+      "name": "Email Reviewer",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        1120,
+        1488
+      ],
+      "typeVersion": 1.7
+    },
+    {
+      "parameters": {
+        "content": "The Email Reviewer agent, taking inspiration from human feedback, rewrites the email",
+        "height": 220,
+        "width": 340
+      },
+      "id": "cc0108cd-8cb0-45c1-a573-8c2e80084ed8",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1072,
+        1408
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Gmail": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Write email",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Email Reviewer",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Email Summarization Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get folder": {
+      "main": [
+        [
+          {
+            "node": "Download Files",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Gmail",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Write email": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download Files": {
+      "main": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Reviewer": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Token Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email Reviewer",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings OpenAI1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Refresh collection": {
+      "main": [
+        [
+          {
+            "node": "Get folder",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "DeepSeek Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Email Summarization Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Qdrant Vector Store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Qdrant Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "Write email",
+            "type": "ai_tool",
+            "index": 0
+          },
+          {
+            "node": "Email Reviewer",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Trigger (IMAP)": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Summarization Chain": {
+      "main": [
+        [
+          {
+            "node": "Write email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "Create collection",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Refresh collection",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "8a195a81-6893-4dae-b6c2-fcd93fd4f0a7",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-21T09:23:07.552Z",
+      "createdAt": "2025-10-21T09:23:07.552Z",
+      "role": "workflow:owner",
+      "workflowId": "vveQgfktjVuiW4u5",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
