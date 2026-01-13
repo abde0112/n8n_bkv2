@@ -1,0 +1,319 @@
+{
+  "updatedAt": "2025-11-12T10:39:26.000Z",
+  "createdAt": "2025-10-21T09:26:39.431Z",
+  "id": "ZnVb9Xus5yLYMdOF",
+  "name": "screenshot",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "name": "On clicking 'execute'",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -608,
+        -48
+      ],
+      "typeVersion": 1,
+      "id": "38ec222a-3d80-40d0-aff3-603e78754a59"
+    },
+    {
+      "parameters": {
+        "functionCode": "item.website = \"https://uproc.io\";\nitem.email = \"miquel@uproc.io\";\n\nreturn item;"
+      },
+      "name": "Create Web + Email Item",
+      "type": "n8n-nodes-base.functionItem",
+      "position": [
+        -416,
+        -48
+      ],
+      "typeVersion": 1,
+      "id": "260c97d8-59a5-4975-a6fa-57dc426e8bad"
+    },
+    {
+      "parameters": {
+        "isBodyHtml": true,
+        "subject": "Your screenshots!",
+        "body": "=Hi,\n<br><br>\nThese are your screenshots:<br>\n<table border=\"0\">\n<tr>\n<th>Simple screenshot</th><th>Fullpage screenshot</th>\n<tr>\n<td style=\"vertical-align: top; text-align: center\"><img src=\"{{$node[\"Generate Screenshot\"].json[\"message\"][\"result\"]}}\" width=\"320\"></td>\n<td style=\"vertical-align: top; text-align: center\"><img src=\"{{$node[\"Generate FullPage\"].json[\"message\"][\"result\"]}}\" width=\"320\"></td>\n</tr>\n</table>\n<br><br>\nThank you!",
+        "fromEmail": "miquel@uproc.io",
+        "toAddresses": [
+          "={{$node[\"Create Web + Email Item\"].json[\"email\"]}}"
+        ],
+        "additionalFields": {}
+      },
+      "name": "Send Email",
+      "type": "n8n-nodes-base.awsSes",
+      "position": [
+        624,
+        -16
+      ],
+      "typeVersion": 1,
+      "id": "2872d26e-0ebc-4518-bf1a-3faf96f6444a",
+      "credentials": {
+        "aws": {
+          "id": null,
+          "name": "ses"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "group": "image",
+        "tool": "getUrlScreenshot",
+        "url": "={{$node[\"Create Web + Email Item\"].json[\"website\"]}}",
+        "width": "640",
+        "fullpage": "yes",
+        "additionalOptions": {}
+      },
+      "name": "Generate FullPage",
+      "type": "n8n-nodes-base.uproc",
+      "position": [
+        -192,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "c99d1ca2-2608-406a-aa7e-22809dd55b1e",
+      "credentials": {
+        "uprocApi": {
+          "id": null,
+          "name": "miquel-uproc"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "group": "image",
+        "tool": "getUrlScreenshot",
+        "url": "={{$node[\"Create Web + Email Item\"].json[\"website\"]}}",
+        "width": "640",
+        "fullpage": "no",
+        "additionalOptions": {}
+      },
+      "name": "Generate Screenshot",
+      "type": "n8n-nodes-base.uproc",
+      "position": [
+        -208,
+        64
+      ],
+      "typeVersion": 1,
+      "id": "b34d210f-8a41-438c-a9d4-dc925e7e7f76",
+      "credentials": {
+        "uprocApi": {
+          "id": null,
+          "name": "miquel-uproc"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "url": "={{$node[\"Generate FullPage\"].json[\"message\"][\"result\"]}}",
+        "allowUnauthorizedCerts": true,
+        "responseFormat": "file",
+        "options": {}
+      },
+      "name": "Get File",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        16,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "e23c999d-0212-4a4c-9e91-f29bcec76727"
+    },
+    {
+      "parameters": {
+        "url": "={{$node[\"Generate Screenshot\"].json[\"message\"][\"result\"]}}",
+        "allowUnauthorizedCerts": true,
+        "responseFormat": "file",
+        "options": {}
+      },
+      "name": "Get File1",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        16,
+        64
+      ],
+      "typeVersion": 1,
+      "id": "097e1d3b-8aaf-477e-9fb2-f938daab00fe"
+    },
+    {
+      "parameters": {
+        "mode": "passThrough"
+      },
+      "name": "Merge",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        432,
+        -16
+      ],
+      "typeVersion": 1,
+      "id": "30ff770d-c9bf-445b-bc2b-b1d7d7ad52c1"
+    },
+    {
+      "parameters": {
+        "path": "/screenshots/sample.png",
+        "binaryData": true
+      },
+      "name": "Upload Screenshot",
+      "type": "n8n-nodes-base.dropbox",
+      "position": [
+        240,
+        64
+      ],
+      "typeVersion": 1,
+      "id": "801f9e8c-5fcd-495c-9a31-aff6ac0e64ca",
+      "credentials": {
+        "dropboxApi": {
+          "id": null,
+          "name": "dropbox-miquel"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "/screenshots/sample_fullpage.png",
+        "binaryData": true
+      },
+      "name": "Upload fullpage",
+      "type": "n8n-nodes-base.dropbox",
+      "position": [
+        240,
+        -112
+      ],
+      "typeVersion": 1,
+      "id": "419c6950-23c8-4a93-8545-e37b067bee4b",
+      "credentials": {
+        "dropboxApi": {
+          "id": null,
+          "name": "dropbox-miquel"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "Send Email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get File": {
+      "main": [
+        [
+          {
+            "node": "Upload fullpage",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get File1": {
+      "main": [
+        [
+          {
+            "node": "Upload Screenshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload fullpage": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate FullPage": {
+      "main": [
+        [
+          {
+            "node": "Get File",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Upload Screenshot": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Generate Screenshot": {
+      "main": [
+        [
+          {
+            "node": "Get File1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "On clicking 'execute'": {
+      "main": [
+        [
+          {
+            "node": "Create Web + Email Item",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Web + Email Item": {
+      "main": [
+        [
+          {
+            "node": "Generate FullPage",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Screenshot",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "3bb15dd8-9607-4804-a0a9-6d06ff00800e",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-21T09:26:39.437Z",
+      "createdAt": "2025-10-21T09:26:39.437Z",
+      "role": "workflow:owner",
+      "workflowId": "ZnVb9Xus5yLYMdOF",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
