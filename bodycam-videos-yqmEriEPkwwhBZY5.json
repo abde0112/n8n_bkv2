@@ -1,0 +1,346 @@
+{
+  "updatedAt": "2025-12-02T12:04:32.000Z",
+  "createdAt": "2025-12-02T10:43:56.726Z",
+  "id": "yqmEriEPkwwhBZY5",
+  "name": "Bodycam Videos",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        592,
+        -80
+      ],
+      "id": "4d63150a-842b-4f4a-848a-dc3871e2a0e2",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "6464",
+        "contextWindowLength": 15
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        768,
+        128
+      ],
+      "id": "b12cb8da-a84f-4c72-8e47-410757b74332",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolThink",
+      "typeVersion": 1.1,
+      "position": [
+        864,
+        128
+      ],
+      "id": "99726971-952f-40c1-98c4-025cddeb1097",
+      "name": "Think"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "generate a prompt.",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "=You are a helpfulYou are an AI that generates video prompts for short form content.\nYour ONLY output must strictly follow this JSON structure:\n\n{\n\"title\": \"Exciting, descriptive, simplistic title here\",\n\"description\": \"Short, few sentence description based on the story\",\n\"prompt\": \"AI video generation prompt here\"\n}\n\nGuidelines:\n\nThe \"title\" must be short, eye-catching, and easy to understand.\n\nThe \"description\" should be 1–3 sentences summarizing the crazy event in a fun, engaging way.\n\nThe \"prompt\" must be a detailed AI video generation prompt describing the scene from the primary video types below. Every prompt needs to be a bodycam, nightcam, or doorbell camera video, but it is typically a bodycam video.\n\nNever break JSON format. Never add extra text or explanation outside the JSON.\n\nNever repeat a video, always cycle through them.\n\nPrimary Video Types:\n\nFirefighter rescues someone in a flood\n\nDog stealing meat from costco and being chased by a cop\n\nCat stealing fish from grocery store and is chased by a cop, an old man trips trying to chase the cat\n\nDog being pulled over for driving, then he drives away\n\nCat being pulled over for driving, then he drives away\n\nKid driving car, getting pulled over, and then saying \"fuck off\" and then running off from the cop\n\nKid throwing food to a dangerous animal on doorbell camera assistant"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        800,
+        -80
+      ],
+      "id": "fc21179e-e3a7-4196-ae13-8128cd72f9c4",
+      "name": "Prompt Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n    \"type\": \"object\",\n    \"properties\": {\n        \"title\": {\n            \"type\": \"string\",\n            \"description\": \"A short, exciting, descriptive, simplistic YouTube Shorts title\"\n        },\n        \"description\": {\n            \"type\": \"string\", \n            \"description\": \"1-3 sentences summarizing the crazy water event\"\n        },\n        \"prompt\": {\n            \"type\": \"string\",\n            \"description\": \"A detailed AI video generation prompt\"\n        }\n    },\n    \"required\": [\"title\", \"description\", \"prompt\"]\n}\n",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        976,
+        128
+      ],
+      "id": "10a73f02-6a98-4988-a2c3-653a584a28c5",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.kie.ai/api/v1/jobs/createTask",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "prompt",
+              "value": "={{ $json.output.properties.prompt.description }}"
+            },
+            {
+              "name": "callBackUrl",
+              "value": "https://unthanked-kenya-vowelly.ngrok-free.dev/webhook/6840c7fd-2523-48d4-851c-bcb2c8f52910"
+            },
+            {
+              "name": "aspectRatio",
+              "value": "16:9"
+            },
+            {
+              "name": "duration",
+              "value": "short"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1152,
+        -80
+      ],
+      "id": "16a8cd70-a0df-4857-a222-abc441a72bce",
+      "name": "Create Video",
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "HzP0Nadiej98ORU7",
+          "name": "kie.ai"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [
+        1360,
+        -80
+      ],
+      "id": "54b3e97f-f7ad-4870-bd1d-45c985bedf3f",
+      "name": "Wait",
+      "webhookId": "54e179b7-7f93-4cef-b013-f3a7e40e9238"
+    },
+    {
+      "parameters": {
+        "url": "https://api.kie.ai/api/v1/jobs/recordInfo",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "taskId",
+              "value": "={{ $json.data.taskId }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1568,
+        -80
+      ],
+      "id": "c5b895a6-34ec-4f6d-8834-353d7d103e48",
+      "name": "Get Video"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        624,
+        224
+      ],
+      "id": "08b12b27-70ea-4e2f-9302-1aca58cbdf91",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "path": "6840c7fd-2523-48d4-851c-bcb2c8f52910",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        1328,
+        128
+      ],
+      "id": "814b1ff3-de64-4739-ae26-59f55a8140ea",
+      "name": "Webhook",
+      "webhookId": "6840c7fd-2523-48d4-851c-bcb2c8f52910"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Prompt Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Prompt Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Think": {
+      "ai_tool": [
+        [
+          {
+            "node": "Prompt Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Prompt Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Prompt Agent": {
+      "main": [
+        [
+          {
+            "node": "Create Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create Video": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Get Video",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Prompt Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Prompt Agent": [
+      {
+        "json": {
+          "output": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string",
+                "description": "Firefighter Flood Rescue"
+              },
+              "description": {
+                "type": "string",
+                "description": "Amidst a raging flood, a brave firefighter wades through treacherous waters to rescue a stranded person from their submerged home. The intense situation is captured from the rescuer's perspective."
+              },
+              "prompt": {
+                "type": "string",
+                "description": "Bodycam footage from a firefighter's perspective. Heavy rain and rising floodwaters are visible. The firefighter navigates through a submerged street, approaching a house partially underwater. The firefighter reaches a person trapped inside the house and assists them to safety through the floodwaters. The scene is chaotic and urgent, with debris floating in the water and strong currents."
+              }
+            },
+            "required": [
+              "title",
+              "description",
+              "prompt"
+            ]
+          }
+        }
+      }
+    ]
+  },
+  "versionId": "44163afd-1240-44f0-93df-12f40a13c9d2",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-12-02T10:43:56.784Z",
+      "createdAt": "2025-12-02T10:43:56.784Z",
+      "role": "workflow:owner",
+      "workflowId": "yqmEriEPkwwhBZY5",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
