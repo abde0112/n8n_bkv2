@@ -1,0 +1,277 @@
+{
+  "updatedAt": "2025-10-22T22:17:48.000Z",
+  "createdAt": "2025-10-21T13:22:35.900Z",
+  "id": "5hNImUFNZgBoJYBN",
+  "name": "RAG Part 1",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an Intelligent Support Assistant that helps customer service agents by retrieving accurate, fact-based answers from a company’s internal knowledge base.\n\n🎯 Your purpose:\n- When a new support question arrives, find the most relevant context using the Pinecone vector database.\n- Then generate a **clear, factual, and helpful answer** using the Google Gemini model.\n\n📘 Knowledge Source:\nAll answers must come from the internal knowledge base stored in Pinecone (which was created from PDF and company data). Each chunk of retrieved context represents verified company information.\n\n---\n\n### Rules & Behavior\n\n1. **Always retrieve context** from Pinecone before answering.  \n2. **Never guess, invent, or hallucinate** missing details.  \n3. If the answer cannot be found in context, politely say:  \n   > “I couldn’t find this information in the company knowledge base. Please escalate this to a human agent.”  \n4. Use **bullet points or short paragraphs** for clarity.  \n5. Keep a **professional, warm, and supportive tone.**  \n6. Include relevant **policy names, warranty details, or procedures** if found in context.  \n7. Add a **confidence note** (e.g., “✅ Confirmed from internal docs” or “⚠️ Not found in KB, escalation needed”).  \n\n---\n\n### Example Behavior\n\n**Input:**  \n> “What is the company’s return policy for electronics?”\n\n**Process:**  \nRetrieve context → summarize policy → respond clearly.\n\n**Output Example:**  \n> ✅ **Suggested Answer:**  \n> The company offers a 30-day return window for electronics, provided the product is unused and in original packaging.  \n> Returns can be initiated through the customer dashboard or by contacting support.  \n>  \n> _Source: Internal Warranty & Returns Policy (2024)_\n\n---\n\n### System Mindset\nThink of yourself as the “Brain” inside an automation system. n8n is the “Orchestrator” that triggers your logic — you provide verified knowledge to help human agents respond faster and smarter.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        64,
+        -80
+      ],
+      "id": "9eacef9f-ee5f-4569-a787-89d6e7a411a5",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": true
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -224,
+        -80
+      ],
+      "id": "95ac0509-d2d1-4240-9fcd-4cedc4fcb0cb",
+      "name": "When chat message received",
+      "webhookId": "881e80ac-fb54-44a3-8c28-caad6747d682"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        112,
+        144
+      ],
+      "id": "819b6353-7f84-4870-ac2c-1b436ec51353",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "nHwi5TJMnbJsLg7O",
+          "name": "Postgres account 2"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        256,
+        304
+      ],
+      "id": "773d891d-af54-4bc8-b61b-d2c6548e7fea",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -80,
+        128
+      ],
+      "id": "8501b931-149e-41a2-a3e1-5db4e47b51f1",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "tableName": {
+          "__rl": true,
+          "value": "n8N",
+          "mode": "list",
+          "cachedResultName": "n8N"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        672,
+        -80
+      ],
+      "id": "3856604f-6937-4e3f-a332-f30188f54463",
+      "name": "Supabase Vector Store1",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2OCQVeKtbdcL29b2",
+          "name": "Supabase account 2"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "dataType": "binary",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        896,
+        144
+      ],
+      "id": "7f4d6bf7-a96c-4d43-b9da-4055e709b45a",
+      "name": "Default Data Loader1"
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        720,
+        128
+      ],
+      "id": "82cd5339-97c1-4b30-a5e0-fa57a9062234",
+      "name": "Embeddings Google Gemini1",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "In the Proactive Support Ticket Assistant, Supabase stores:\n\nEach customer question received from the Webhook.\n\nThe AI-generated answer from the RAG system.\n\nWhether the response came from verified sources or was escalated to a human agent.",
+        "tableName": {
+          "__rl": true,
+          "value": "n8N",
+          "mode": "list",
+          "cachedResultName": "n8N"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStoreSupabase",
+      "typeVersion": 1.3,
+      "position": [
+        336,
+        112
+      ],
+      "id": "f3b8a5d7-00eb-45f4-9531-e724e7c79065",
+      "name": "Supabase Vector Store2",
+      "credentials": {
+        "supabaseApi": {
+          "id": "2OCQVeKtbdcL29b2",
+          "name": "Supabase account 2"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store2",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Default Data Loader1": {
+      "ai_document": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini1": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Supabase Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Supabase Vector Store2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "bd65bedc-d237-45b0-8d8a-0b297d16889e",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-21T13:22:35.916Z",
+      "createdAt": "2025-10-21T13:22:35.916Z",
+      "role": "workflow:owner",
+      "workflowId": "5hNImUFNZgBoJYBN",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
