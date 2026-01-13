@@ -1,0 +1,127 @@
+{
+  "updatedAt": "2025-11-18T16:00:36.000Z",
+  "createdAt": "2025-11-16T19:07:11.107Z",
+  "id": "b1wnASh0u2DcK3pV",
+  "name": "telegram",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "b166db14-67a5-4706-8b77-e7507cfec834",
+      "name": "Telegram Trigger",
+      "webhookId": "e387039e-41d7-4440-bb2f-0ed3171e18cc",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://hook.eu1.make.com/boioo7xs6zhq87nqfy7w714p2k4x3lwv",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "my_message",
+              "value": "={{ $json.message.text }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "aace9cdb-6e6e-4f14-a581-a8fb3c8e23cf",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "Thanks! I've received your message and created a lead in our system.",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "55de1482-0a43-4cc4-952b-c054b85a640f",
+      "name": "Send a text message",
+      "webhookId": "daf6b1c7-4079-400e-bda3-41a2d7a12830",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK MG"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "a9511412-6dbf-4b83-bd80-08dbfe040dce",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-11-16T19:07:11.137Z",
+      "createdAt": "2025-11-16T19:07:11.137Z",
+      "role": "workflow:owner",
+      "workflowId": "b1wnASh0u2DcK3pV",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
