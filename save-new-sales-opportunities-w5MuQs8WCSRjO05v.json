@@ -1,0 +1,222 @@
+{
+  "updatedAt": "2025-10-21T09:35:22.000Z",
+  "createdAt": "2025-10-21T09:35:22.620Z",
+  "id": "w5MuQs8WCSRjO05v",
+  "name": "Save New Sales Opportunities",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyHour"
+            }
+          ]
+        },
+        "simple": false,
+        "filters": {
+          "labelIds": [
+            "Label_8035866011660570111"
+          ]
+        },
+        "options": {}
+      },
+      "id": "a60867eb-378a-44b0-b0a9-b96f432c9c8f",
+      "name": "Received Emails with Sales Label",
+      "type": "n8n-nodes-base.gmailTrigger",
+      "position": [
+        -32,
+        224
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "resource": "opportunity",
+        "opportunityName": "={{ $('Received Emails with Sales Label').item.json.headers.subject }}",
+        "additionalFields": {
+          "email_from": "={{ $('Received Emails with Sales Label').item.json.from.value[0].address }}",
+          "description": "={{ $json.response.text }}"
+        }
+      },
+      "id": "04e64ade-6c63-498f-aa9c-c84544063fb8",
+      "name": "Odoo - Create Opportunity",
+      "type": "n8n-nodes-base.odoo",
+      "position": [
+        704,
+        224
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-3.5-turbo-instruct"
+        },
+        "options": {}
+      },
+      "id": "f67b1412-5993-4923-8663-872a61c2c81d",
+      "name": "OpenAI Model",
+      "type": "@n8n/n8n-nodes-langchain.lmOpenAi",
+      "position": [
+        256,
+        416
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Summarize emails and save them as notes on sales opportunity in Odoo\n\nSet up steps:\n* Configure Google Cloud credentials with Gmail access\n* Configure OpenAI credentials\n* Configure Odoo credentials\n ",
+        "height": 261.8821936357484,
+        "width": 446.44549763033154
+      },
+      "id": "edc7d1ac-9fa0-4dfc-8b3b-15911e241e75",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -96,
+        -96
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {
+          "summarizationMethodAndPrompts": {
+            "values": {
+              "combineMapPrompt": "=Write a concise summary of the following sales inquiry:\n\"{{ $json.text }}\"\nExtract information such as project budget, timelines and a general summary.\n\nCONCISE SUMMARY: \n",
+              "prompt": "=Write a concise summary of the following sales inquiry:\n\" {{ $json.text }}\"\nInclude structured information such as project budget, timelines, industry and a general summary\n\nCONCISE SUMMARY: \n"
+            }
+          }
+        }
+      },
+      "id": "acf061b8-7432-4cd5-8a8b-f475bb867cce",
+      "name": "Summarize Email Content",
+      "type": "@n8n/n8n-nodes-langchain.chainSummarization",
+      "position": [
+        272,
+        224
+      ],
+      "typeVersion": 2
+    }
+  ],
+  "connections": {
+    "OpenAI Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Summarize Email Content",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Summarize Email Content": {
+      "main": [
+        [
+          {
+            "node": "Odoo - Create Opportunity",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Received Emails with Sales Label": {
+      "main": [
+        [
+          {
+            "node": "Summarize Email Content",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {
+    "Summarize Email Content": [
+      {
+        "json": {
+          "response": {
+            "text": "Mihai Farcas, Procurement Manager at Innovative Solutions Inc, is interested in incorporating CloudConnect Pro platform into their upcoming projects. They are impressed by its capabilities in cloud integration, data management, and flexibility. They request detailed information on pricing, implementation options, support services, and case studies for enterprise-level deployments. They are eager to learn more and hope for a mutually beneficial partnership. "
+          }
+        }
+      }
+    ],
+    "Received Emails with Sales Label": [
+      {
+        "json": {
+          "id": "1903f41a3a4813f4",
+          "to": {
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Mihai Farcas</span> &lt;<a href=\"mailto:farcasmihai91@gmail.com\" class=\"mp_address_email\">farcasmihai91@gmail.com</a>&gt;</span>",
+            "text": "\"Mihai Farcas\" <farcasmihai91@gmail.com>",
+            "value": [
+              {
+                "name": "Mihai Farcas",
+                "address": "farcasmihai91@gmail.com"
+              }
+            ]
+          },
+          "date": "2024-06-22T09:23:01.000Z",
+          "from": {
+            "html": "<span class=\"mp_address_group\"><span class=\"mp_address_name\">Mihai Farcas</span> &lt;<a href=\"mailto:contact@mihai.ltd\" class=\"mp_address_email\">contact@mihai.ltd</a>&gt;</span>",
+            "text": "\"Mihai Farcas\" <contact@mihai.ltd>",
+            "value": [
+              {
+                "name": "Mihai Farcas",
+                "address": "contact@mihai.ltd"
+              }
+            ]
+          },
+          "html": "<div dir=\"ltr\"><p>Dear Alex,</p><p>I hope this email finds you well.</p><p>My name is Mihai Farcas, and I&#39;m the Procurement Manager at Innovative Solutions Inc. We are a leading provider of cutting-edge technological solutions for businesses across various industries.</p><p>I&#39;m reaching out to you today to express our strong interest in your company&#39;s CloudConnect Pro platform. We&#39;ve been thoroughly impressed by its capabilities in cloud integration, data management, and overall flexibility. Our research indicates that it could be an excellent fit for our clients&#39; needs, particularly in the areas of streamlining workflows and enhancing data accessibility.</p><p>We are currently exploring the possibility of incorporating CloudConnect Pro into our upcoming projects. To this end, we would appreciate it if you could provide us with detailed information on pricing, implementation options, and support services for enterprise-level deployments.  Additionally, any case studies or testimonials from companies similar to ours would be most welcome.</p><p>Given the urgency of our projects, a prompt response would be greatly appreciated. We are eager to learn more about how CloudConnect Pro can contribute to our success and look forward to the possibility of a mutually beneficial partnership.</p><p>Thank you for your time and consideration.</p><p><br></p><p>Sincerely,</p><p>Mihai Farcas</p><p>Procurement Manager</p><p>Innovative Solutions Inc.</p></div>\n",
+          "text": "Dear Alex,\n\nI hope this email finds you well.\n\nMy name is Mihai Farcas, and I'm the Procurement Manager at Innovative\nSolutions Inc. We are a leading provider of cutting-edge technological\nsolutions for businesses across various industries.\n\nI'm reaching out to you today to express our strong interest in your\ncompany's CloudConnect Pro platform. We've been thoroughly impressed by its\ncapabilities in cloud integration, data management, and overall\nflexibility. Our research indicates that it could be an excellent fit for\nour clients' needs, particularly in the areas of streamlining workflows and\nenhancing data accessibility.\n\nWe are currently exploring the possibility of incorporating CloudConnect\nPro into our upcoming projects. To this end, we would appreciate it if you\ncould provide us with detailed information on pricing, implementation\noptions, and support services for enterprise-level deployments.\nAdditionally, any case studies or testimonials from companies similar to\nours would be most welcome.\n\nGiven the urgency of our projects, a prompt response would be greatly\nappreciated. We are eager to learn more about how CloudConnect Pro can\ncontribute to our success and look forward to the possibility of a mutually\nbeneficial partnership.\n\nThank you for your time and consideration.\n\n\nSincerely,\n\nMihai Farcas\n\nProcurement Manager\n\nInnovative Solutions Inc.\n",
+          "headers": {
+            "to": "To: Mihai Farcas <farcasmihai91@gmail.com>",
+            "date": "Date: Sat, 22 Jun 2024 12:23:01 +0300",
+            "from": "From: Mihai Farcas <contact@mihai.ltd>",
+            "subject": "Subject: Urgent Inquiry for CloudConnect Pro Integration",
+            "message-id": "Message-ID: <CAGDzDQR5BWWjU40G26dg4AZuiMKZ5b0GtdUyn-2FbfMFs2yJwg@mail.gmail.com>",
+            "content-type": "Content-Type: multipart/alternative; boundary=\"00000000000064dc5b061b7718a6\"",
+            "mime-version": "MIME-Version: 1.0"
+          },
+          "subject": "Urgent Inquiry for CloudConnect Pro Integration",
+          "labelIds": [
+            "Label_8035866011660570111",
+            "IMPORTANT",
+            "SENT",
+            "INBOX"
+          ],
+          "threadId": "1903f3f36f29657c",
+          "messageId": "<CAGDzDQR5BWWjU40G26dg4AZuiMKZ5b0GtdUyn-2FbfMFs2yJwg@mail.gmail.com>",
+          "textAsHtml": "<p>Dear Alex,</p><p>I hope this email finds you well.</p><p>My name is Mihai Farcas, and I&apos;m the Procurement Manager at Innovative<br/>Solutions Inc. We are a leading provider of cutting-edge technological<br/>solutions for businesses across various industries.</p><p>I&apos;m reaching out to you today to express our strong interest in your<br/>company&apos;s CloudConnect Pro platform. We&apos;ve been thoroughly impressed by its<br/>capabilities in cloud integration, data management, and overall<br/>flexibility. Our research indicates that it could be an excellent fit for<br/>our clients&apos; needs, particularly in the areas of streamlining workflows and<br/>enhancing data accessibility.</p><p>We are currently exploring the possibility of incorporating CloudConnect<br/>Pro into our upcoming projects. To this end, we would appreciate it if you<br/>could provide us with detailed information on pricing, implementation<br/>options, and support services for enterprise-level deployments.<br/>Additionally, any case studies or testimonials from companies similar to<br/>ours would be most welcome.</p><p>Given the urgency of our projects, a prompt response would be greatly<br/>appreciated. We are eager to learn more about how CloudConnect Pro can<br/>contribute to our success and look forward to the possibility of a mutually<br/>beneficial partnership.</p><p>Thank you for your time and consideration.</p><p>Sincerely,</p><p>Mihai Farcas</p><p>Procurement Manager</p><p>Innovative Solutions Inc.</p>",
+          "sizeEstimate": 3554
+        }
+      }
+    ]
+  },
+  "versionId": "3c98dffb-d3c7-4830-9b4d-693b961cbb93",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-21T09:35:22.674Z",
+      "createdAt": "2025-10-21T09:35:22.674Z",
+      "role": "workflow:owner",
+      "workflowId": "w5MuQs8WCSRjO05v",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
