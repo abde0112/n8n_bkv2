@@ -1,0 +1,487 @@
+{
+  "updatedAt": "2025-10-30T17:56:46.000Z",
+  "createdAt": "2025-10-10T20:28:46.208Z",
+  "id": "BCOM4N3P9brZia1S",
+  "name": "⚙️ Project: UltraWatch IPTV — Free Trial Chatbot",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message",
+          "*"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        64,
+        0
+      ],
+      "id": "5da5dd08-a4b0-4d8b-a1e8-d26cf3943038",
+      "name": "Telegram Trigger",
+      "webhookId": "0d37587b-dcf4-41a1-aaa7-64229e4872e3",
+      "credentials": {
+        "telegramApi": {
+          "id": "4n8IpWawZqtjvUJ9",
+          "name": "N8N ARK"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        704,
+        368
+      ],
+      "id": "145916cb-7502-4e30-8795-9d70f63a2241",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false,
+          "parse_mode": "HTML"
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1248,
+        144
+      ],
+      "id": "bfc49504-001e-482c-b11c-694f7cea1961",
+      "name": "Send a text message",
+      "webhookId": "dd50cb75-1e51-47d2-9335-a53ebbf57f37",
+      "credentials": {
+        "telegramApi": {
+          "id": "4n8IpWawZqtjvUJ9",
+          "name": "N8N ARK"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.output }}",
+        "options": {
+          "systemMessage": "You are Enigma+ IPTV Service Assistant 💫\n\nGoal:\n- Handle users who want to subscribe to IPTV\n- Use info collected in Free Trial if available\n- Collect missing info step-by-step\n- Confirm all info at the end\n\nQuestions to collect:\n1️⃣ WhatsApp number 📱 (if not collected)\n2️⃣ Plan 💰 (1 Month $15, 3 Months $25, 6 Months $35, 12 Months $55)\n3️⃣ Adult content 🔞 (Yes/No)\n4️⃣ Device type 💻 (Smart TV, FireStick, Android, iPhone, MAG/STB…)\n5️⃣ MAC address (if MAG/STB)\n6️⃣ Payment method 💳 (PayPal, Credit Card)\n7️⃣ Confirm Privacy & Refund Policy ✅\n\nAfter all answers, confirm:\n\"✅ Perfect! I’ll send your subscription login details soon. Thank you for choosing Enigma+ IPTV Service 💫\"\n\nOutput JSON:\n{\n  \"whatsapp\": \"...\",\n  \"plan\": \"...\",\n  \"adult\": \"...\",\n  \"device\": \"...\",\n  \"mac\": \"...\",\n  \"payment\": \"...\",\n  \"privacy_ack\": \"Yes\"\n}\n\nRules:\n- Be friendly, short, and polite\n- Use emojis naturally\n- Never skip questions\n- Wait for user input\n- Store answers in Simple Memory\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        1264,
+        -192
+      ],
+      "id": "1683b616-578d-44b2-9e46-722c9c44db9d",
+      "name": "Service / Subscription AI Agent"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are Enigma+, a smart AI assistant that manages IPTV trial activations and subscriptions.\n\n🎯 GOAL:\nHandle user requests for free trials and subscriptions while enforcing the rule:\n➡️ Each user can have a maximum of 2 free trials.\n\nTOOLS AVAILABLE:\n1️⃣ Google Sheets (Read): \"Enigma_Users_Record\"\n   - Use this to check if the user's WhatsApp or ChatID already exists.\n   - If found and FreeTrialCount >= 2 → tell the user they’ve reached their limit.\n\n2️⃣ Google Sheets (Append): \"Enigma_Trial_Log\"\n   - Use this to record a new free trial when the user confirms all details.\n\n🧠 MEMORY:\nUse Simple Memory to keep track of what the user says (Country, WhatsApp, Device, App, Category).\n\n💬 FLOW LOGIC:\n1️⃣ Start the conversation:\n   - Greet user and ask if they want a Free Trial or Subscription.\n   Example: \n   \"👋 Hello and welcome to Enigma+ IPTV Support!  \n   Would you like to start a Free Trial or Subscribe to our service?\"\n\n2️⃣ If Free Trial:\n   - Ask step by step:\n     🌍 Country\n     📱 WhatsApp number 📱 (must match this regex: `^\\+?\\d{6,15}$`)  \n     - If invalid, say:  \n       ```\n       ⚠️ Please enter a valid WhatsApp number (starts with + or digits, 6–15 numbers long).\n       ```\n       Then wait for correction.\n     💻 Device\n     🎬 App/Player\n     📺 Category/Channels\n   - After all answers, confirm summary:\n     “Here’s what I got: [list all details].  \n      Is everything correct? (Yes/No)”\n\n3️⃣ Before approving the trial:\n   - Use the Google Sheets (Read) tool to check if the user already exists.\n   - If they have 2 or more free trials:\n     “⚠️ You’ve already used 2 free trials.  \n      To continue watching, please subscribe to Enigma+ IPTV. 💫”\n     → Do NOT append new data.\n\n4️⃣ If they are eligible:\n   - When user says “Yes” to confirmation:\n     - Use Google Sheets (Append) to record:\n       ChatID, WhatsApp, Country, Device, App, Category, FreeTrialCount = previous + 1, Date = today\n     - Respond with:\n       “🎁 Perfect! Your free trial will be activated soon.  \n        You’ll receive your login details shortly.  \n        Would you like to subscribe to Enigma+ IPTV now to continue enjoying premium access? 💫”\n\n5️⃣ If user says “No”:\n   - Ask what needs to be corrected and update memory.\n\n6️⃣ If the user asks again for free trial after 2 records:\n   - Politely remind them they’ve reached the limit.\n   - Offer a subscription instead.\n\n💬 Style:\n- Always answer with friendly tone.\n- Never return JSON.\n- Keep responses short and professional.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        496,
+        0
+      ],
+      "id": "cf531f46-5300-499b-b293-58e30cf0c17b",
+      "name": "Free Trial AI Agent"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "loose",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ad703c13-4602-4a69-bddc-65badbff8c94",
+              "leftValue": "={{ $json.output }}",
+              "rightValue": "Subscribe",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "looseTypeValidation": true,
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        880,
+        0
+      ],
+      "id": "4bbdbb33-1299-4e67-98ce-174370902ec0",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1EzVNcpb5Ls-R-rUtNHE1v5LcTplUAuwQcQbjqjS1gUY",
+          "mode": "list",
+          "cachedResultName": "Enigma telegram",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EzVNcpb5Ls-R-rUtNHE1v5LcTplUAuwQcQbjqjS1gUY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EzVNcpb5Ls-R-rUtNHE1v5LcTplUAuwQcQbjqjS1gUY/edit#gid=0"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        528,
+        304
+      ],
+      "id": "b3e6b8f1-c33c-473c-8d57-4595ec653494",
+      "name": "Enigma_Users_Record",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1EzVNcpb5Ls-R-rUtNHE1v5LcTplUAuwQcQbjqjS1gUY",
+          "mode": "list",
+          "cachedResultName": "Enigma telegram",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EzVNcpb5Ls-R-rUtNHE1v5LcTplUAuwQcQbjqjS1gUY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1EzVNcpb5Ls-R-rUtNHE1v5LcTplUAuwQcQbjqjS1gUY/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "WhatsApp": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('WhatsApp', ``, 'string') }}",
+            "Country": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Country', ``, 'string') }}",
+            "Device": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Device', ``, 'string') }}",
+            "App": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('App', ``, 'string') }}",
+            "Category": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Category', ``, 'string') }}",
+            "FreeTrialCount": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('FreeTrialCount', ``, 'string') }}",
+            "LastTrialDate": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('LastTrialDate', ``, 'string') }}"
+          },
+          "matchingColumns": [
+            "WhatsApp"
+          ],
+          "schema": [
+            {
+              "id": "WhatsApp",
+              "displayName": "WhatsApp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Country",
+              "displayName": "Country",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Device",
+              "displayName": "Device",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "App",
+              "displayName": "App",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Category",
+              "displayName": "Category",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "FreeTrialCount",
+              "displayName": "FreeTrialCount",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "LastTrialDate",
+              "displayName": "LastTrialDate",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        384,
+        240
+      ],
+      "id": "28a971eb-d8c6-4471-9785-eeedda5782ad",
+      "name": "Enigma_Trial_Log",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "BCOM4N3P9brZia1S"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        992,
+        352
+      ],
+      "id": "6f9cf2eb-60a6-4eee-859a-47e06c86eb27",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        1584,
+        -192
+      ],
+      "id": "d6fadda0-d0e2-4049-870e-9ca10aa60eea",
+      "name": "Send a text message1",
+      "webhookId": "dd50cb75-1e51-47d2-9335-a53ebbf57f37",
+      "credentials": {
+        "telegramApi": {
+          "id": "4n8IpWawZqtjvUJ9",
+          "name": "N8N ARK"
+        }
+      },
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        304,
+        0
+      ],
+      "id": "5e74e800-b0b5-49b6-9f9e-6abf1e1e0f3e",
+      "name": "When chat message received",
+      "webhookId": "9b476c1a-024b-4310-90e2-c871ff00f958"
+    }
+  ],
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        []
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Free Trial AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Service / Subscription AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Free Trial AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Service / Subscription AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Service / Subscription AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enigma_Users_Record": {
+      "ai_tool": [
+        [
+          {
+            "node": "Free Trial AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Enigma_Trial_Log": {
+      "ai_tool": [
+        [
+          {
+            "node": "Free Trial AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "Free Trial AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          },
+          {
+            "node": "Service / Subscription AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Free Trial AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "8bcdb0d2-d120-486b-bef6-aecf0b6c6205",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-10-10T20:28:46.226Z",
+      "createdAt": "2025-10-10T20:28:46.226Z",
+      "role": "workflow:owner",
+      "workflowId": "BCOM4N3P9brZia1S",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
