@@ -1,0 +1,32 @@
+{
+  "updatedAt": "2025-09-12T21:32:28.000Z",
+  "createdAt": "2025-09-12T09:58:45.400Z",
+  "id": "fgqu8RlJch1ZCqe3",
+  "name": "The Product Variant Flattener",
+  "active": false,
+  "isArchived": true,
+  "nodes": [],
+  "connections": {},
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "aba5beba-d175-484b-b2a1-22a76f1a53f5",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-12T09:58:45.417Z",
+      "createdAt": "2025-09-12T09:58:45.417Z",
+      "role": "workflow:owner",
+      "workflowId": "fgqu8RlJch1ZCqe3",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
