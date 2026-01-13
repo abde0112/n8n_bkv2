@@ -1,0 +1,601 @@
+{
+  "updatedAt": "2025-10-09T08:30:04.000Z",
+  "createdAt": "2025-10-06T20:45:09.598Z",
+  "id": "NCQ1qkpZrxhSVQVl",
+  "name": "DAY 11 MINI PROJECT 🎯 Mission: Build an AI Concierge with Routing + Scheduling Logic",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "TEST",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        -192,
+        0
+      ],
+      "id": "e613876d-4245-4f5d-b9d3-0b9c4b54331a",
+      "name": "Webhook",
+      "webhookId": "30765493-7e2e-465e-b5c6-c147ee889e74"
+    },
+    {
+      "parameters": {
+        "respondWith": "allIncomingItems",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1120,
+        -224
+      ],
+      "id": "289ed4dc-584c-4adb-8ac5-95b7f781d553",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "24d52ab2-7ab8-4831-b982-c5f3d279dba6",
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "Order Status",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.content.parts[0].text }}",
+                    "rightValue": "Schedule Call",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals"
+                    },
+                    "id": "ce6ba518-7e1d-49cc-be8e-16d8f83313a8"
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.3,
+      "position": [
+        464,
+        0
+      ],
+      "id": "943390ac-4189-4f82-822f-c464d66f66d1",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "calendar": {
+          "__rl": true,
+          "value": "abdellahkrimo13@gmail.com",
+          "mode": "list",
+          "cachedResultName": "abdellahkrimo13@gmail.com"
+        },
+        "returnAll": true,
+        "timeMax": "={{ $now.plus({ hours: 48 }) }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1.3,
+      "position": [
+        720,
+        304
+      ],
+      "id": "ed3bf68b-4b09-45dd-9075-bd62ee1369f5",
+      "name": "Get Busy Events",
+      "credentials": {
+        "googleCalendarOAuth2Api": {
+          "id": "8HX6F1LWhek8AoYJ",
+          "name": "Google Calendar account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Business hours configuration\nconst businessStartHour = 9;   // 9 AM\nconst businessEndHour = 17;    // 5 PM\nconst slotDurationMinutes = 30;\nconst hoursAhead = 48;\n\n// Time helpers\nconst now = new Date();\nconst endTime = new Date(now.getTime() + hoursAhead * 60 * 60 * 1000);\n\nconst slots = [];\n\nlet current = new Date(now);\n\n// Loop through each day\nwhile (current < endTime) {\n  // Get current date's start and end of business day\n  const startOfDay = new Date(current);\n  startOfDay.setHours(businessStartHour, 0, 0, 0);\n\n  const endOfDay = new Date(current);\n  endOfDay.setHours(businessEndHour, 0, 0, 0);\n\n  let slotStart = new Date(startOfDay);\n\n  while (slotStart < endOfDay) {\n    const slotEnd = new Date(slotStart.getTime() + slotDurationMinutes * 60 * 1000);\n    slots.push({\n      start: slotStart.toISOString(),\n      end: slotEnd.toISOString(),\n    });\n    slotStart = slotEnd;\n  }\n\n  // Move to next day\n  current.setDate(current.getDate() + 1);\n  current.setHours(0, 0, 0, 0);\n}\n\nreturn [{ json: { possibleSlots: slots } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        944,
+        304
+      ],
+      "id": "6ad2c6b0-eb79-4ebb-98f3-276c31ff081f",
+      "name": "Generate Possible Slots"
+    },
+    {
+      "parameters": {
+        "jsCode": "// get the free slots from the previous node\nconst freeSlots = $json[\"freeSlots\"] || [];\n\n// format each slot into readable text\nconst formattedSlots = freeSlots.map(slot => {\n  const start = new Date(slot.start);\n  const end = new Date(slot.end);\n  const day = start.toLocaleDateString(\"en-GB\", { weekday: \"short\", day: \"2-digit\", month: \"short\" });\n  const options = { hour: \"2-digit\", minute: \"2-digit\" };\n  return `${day} ${start.toLocaleTimeString(\"en-GB\", options)}–${end.toLocaleTimeString(\"en-GB\", options)}`;\n});\n\n// create a final message\nconst text = formattedSlots.length\n  ? `Available slots: ${formattedSlots.slice(0, 10).join(\", \")}`\n  : \"No free slots found.\";\n\n// return it as a new item\nreturn [{\n  availableSlotsText: text,\n  availableSlotsCount: freeSlots.length\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1520,
+        304
+      ],
+      "id": "684540e4-9441-4f49-a180-302110651494",
+      "name": "Format Response"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Input 1: busy events from Google Calendar\nconst busyEvents = $items(\"Get Busy Events\").map(i => i.json);\n\n// Input 2: all possible 30-min slots\nconst possibleSlots = $json[\"possibleSlots\"] || [];\n\n// Convert busy events to time intervals\nconst busyTimes = busyEvents.map(e => ({\n  start: new Date(e.start.dateTime || e.start),\n  end: new Date(e.end.dateTime || e.end),\n}));\n\n// Function to check overlap\nfunction isOverlapping(slot, busy) {\n  return (\n    new Date(slot.start) < busy.end &&\n    new Date(slot.end) > busy.start\n  );\n}\n\n// Filter out overlapping slots\nconst freeSlots = possibleSlots.filter(slot => {\n  return !busyTimes.some(busy => isOverlapping(slot, busy));\n});\n\n// Return result\nreturn [{ json: { freeSlots } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1232,
+        304
+      ],
+      "id": "a9b1737d-3ebd-47b1-b6a8-806015704ab3",
+      "name": "Filter Free Slots"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "a9d08e45-6fc8-40a2-a8c3-82fe67d98226",
+              "name": "availableSlotsText",
+              "value": "={{ $json.availableSlotsText }}",
+              "type": "string"
+            },
+            {
+              "id": "c1341f29-42b2-4967-ab04-582d97e2ad5e",
+              "name": "availableSlotsCount",
+              "value": "={{ $json.availableSlotsCount }}",
+              "type": "number"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1808,
+        304
+      ],
+      "id": "e623637c-3824-487f-aa72-368d607a9556",
+      "name": "Return Response"
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ $json.availableSlotsText }}\n{{ $json.availableSlotsCount }}\n",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        2064,
+        304
+      ],
+      "id": "43bd2d2b-9771-43ca-bc5f-7943063a5171",
+      "name": "Respond to Webhook1"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "models/gemini-2.5-flash",
+          "mode": "list",
+          "cachedResultName": "models/gemini-2.5-flash"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=You are an intent classifier. Read the user’s message carefully and classify it as either “Order Status” or “Schedule Call.”\nRespond with only one word — either:\n\nOrder Status\n\nSchedule Call\n\nMessage: {{ $json.body.message }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        0
+      ],
+      "id": "21057889-0c07-4df1-a2c6-a0059fd96fff",
+      "name": "🤖 2. Message a Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "40a6c968-292b-466a-afd4-0876ed58399b",
+              "name": "MESSAGE",
+              "value": "Order found: #1234, shipping tomorrow.",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        784,
+        -224
+      ],
+      "id": "82d7fc07-a852-4628-bb8f-c1e4b16e50dd",
+      "name": "🧭 Path 1 – “Order Status”"
+    },
+    {
+      "parameters": {
+        "content": "🧭 Path 1 – “Order Status”",
+        "height": 496,
+        "width": 848,
+        "color": 2
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        -464
+      ],
+      "typeVersion": 1,
+      "id": "97747a05-ba15-4af4-8187-74f92f46a333",
+      "name": "Sticky Note"
+    },
+    {
+      "parameters": {
+        "content": "🧭 Path 2 – “Schedule Call”",
+        "height": 576,
+        "width": 1664
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        640,
+        48
+      ],
+      "typeVersion": 1,
+      "id": "12145953-c75e-4e58-bde3-9d781d1dfa79",
+      "name": "Sticky Note1"
+    },
+    {
+      "parameters": {
+        "content": "📅 6. Get Busy Events\n\nFetches all Google Calendar events for the next 48 hours.",
+        "height": 352,
+        "width": 192,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        672,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "174fd53b-ead6-4ced-bcb6-2e53cc890f20",
+      "name": "Sticky Note2"
+    },
+    {
+      "parameters": {
+        "content": "🧠 7. Generate Possible Slots\n\nCreates every possible 30-minute slot between 09:00–17:00 for the next two days.",
+        "height": 352,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        880,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "66e8ca84-d626-4b0e-9789-10e01fc3663d",
+      "name": "Sticky Note3"
+    },
+    {
+      "parameters": {
+        "content": "🔍 8. Filter Free Slots\n\nCompares all generated slots with the list of busy events.\n\nRemoves overlapping times.\n\nReturns only available (“free”) slots.",
+        "height": 352,
+        "width": 304
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1136,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "7fddb4c2-d45b-41d0-a12a-2a901750bb7f",
+      "name": "Sticky Note4"
+    },
+    {
+      "parameters": {
+        "content": "🪄 9. Format Response\n\nTakes the free slots and turns them into human-readable text.\n\nExample output:\n\nAvailable slots: Tue 07 Oct 09:00–09:30, Tue 07 Oct 09:30–10:00, ...\n",
+        "height": 352,
+        "width": 272,
+        "color": 7
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1456,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "fe9d66b1-21bb-49ab-9391-b3fcd3cc4b66",
+      "name": "Sticky Note5"
+    },
+    {
+      "parameters": {
+        "content": "🧾 10. Return Response\n\nCopies the final availableSlotsText and availableSlotsCount\ninto clean JSON keys for the webhook reply.",
+        "height": 352,
+        "width": 224,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1744,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "ef112a45-d20e-42fb-848f-3de1806ebed5",
+      "name": "Sticky Note6"
+    },
+    {
+      "parameters": {
+        "content": "💬 11. Respond to Webhook1\n\nSends the formatted schedule message back to the user.",
+        "height": 352,
+        "color": 3
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2000,
+        96
+      ],
+      "typeVersion": 1,
+      "id": "9eaa0609-6a48-424f-a61e-ba4f53bdc66a",
+      "name": "Sticky Note7"
+    },
+    {
+      "parameters": {
+        "content": "🤖 2. Message a Model (AI Router)\n\nUses Google Gemini 2.5 Flash.\n\nPrompt:\n\nYou are an intent classifier. Read the user’s message carefully and classify it as either “Order Status” or “Schedule Call.” Respond with only one word.\n\nInput: {{ $json.body.message }}\n\nOutput Example:\n\n\"Order Status\"\n\n\"Schedule Call\"\n\nThis AI acts like a traffic director.",
+        "height": 592,
+        "width": 352
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        -400
+      ],
+      "typeVersion": 1,
+      "id": "6894e380-7d4b-4adb-a586-aeaa25feb5db",
+      "name": "Sticky Note8"
+    },
+    {
+      "parameters": {
+        "content": "⚙️ 3. Switch\n\nLooks at {{ $json.content.parts[0].text }} (AI’s output).\n\nIf “Order Status” → Path 1\n\nIf “Schedule Call” → Path 2\n\nThis is where routing happens.",
+        "height": 592,
+        "width": 256,
+        "color": 4
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        368,
+        -400
+      ],
+      "typeVersion": 1,
+      "id": "8e091621-93a8-48e1-bbd5-c1f4f08b7fb3",
+      "name": "Sticky Note9"
+    },
+    {
+      "parameters": {
+        "content": "🧱 4. Edit Fields\n\nJust a placeholder to simulate order checking.\n\nReturns:\n\n{ \"MESSAGE\": \"Order found: #1234, shipping tomorrow.\" }",
+        "height": 368,
+        "width": 304,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        672,
+        -416
+      ],
+      "typeVersion": 1,
+      "id": "fd45ed3f-38bf-4d72-bb6b-ac3e435a9f82",
+      "name": "Sticky Note10"
+    },
+    {
+      "parameters": {
+        "content": "💬 5. Respond to Webhook\n\nSends the MESSAGE text back to the requester.\n\n✅ Tested, works instantly.",
+        "height": 368,
+        "width": 272,
+        "color": 5
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1040,
+        -416
+      ],
+      "typeVersion": 1,
+      "id": "f39ed385-dbb4-40b7-acc3-d4f8aba9db7d",
+      "name": "Sticky Note11"
+    },
+    {
+      "parameters": {
+        "content": "🧱 1. Webhook\n\nTrigger: When a user message arrives (e.g., from a chat frontend or API).\n\nPath: /TEST\n\nThe workflow starts immediately when you send a POST request to\nhttps://<your-n8n-domain>/webhook/TEST\nwith JSON like:\n\n{ \"message\": \"I want to book a call\" }\n",
+        "height": 592,
+        "width": 288,
+        "color": 6
+      },
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -304,
+        -400
+      ],
+      "typeVersion": 1,
+      "id": "22584ac8-256d-4483-9a69-546088504ae7",
+      "name": "Sticky Note12"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "🤖 2. Message a Model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "🧭 Path 1 – “Order Status”",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Get Busy Events",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Busy Events": {
+      "main": [
+        [
+          {
+            "node": "Generate Possible Slots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Possible Slots": {
+      "main": [
+        [
+          {
+            "node": "Filter Free Slots",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Return Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Filter Free Slots": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Return Response": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🤖 2. Message a Model": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "🧭 Path 1 – “Order Status”": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "ff44a39a-9aa0-49b7-a9e0-449ff8f7f68d",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-06T20:45:09.621Z",
+      "createdAt": "2025-10-06T20:45:09.621Z",
+      "role": "workflow:owner",
+      "workflowId": "NCQ1qkpZrxhSVQVl",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
