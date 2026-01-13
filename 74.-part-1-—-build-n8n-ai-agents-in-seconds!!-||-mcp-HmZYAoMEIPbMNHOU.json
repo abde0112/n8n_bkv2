@@ -1,0 +1,107 @@
+{
+  "updatedAt": "2025-10-28T11:16:31.000Z",
+  "createdAt": "2025-10-27T10:49:54.026Z",
+  "id": "HmZYAoMEIPbMNHOU",
+  "name": "74. Part 1 — Build n8n AI Agents in seconds!! || MCP",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "emails"
+      },
+      "type": "@n8n/n8n-nodes-langchain.mcpTrigger",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "306a3de9-f431-4204-9ede-e362d84f9420",
+      "name": "MCP Server Trigger",
+      "webhookId": "83c65243-8d0d-4a1e-8380-ceb98a253db7"
+    },
+    {
+      "parameters": {
+        "sendTo": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('To', ``, 'string') }}",
+        "subject": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Subject', ``, 'string') }}",
+        "emailType": "text",
+        "message": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Message', ``, 'string') }}",
+        "options": {
+          "appendAttribution": false
+        }
+      },
+      "type": "n8n-nodes-base.gmailTool",
+      "typeVersion": 2.1,
+      "position": [
+        48,
+        208
+      ],
+      "id": "9e89e874-5169-4a62-a078-61141c92f798",
+      "name": "Send a message in Gmail",
+      "webhookId": "6830edc4-23e9-4627-81db-c0dd59197fde",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "kwQyExBG7xNmebmA",
+          "name": "Gmail account 4"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.toolCalculator",
+      "typeVersion": 1,
+      "position": [
+        192,
+        224
+      ],
+      "id": "f1ce111e-3d6e-4490-b711-af7c0497cae3",
+      "name": "Calculator"
+    }
+  ],
+  "connections": {
+    "Send a message in Gmail": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculator": {
+      "ai_tool": [
+        [
+          {
+            "node": "MCP Server Trigger",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "c43cdf5f-176c-4456-be28-6759a1356aca",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-10-27T10:49:54.041Z",
+      "createdAt": "2025-10-27T10:49:54.041Z",
+      "role": "workflow:owner",
+      "workflowId": "HmZYAoMEIPbMNHOU",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
