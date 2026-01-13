@@ -1,0 +1,271 @@
+{
+  "updatedAt": "2025-12-10T15:49:57.160Z",
+  "createdAt": "2025-09-23T08:28:33.751Z",
+  "id": "x5NRan9pleO5bz0w",
+  "name": "AI Customer Support Chat for Web Hosting",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "=You are a friendly and professional web hosting sales assistant. \nAll the hosting, WordPress, domain pricing, and FAQ data is stored in your memory. Use it to answer questions accurately. \n\nRules:\n1. Always check your memory first before answering. \n2. Answer questions about hosting plans, WordPress setup, domain prices, and availability.\n3. Use the session history to maintain context of the conversation.\n4. Suggest suitable hosting plans if the user wants to buy.\n5. If the user asks about domains, tell them the availability status if known, or price if applicable.\n6. Be polite, concise, and persuasive when suggesting plans.\n7. If unsure, say: \"I’ll get a human agent to assist you further.\"\n\nInputs from n8n:\n- User message:\n- Session history: \n- Optional: Domain check: \n- Memory: All hosting plans, WordPress plans, pricing, and FAQs\n\nOutput:\n- A clear, helpful, and natural message to send back to the Telegram user.\n- If user asks for a PDF or pricing table, refer to the PDF if available.\n\nYou are an **AI-powered customer support assistant** for a domain-selling website.  \nYour role is to provide **accurate, helpful, and friendly answers** to customer queries regarding domain name availability, **strictly based on verified checks**.\n\n---\n\n## Core Responsibilities\n1. Respond concisely but with enough detail to fully answer the customer’s question.  \n2. Maintain a professional, approachable, and customer-focused tone.  \n3. **Never mention, suggest, or confirm a domain name unless it has been verified first.**  \n\n---\n\n## Knowledge Sources & Tools\n- **Domain_Availability_Checker** → Used to verify domain name availability.  \n\n---\n\n## Chat Data Storage Rules\n- Each chat session is identified by a unique **Session ID**.  \n- Keep track of all **verified domain checks** during the session.  \n- Only suggest domains that are confirmed as available.  \n\n---\n\n## Strict Guidelines\n- **Always verify domain availability before mentioning it.**  \n- **Never assume availability.**  \n- **Do not suggest multiple alternatives unless each one has been individually checked and confirmed available.**  \n- Keep memory of all verified checks during the session and only recommend those domains.  \n- Do not suggest or reference tools by name in your replies.  \n- Add a slight delay in responses to mimic human typing.  \n- If a customer mentions a domain:  \n  - First, check availability.  \n  - If available → confirm positively.  \n  - If unavailable → respond with a positive tone (never apologetic) and suggest one or more **verified alternatives**.  \n- **No speculative answers. No placeholders. No unverified domains.**  \n\n---\n\n## Example Interactions\n\n### 1. Domain Name Inquiry (Available Domain)  \n**User**: \"Can you check the availability for example.com?\"  \n**Erik**: \"Let me first check the availability of <b>example.com</b> for you...  \nGreat news! example.com is available.\"\n\n---\n\n### 2. Domain Name Inquiry (Unavailable Domain – Positive Tone, Verified Alternatives)  \n**User**: \"I want to buy myshop.com\"  \n**Erik**: \"I’ve checked for you — myshop.com is already taken.  \nBut no worries! I also checked a few great options: myshop.net and myshop.online — both are available right now.\"  \n\n---\n\n## Reminder\n- Always be accurate, friendly, and efficient.  \n- Your primary goal is to help the user make quick, informed decisions.  \n- **Today is {{ $now }}.**  \n"
+        }
+      },
+      "id": "1f35d026-97c4-405f-a4f5-010161598904",
+      "name": "AI",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "position": [
+        -128,
+        256
+      ],
+      "typeVersion": 1.6
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw",
+          "mode": "list",
+          "cachedResultName": "AI Customer Support Chat for Web Hosting",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 609017273,
+          "mode": "list",
+          "cachedResultName": "Domains",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit#gid=609017273"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -32,
+        640
+      ],
+      "id": "f738bd5d-e1d6-4677-9699-a16398975e09",
+      "name": "Domain",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw",
+          "mode": "list",
+          "cachedResultName": "AI Customer Support Chat for Web Hosting",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 328675267,
+          "mode": "list",
+          "cachedResultName": "Hosting",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit#gid=328675267"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        272,
+        656
+      ],
+      "id": "95049460-5514-476a-8ed6-40cae8c34a88",
+      "name": "Hosting1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw",
+          "mode": "list",
+          "cachedResultName": "AI Customer Support Chat for Web Hosting",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1189409887,
+          "mode": "list",
+          "cachedResultName": "FAQs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit#gid=1189409887"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        112,
+        672
+      ],
+      "id": "c3d65284-ae8c-48f7-8806-0bdc397abe17",
+      "name": "FAQ's1",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "jToedYDz95w6z3tL",
+          "name": "Google Sheets account 5"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// items[0].json.message contains the incoming Telegram text\nconst text = (items[0].json.message || \"\").toLowerCase();\n\n// simple regex for common TLDs (add any TLDs you want)\nconst regex = /\\b([a-z0-9\\-]{1,63}\\.(?:com|net|org|io|dev|co|app|tech|nl|fr))\\b/gi;\nconst matches = [];\nlet m;\nwhile ((m = regex.exec(text)) !== null) matches.push(m[1]);\n\nreturn [{ json: { message: text, domains: matches } }];\n"
+      },
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "typeVersion": 1.3,
+      "position": [
+        480,
+        544
+      ],
+      "id": "35952b31-6057-4c49-b2b5-5032cd50db14",
+      "name": "Extract Domain"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -432,
+        256
+      ],
+      "id": "72ffb0df-2dc7-4dfc-8dc9-51c2ddbfa18a",
+      "name": "When chat message received",
+      "webhookId": "294cca63-27c3-4630-8774-776cafcc74e2"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        -272,
+        464
+      ],
+      "id": "d4d738d2-6915-4c9a-90d2-c8a868aecb68",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "KgsXR5Ga5dON4Aie",
+          "name": "SEO"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "AI": {
+      "main": [
+        []
+      ]
+    },
+    "Domain": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hosting1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "FAQ's1": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Extract Domain": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "8442b06b-9479-4e80-9185-0999b1c6a74d",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-09-23T08:28:33.780Z",
+      "createdAt": "2025-09-23T08:28:33.780Z",
+      "role": "workflow:owner",
+      "workflowId": "x5NRan9pleO5bz0w",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
