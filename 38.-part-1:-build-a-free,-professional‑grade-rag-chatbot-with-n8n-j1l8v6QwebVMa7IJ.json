@@ -1,0 +1,521 @@
+{
+  "updatedAt": "2025-12-31T17:46:47.315Z",
+  "createdAt": "2025-10-21T08:53:07.330Z",
+  "id": "j1l8v6QwebVMa7IJ",
+  "name": "38. Part 1: Build a free, professional‑grade RAG chatbot with n8n",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "dataType": "binary",
+        "binaryMode": "specificField",
+        "textSplittingMode": "custom",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.documentDefaultDataLoader",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        432
+      ],
+      "id": "549be19a-1da8-4c4a-bf03-fb86a8f539ec",
+      "name": "Default Data Loader"
+    },
+    {
+      "parameters": {
+        "pollTimes": {
+          "item": [
+            {
+              "mode": "everyMinute"
+            }
+          ]
+        },
+        "triggerOn": "specificFolder",
+        "folderToWatch": {
+          "__rl": true,
+          "value": "1DqyKKjXAnyUbPyEV8Bo0cBIvsnY40Xus",
+          "mode": "list",
+          "cachedResultName": "Udemy (1)",
+          "cachedResultUrl": "https://drive.google.com/drive/folders/1DqyKKjXAnyUbPyEV8Bo0cBIvsnY40Xus"
+        },
+        "event": "fileCreated",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDriveTrigger",
+      "typeVersion": 1,
+      "position": [
+        -576,
+        208
+      ],
+      "id": "849221a5-f760-4e1b-8f97-f3cb348ae19a",
+      "name": "Google Drive Trigger1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "HUgBuWJOD3ngv7CC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "download",
+        "fileId": {
+          "__rl": true,
+          "value": "=https://drive.google.com/file/d/1geyVC0Jn4OrrsmrgAuzYdr3lP2unfzW2/view?usp=sharing",
+          "mode": "url"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleDrive",
+      "typeVersion": 3,
+      "position": [
+        -368,
+        208
+      ],
+      "id": "6cca952b-ad90-438b-ac6b-1b28074aeadb",
+      "name": "Download file1",
+      "credentials": {
+        "googleDriveOAuth2Api": {
+          "id": "HUgBuWJOD3ngv7CC",
+          "name": "Google Drive account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "insert",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "yyyyyyyyyyyyyyyyyyyyy",
+          "mode": "list",
+          "cachedResultName": "yyyyyyyyyyyyyyyyyyyyy"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        -160,
+        208
+      ],
+      "id": "5058e1bd-e633-477e-892e-18867e9da921",
+      "name": "Pinecone Vector Store1",
+      "credentials": {
+        "pineconeApi": {
+          "id": "akk9g6AgLQCV8UCq",
+          "name": "IP-T"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -224,
+        448
+      ],
+      "id": "3eacbd4d-5335-414e-9e2b-14523d866e39",
+      "name": "Embeddings Google Gemini2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "2chan"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chunkOverlap": 200,
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.textSplitterRecursiveCharacterTextSplitter",
+      "typeVersion": 1,
+      "position": [
+        16,
+        576
+      ],
+      "id": "5a5884e9-960e-410a-a48a-dc65c21e880e",
+      "name": "Recursive Character Text Splitter"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.chatInput }}",
+        "options": {
+          "systemMessage": "You are an intelligent assistant specialized in answering questions using the information stored in a connected PDF knowledge base.\n\nYour task:\n- Always retrieve context from the Pinecone vector database before answering.\n- Use the Google Gemini model to generate clear, factual, and friendly responses.\n- If the answer is not found in the retrieved context, politely say:\n  \"I couldn't find this information in the document.\"\n\nRules:\n1. Prioritize accuracy over creativity.\n2. Never invent or assume details not found in the PDF.\n3. Include short summaries or bullet points when helpful.\n4. Maintain a professional and supportive tone.\n\nContext Source:\nThe data comes from a PDF document that was processed into embeddings and stored in Pinecone. Each chunk of text represents part of the original file.\n\nExample Behavior:\nUser: \"What is mentioned about pricing in the document?\"\nAgent: Retrieve relevant sections from Pinecone → summarize key points clearly.\n\nNow, wait for the user’s question and use the vector store to find the best context before answering.\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        544,
+        208
+      ],
+      "id": "73cd8a96-8db5-41c3-8250-4895e9867e5a",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {
+          "allowFileUploads": false
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        368,
+        208
+      ],
+      "id": "0d0266ea-28b7-4f0d-aba5-d00c4565e0d5",
+      "name": "When chat message received",
+      "webhookId": "6f6ef782-34d9-4c2b-b96c-48297fdd17cf"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        416,
+        416
+      ],
+      "id": "72eaab05-c41e-44a3-833b-31c12ac3e7fd",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "2chan"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        560,
+        416
+      ],
+      "id": "78dbcdcd-7d4f-4d9c-bf2d-b11441aff5ac",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "mode": "retrieve-as-tool",
+        "toolDescription": "git data from pincone",
+        "pineconeIndex": {
+          "__rl": true,
+          "value": "768",
+          "mode": "list",
+          "cachedResultName": "768"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.vectorStorePinecone",
+      "typeVersion": 1.3,
+      "position": [
+        736,
+        384
+      ],
+      "id": "119b6d2d-1063-4407-b51d-897f4ee45e02",
+      "name": "Pinecone Vector Store",
+      "credentials": {
+        "pineconeApi": {
+          "id": "3cI5NN2AcMBFbbuJ",
+          "name": "PineconeApi account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.embeddingsGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        832,
+        592
+      ],
+      "id": "0c1053f0-e1f3-4f79-b36f-4f7f999f8f11",
+      "name": "Embeddings Google Gemini",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "2chan"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Default Data Loader": {
+      "ai_document": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_document",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Drive Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Download file1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Download file1": {
+      "main": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store1": {
+      "main": [
+        []
+      ]
+    },
+    "Embeddings Google Gemini2": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store1",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Recursive Character Text Splitter": {
+      "ai_textSplitter": [
+        [
+          {
+            "node": "Default Data Loader",
+            "type": "ai_textSplitter",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Pinecone Vector Store": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Embeddings Google Gemini": {
+      "ai_embedding": [
+        [
+          {
+            "node": "Pinecone Vector Store",
+            "type": "ai_embedding",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {
+    "Google Drive Trigger1": [
+      {
+        "json": {
+          "parents": [
+            "1DqyKKjXAnyUbPyEV8Bo0cBIvsnY40Xus"
+          ],
+          "lastModifyingUser": {
+            "displayName": "Abdellah Krimo",
+            "kind": "drive#user",
+            "me": true,
+            "permissionId": "17046981593113446749",
+            "emailAddress": "abdellahkrimo13@gmail.com",
+            "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKtXJpcwts0XMvpQnwvKDBeTQY5D4lG7-8SyTe0rq5T2dwLHS9k=s64"
+          },
+          "owners": [
+            {
+              "displayName": "Abdellah Krimo",
+              "kind": "drive#user",
+              "me": true,
+              "permissionId": "17046981593113446749",
+              "emailAddress": "abdellahkrimo13@gmail.com",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKtXJpcwts0XMvpQnwvKDBeTQY5D4lG7-8SyTe0rq5T2dwLHS9k=s64"
+            }
+          ],
+          "permissions": [
+            {
+              "kind": "drive#permission",
+              "id": "17046981593113446749",
+              "type": "user",
+              "emailAddress": "abdellahkrimo13@gmail.com",
+              "role": "owner",
+              "displayName": "Abdellah Krimo",
+              "photoLink": "https://lh3.googleusercontent.com/a/ACg8ocKtXJpcwts0XMvpQnwvKDBeTQY5D4lG7-8SyTe0rq5T2dwLHS9k=s64",
+              "deleted": false,
+              "pendingOwner": false
+            }
+          ],
+          "spaces": [
+            "drive"
+          ],
+          "capabilities": {
+            "canAcceptOwnership": false,
+            "canAddChildren": false,
+            "canAddMyDriveParent": false,
+            "canChangeCopyRequiresWriterPermission": true,
+            "canChangeItemDownloadRestriction": true,
+            "canChangeSecurityUpdateEnabled": false,
+            "canChangeViewersCanCopyContent": true,
+            "canComment": true,
+            "canCopy": true,
+            "canDelete": true,
+            "canDisableInheritedPermissions": false,
+            "canDownload": true,
+            "canEdit": true,
+            "canEnableInheritedPermissions": true,
+            "canListChildren": false,
+            "canModifyContent": true,
+            "canModifyContentRestriction": true,
+            "canModifyEditorContentRestriction": true,
+            "canModifyOwnerContentRestriction": true,
+            "canModifyLabels": false,
+            "canMoveChildrenWithinDrive": false,
+            "canMoveItemIntoTeamDrive": true,
+            "canMoveItemOutOfDrive": true,
+            "canMoveItemWithinDrive": true,
+            "canReadLabels": false,
+            "canReadRevisions": true,
+            "canRemoveChildren": false,
+            "canRemoveContentRestriction": false,
+            "canRemoveMyDriveParent": true,
+            "canRename": true,
+            "canShare": true,
+            "canTrash": true,
+            "canUntrash": true
+          },
+          "permissionIds": [
+            "17046981593113446749"
+          ],
+          "linkShareMetadata": {
+            "securityUpdateEligible": false,
+            "securityUpdateEnabled": true
+          },
+          "downloadRestrictions": {
+            "itemDownloadRestriction": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            },
+            "effectiveDownloadRestrictionWithContext": {
+              "restrictedForReaders": false,
+              "restrictedForWriters": false
+            }
+          },
+          "kind": "drive#file",
+          "id": "1xdZHVrslzaNuqtypDyqlGQQNXcYTuQTQ",
+          "name": "FY24_Q4_Consolidated_Financial_Statements.pdf",
+          "mimeType": "application/pdf",
+          "starred": false,
+          "trashed": false,
+          "explicitlyTrashed": false,
+          "version": "3",
+          "webContentLink": "https://drive.google.com/uc?id=1xdZHVrslzaNuqtypDyqlGQQNXcYTuQTQ&export=download",
+          "webViewLink": "https://drive.google.com/file/d/1xdZHVrslzaNuqtypDyqlGQQNXcYTuQTQ/view?usp=drivesdk",
+          "iconLink": "https://drive-thirdparty.googleusercontent.com/16/type/application/pdf",
+          "hasThumbnail": true,
+          "thumbnailLink": "https://lh3.googleusercontent.com/drive-storage/AJQWtBOIMB8cZCezb1Dpl2wDLdTA5JGN4rF4S0gU7Xki_ECWjWIcXkKGToyla-b36bNg9AsgDTJA7Yrq91gg7MS1rc7NU0etmM20ofQSvhtjL-Nesg=s220",
+          "thumbnailVersion": "1",
+          "viewedByMe": true,
+          "viewedByMeTime": "2025-10-21T09:12:11.388Z",
+          "createdTime": "2025-10-21T09:12:11.388Z",
+          "modifiedTime": "2025-10-21T08:58:58.000Z",
+          "modifiedByMeTime": "2025-10-21T08:58:58.000Z",
+          "modifiedByMe": true,
+          "shared": false,
+          "ownedByMe": true,
+          "viewersCanCopyContent": true,
+          "copyRequiresWriterPermission": false,
+          "writersCanShare": true,
+          "originalFilename": "FY24_Q4_Consolidated_Financial_Statements.pdf",
+          "fullFileExtension": "pdf",
+          "fileExtension": "pdf",
+          "md5Checksum": "5eece7934765e46cff0a105d1b7316e4",
+          "sha1Checksum": "f107ecbbc541efe44c7a83af578ce3b56c64ce43",
+          "sha256Checksum": "af9646018330484238d357f1168ae74194fd768f4ea9921e4b2828c88309320c",
+          "size": "4919216",
+          "quotaBytesUsed": "4919216",
+          "headRevisionId": "0BzIOfAu_SU5BYUZtSGcwM1E0bnI5WjBjbjl6R21lZmI5SGNrPQ",
+          "isAppAuthorized": false,
+          "inheritedPermissionsDisabled": false
+        }
+      }
+    ]
+  },
+  "versionId": "13272c89-b4f6-4a6b-af89-91dfef6819a7",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-21T08:53:07.348Z",
+      "createdAt": "2025-10-21T08:53:07.348Z",
+      "role": "workflow:owner",
+      "workflowId": "j1l8v6QwebVMa7IJ",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
