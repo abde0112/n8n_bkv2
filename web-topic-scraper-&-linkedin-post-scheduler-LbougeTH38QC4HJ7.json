@@ -1,0 +1,273 @@
+{
+  "updatedAt": "2025-09-27T10:48:23.000Z",
+  "createdAt": "2025-09-16T15:00:33.314Z",
+  "id": "LbougeTH38QC4HJ7",
+  "name": "Web-Topic Scraper & LinkedIn Post Scheduler",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.limit",
+      "typeVersion": 1,
+      "position": [
+        -144,
+        -16
+      ],
+      "id": "1124eb9e-d5f7-4a63-8b98-686197036f7a",
+      "name": "Limit"
+    },
+    {
+      "parameters": {
+        "url": "https://news.google.com/rss?hl=it&gl=IT&ceid=IT:it",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1.2,
+      "position": [
+        -416,
+        -32
+      ],
+      "id": "25caa621-1a1c-4e8f-a7b7-d58c09afe153",
+      "name": "RSS Read"
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "triggerAtHour": 15
+            }
+          ]
+        }
+      },
+      "id": "eb5b61aa-ca0d-4b3c-b336-ac796a1c6a9a",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -832,
+        -48
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "person": "_RmSSZc0jB",
+        "text": "={{ $json.message.content }}",
+        "shareMediaCategory": "IMAGE",
+        "additionalFields": {}
+      },
+      "id": "ca618af7-98f7-44d8-b8f3-0ad3ce985814",
+      "name": "Post on LinkedIn",
+      "type": "n8n-nodes-base.linkedIn",
+      "position": [
+        1904,
+        -64
+      ],
+      "typeVersion": 1,
+      "credentials": {
+        "linkedInOAuth2Api": {
+          "id": "0rPogEHxY2NpubeO",
+          "name": "LinkedIn account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "mode": "combine",
+        "combinationMode": "mergeByPosition",
+        "options": {}
+      },
+      "id": "8a146def-cf2a-4009-9cc7-d9d05f827a0a",
+      "name": "Combine text+image",
+      "type": "n8n-nodes-base.merge",
+      "position": [
+        1056,
+        -64
+      ],
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "value": "chatgpt-4o-latest",
+          "mode": "list",
+          "cachedResultName": "CHATGPT-4O-LATEST"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "=Thank you kindly for your help, please refer to the following LinkedIn post, and output a reformatted and fact chechked version employing thoroughly thought-out paragraph breaks, and lists if present make sure that you answer has only the updated content in plain text and in english that I will copy paste to my post zithout any\"/n\":\n```{{ $json.contentSnippet }}```"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "143714ca-f85b-40ea-9fce-1e9278676a2e",
+      "name": "Reformat Post Text",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        416,
+        -192
+      ],
+      "typeVersion": 1.3,
+      "credentials": {
+        "openAiApi": {
+          "id": "Y5EZ7nONrSFTfDWw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "image",
+        "prompt": "=Based on the post content create an image that will be compatible with my content: {{ $json.contentSnippet }}",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "typeVersion": 1.8,
+      "position": [
+        416,
+        48
+      ],
+      "id": "53b9964a-a7c2-4293-9c1b-8fb23ab00c7f",
+      "name": "Generate an image",
+      "credentials": {
+        "openAiApi": {
+          "id": "Y5EZ7nONrSFTfDWw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "1089859b-72f9-4a2e-8eb9-83dbbaeccae0",
+              "name": "message.content",
+              "value": "={{ $json.message.content }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1264,
+        -64
+      ],
+      "id": "48c24362-6103-43be-bb46-9457686b0a42",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "Limit": {
+      "main": [
+        [
+          {
+            "node": "Reformat Post Text",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate an image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "RSS Read": {
+      "main": [
+        [
+          {
+            "node": "Limit",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Combine text+image": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reformat Post Text": {
+      "main": [
+        [
+          {
+            "node": "Combine text+image",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate an image": {
+      "main": [
+        [
+          {
+            "node": "Combine text+image",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Post on LinkedIn",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "RSS Read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "629da0fa-9457-408e-b8cc-5344562852fe",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-16T15:00:33.342Z",
+      "createdAt": "2025-09-16T15:00:33.342Z",
+      "role": "workflow:owner",
+      "workflowId": "LbougeTH38QC4HJ7",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
