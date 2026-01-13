@@ -1,0 +1,495 @@
+{
+  "updatedAt": "2025-09-10T09:24:25.000Z",
+  "createdAt": "2025-09-09T19:57:41.442Z",
+  "id": "kh60e5vpyH76Sbvr",
+  "name": "Product Catalog Collector",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "minutes"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3226d8ca-429d-46aa-8883-0219164e93e4",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "url": "https://fakestoreapi.com/products",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "e122e433-d597-4021-bfd8-24d20125dd6d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "b8529de8-690c-4dd5-9b4f-812057485cfe",
+              "name": "productName",
+              "value": "={{ $json.title }}",
+              "type": "string"
+            },
+            {
+              "id": "b6aa0277-e528-4ad0-85c1-8dcf59dd9820",
+              "name": "price",
+              "value": "={{ $json.price }}",
+              "type": "string"
+            },
+            {
+              "id": "8a2f10f0-7ea0-45df-b4bd-a2fcbdea0598",
+              "name": "description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "7f8e8456-551e-4efe-a464-6de14dabc039",
+              "name": "imageUrl",
+              "value": "={{ $json.image }}",
+              "type": "string"
+            },
+            {
+              "id": "063d8ad6-9b10-443c-b1c2-4bf8c2e7b892",
+              "name": "rawCategory",
+              "value": "={{ $json.category }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        416,
+        0
+      ],
+      "id": "989bf890-a7d9-4ac2-b651-8c89cbe32fa9",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5e763603-6162-4a9d-ad71-b58201315e55",
+              "leftValue": "={{ $('HTTP Request').item.json.category }}",
+              "rightValue": "clothing",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        1200,
+        -256
+      ],
+      "id": "25bd9c6c-b6a0-49c8-96bf-b33325ee3788",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "resource": "spreadsheet",
+        "title": "Product Catalog Collector",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        832,
+        -224
+      ],
+      "id": "8b957cff-8ee4-48a3-87a4-da2efc48d86d",
+      "name": "Create spreadsheet",
+      "executeOnce": true,
+      "retryOnFail": false,
+      "notesInFlow": false,
+      "alwaysOutputData": false,
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "e67e6fb8-68e2-4987-977b-08bc48e4642d",
+              "name": "sheet",
+              "value": "={{ $json.spreadsheetUrl }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1040,
+        -224
+      ],
+      "id": "f806fee7-d456-4809-b7f2-c5ab28dc69a3",
+      "name": "Edit Fields1"
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "1I0A8slGAeLKuJx7gu_psTKqNCdmmgozjk6M2SA1Bh7E",
+          "mode": "list",
+          "cachedResultName": "Product Catalog Collector",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I0A8slGAeLKuJx7gu_psTKqNCdmmgozjk6M2SA1Bh7E/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1I0A8slGAeLKuJx7gu_psTKqNCdmmgozjk6M2SA1Bh7E/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "productName",
+              "displayName": "productName",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "price",
+              "displayName": "price",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "description",
+              "displayName": "description",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "imageUrl",
+              "displayName": "imageUrl",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        1264,
+        192
+      ],
+      "id": "94cba9df-9e19-4e92-a623-cc8f99a56c17",
+      "name": "Append row in sheet",
+      "credentials": {
+        "googleSheetsOAuth2Api": {
+          "id": "ELb54M7cyXuXINwV",
+          "name": "Google Sheets account 3"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=SYSTEM:\nYou are a product data standardization assistant. Return ONLY valid JSON (no extra text, no markdown). The JSON must match this schema:\n{\n  \"productName\": string | null,\n  \"price\": number | null,\n  \"description\": string | null,             // neutral, concise, inclusive language\n  \"category\": string | null,                // use taxonomy \"Top > Sub > Sub\"\n  \"biasNotes\": [ string ],                  // short notes about potential bias (empty array if none)\n  \"imageTags\": [ string ],                  // short list of tags describing the image content\n  \"confidence\": number                      // 0.0 - 1.0 estimate of your classification confidence\n}\n\nUSER:\nHere is the raw product data. Use it to produce the JSON exactly as specified above.\n\ntitle: {{$json[\"productName\"]}}\nprice: {{$json[\"price\"]}}\ndescription: {{$json[\"description\"]}}\nimageUrl: {{$json[\"imageUrl\"]}}\nrawCategory: {{$json[\"rawCategory\"]}}\n\nRules:\n1. Standardize the title to a short neutral `productName`. Remove emojis, promo words, and gendered marketing where possible.\n2. Rewrite description to be neutral, concise (1-2 sentences), and inclusive. If you must keep original specifics, keep them but remove biased language.\n3. Map `rawCategory` to a taxonomy. If rawCategory is empty or ambiguous, infer from description/title. Use format \"Top > Sub > Sub\" (e.g., \"Clothing > Jackets > Cotton\").\n4. `biasNotes`: include 0–3 short findings (e.g., \"Uses gendered term 'men's'\", \"Images show only one demographic\", \"Price distribution indicates exclusivity\"). If none, return [].\n5. `imageTags`: suggest 3–6 short tags describing main objects/people (neutral).\n6. `confidence`: return a decimal between 0.0 and 1.0 representing your confidence in the category + bias detection.\n7. If a field is missing, use null (or empty array for biasNotes / imageTags).\n8. Output must be parsable JSON ONLY. No commentary.\n\nProduce the JSON now.\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        656,
+        32
+      ],
+      "id": "7a579433-557f-4ca0-89d4-a19110e379fd",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4.1-mini"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.2,
+      "position": [
+        528,
+        240
+      ],
+      "id": "2b745b48-6b68-4210-9c72-ab2a6b98f2f5",
+      "name": "OpenAI Chat Model",
+      "credentials": {
+        "openAiApi": {
+          "id": "Y5EZ7nONrSFTfDWw",
+          "name": "OpenAi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Function node: parse AI assistant's text output into real JSON fields\nconst item = items[0].json;\n\n// try common response places\nconst rawText =\n  item.choices?.[0]?.message?.content\n  || item.choices?.[0]?.text\n  || item.text\n  || item.output\n  || item.response\n  || item.data;\n\n// If still undefined, try the whole json as string\nconst candidate = typeof rawText === 'string' ? rawText.trim() : JSON.stringify(rawText);\n\ntry {\n  const parsed = JSON.parse(candidate);\n  // wrap parsed with original product for traceability\n  return [{ json: { ...parsed, _rawAI: candidate, _original: item } }];\n} catch (err) {\n  return [{ json: { _error: true, errorMessage: err.message, _rawAI: candidate, _original: item } }];\n}\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        16
+      ],
+      "id": "58668b60-5d33-4676-922c-589c5814d475",
+      "name": "Code"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "c600d774-7a06-498a-85dd-8312dcb5922d",
+              "name": "productName",
+              "value": "={{ $json.productName }}",
+              "type": "string"
+            },
+            {
+              "id": "9bda9049-78f4-46e3-a566-055bee0e2758",
+              "name": "price",
+              "value": "={{ $json.price }}",
+              "type": "string"
+            },
+            {
+              "id": "82700002-2141-4bd7-82e5-345f318d5d5b",
+              "name": "description",
+              "value": "={{ $json.description }}",
+              "type": "string"
+            },
+            {
+              "id": "ed9f933f-cef8-4753-a515-90d766eb7a5d",
+              "name": "category",
+              "value": "={{ $json.category }}",
+              "type": "string"
+            },
+            {
+              "id": "fc18ca48-7bf1-4c9f-be41-9164a8e101aa",
+              "name": "biasNotes",
+              "value": "={{ $json.biasNotes }}",
+              "type": "string"
+            },
+            {
+              "id": "a07c2833-f5d8-4ba6-9afe-7b9f3c98f127",
+              "name": "imageTags",
+              "value": "={{ $json.imageTags }}",
+              "type": "string"
+            },
+            {
+              "id": "a6abd44f-fa7a-458c-956b-04475dbe437b",
+              "name": "confidence",
+              "value": "={{ $json.confidence }}",
+              "type": "string"
+            },
+            {
+              "id": "6814cada-b466-4fef-bbc4-e10c92460d5a",
+              "name": "_rawAI",
+              "value": "={{ $json._rawAI }}",
+              "type": "string"
+            },
+            {
+              "id": "cf6e91fc-1b7c-4d52-adcc-f01f16b7e31a",
+              "name": "_original",
+              "value": "={{ $json._original }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        1152,
+        16
+      ],
+      "id": "72bf1ceb-fd6f-4e77-83b7-cec6a7183d72",
+      "name": "Edit Fields2"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [],
+        []
+      ]
+    },
+    "Create spreadsheet": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields1": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Code",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "ae9ad5fb-e3d0-4f8f-90ae-3695af86b62d",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-09T19:57:41.482Z",
+      "createdAt": "2025-09-09T19:57:41.482Z",
+      "role": "workflow:owner",
+      "workflowId": "kh60e5vpyH76Sbvr",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
