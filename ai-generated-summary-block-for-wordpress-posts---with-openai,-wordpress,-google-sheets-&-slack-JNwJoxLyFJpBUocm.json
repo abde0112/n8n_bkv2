@@ -1,0 +1,971 @@
+{
+  "updatedAt": "2025-11-01T16:34:22.000Z",
+  "createdAt": "2025-10-17T10:27:58.905Z",
+  "id": "JNwJoxLyFJpBUocm",
+  "name": "AI-Generated Summary Block for WordPress Posts - with OpenAI, WordPress, Google Sheets & Slack",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "a5f222a4-ff3e-4bf1-a3dd-561d902cc779",
+      "name": "When clicking ‘Test workflow’",
+      "type": "n8n-nodes-base.manualTrigger",
+      "position": [
+        -48,
+        976
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "inputText": "={{ $json.data }}",
+        "categories": {
+          "categories": [
+            {
+              "category": "not_summarized",
+              "description": "Content that does not contain an 'AI Summary'."
+            },
+            {
+              "category": "=summarized",
+              "description": "Content that contains an 'AI Summary'."
+            }
+          ]
+        },
+        "options": {
+          "systemPromptTemplate": "Analyze the provided text and classify it into one of the following categories: {categories}. \n- If the text contains an 'AI Summary', classify it as \"summarized\".\n- If the text does not contain an 'AI Summary', classify it as \"not_summarized\".\n\nFollow these instructions strictly:\n- Provide the result in JSON format.\n- Do not include any explanations, comments, or additional text.\n"
+        }
+      },
+      "id": "65f2f5a0-9757-4807-a8b1-46b15a096473",
+      "name": "Text Classifier",
+      "type": "@n8n/n8n-nodes-langchain.textClassifier",
+      "position": [
+        4976,
+        960
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "e15eeab0-df34-4377-b638-2ca5400b5fe4",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        5008,
+        1152
+      ],
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "53e9714b-7e7f-4712-90e6-215de9dfa9ba",
+      "name": "Loop Over Items",
+      "type": "n8n-nodes-base.splitInBatches",
+      "position": [
+        1520,
+        976
+      ],
+      "typeVersion": 3
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "44a27f03-4285-4771-a507-c55f029256e9",
+              "operator": {
+                "type": "number",
+                "operation": "exists",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.post_id }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f92cafe9-918b-486f-96ef-2eca74cf7945",
+      "name": "If",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        3120,
+        944
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "4946fc26-bea4-4244-b37c-203c39537246",
+        "authentication": "headerAuth",
+        "options": {}
+      },
+      "id": "9fedd75d-eabe-421b-bc32-eb445d500b98",
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "position": [
+        -48,
+        1392
+      ],
+      "webhookId": "36854be0-0d2c-43ef-95df-d8e6d58d63e6",
+      "typeVersion": 2,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "seconds"
+            }
+          ]
+        }
+      },
+      "id": "2bebdb29-ad41-4baf-8d19-6747411a346c",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        -48,
+        1152
+      ],
+      "typeVersion": 1.2,
+      "disabled": true
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "=https://<your-domain.com>/wp-json/wp/v2/posts/{{ $('Loop Over Items').item.json.id }}",
+        "authentication": "predefinedCredentialType",
+        "nodeCredentialType": "wordpressApi",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "=content",
+              "value": "={{ `${$json.message.content} ${$('Text Classifier').item.json.content.raw}` }}"
+            },
+            {
+              "name": "excerpt",
+              "value": "={{ $('Text Classifier').item.json.excerpt.rendered }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "544e1cfd-d152-424c-842c-df65d0099fbd",
+      "name": "Wordpress - Update Post",
+      "type": "n8n-nodes-base.httpRequest",
+      "position": [
+        7376,
+        944
+      ],
+      "typeVersion": 4.2
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1uO0zaNc5UrLhtdcvETFcZGln_qij-nqpYP06n9GxJUk",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uO0zaNc5UrLhtdcvETFcZGln_qij-nqpYP06n9GxJUk/edit?usp=drivesdk",
+          "cachedResultName": "Template - AI Summary WordPress Posts"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uO0zaNc5UrLhtdcvETFcZGln_qij-nqpYP06n9GxJUk/edit#gid=0",
+          "cachedResultName": "AI-Summarized Posts"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "post_id",
+              "lookupValue": "={{ $json.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4a037e76-0a0d-49c0-9160-0b9dc143b4cc",
+      "name": "Google Sheets - Get rows",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        2384,
+        944
+      ],
+      "typeVersion": 4.5,
+      "alwaysOutputData": true
+    },
+    {
+      "parameters": {
+        "html": "={{ $json.content.rendered }}",
+        "options": {}
+      },
+      "id": "202997a3-bbdc-4f91-aa07-bed9a90e615f",
+      "name": "HTML to Markdown",
+      "type": "n8n-nodes-base.markdown",
+      "position": [
+        4160,
+        960
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini",
+          "cachedResultName": "GPT-4O-MINI"
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "={{ $json.data }}"
+            },
+            {
+              "content": "=You are an expert in content summarization and web-optimized writing.  \nYour mission is to analyze the HTML content of an article from a website focused on electric vehicles and green mobility and extract the key information.  \n\nGenerate only an HTML block containing a concise summary in bullet point format, strictly following this structure:\n\n\n<!-- wp:html -->\n<div class=\"wp-block-group has-background\" style=\"background-color:#f8faff; border-radius:4px; padding:10px;\">\n    <p style=\"font-style:normal; font-weight:1000; font-size:1.1em; margin:0 0 10px 0;\">\n        <strong>✨ AI Summary</strong> :\n    </p>\n\n    <li>[Key point 1]</li>\n    <li>[Key point 2]</li>\n    <li>[Key point 3]</li>\n    <li>[Key point 4]</li>\n\n</div>\n<!-- /wp:html -->\n\n<!-- wp:separator -->\n<hr class=\"wp-block-separator has-alpha-channel-opacity\"/>\n<!-- /wp:separator -->\n\n## Important: Strict Guidelines to Follow\n\n- Ensure the summary is **clear, concise, and informative**, focusing only on key points.  \n- **Avoid unnecessary introductions**, such as \"This article presents\" or similar phrases.  \n- **Output only the required HTML block**, without any additional explanations or commentary.  \n- The output must **start with** the `<!-- wp:html -->` tag and **end with** the closing separator tag.  \n- The summary must be **in the user's language**, including the phrase `\"✨ AI Summary\"`, which should also be translated accordingly.  \n- **Do not add** any extra text, comments, or formatting outside the specified HTML block.  \n\n\n## Example of a GOOD output:\n\n<!-- wp:html -->\n<div class=\"wp-block-group has-background\" style=\"background-color:#f8faff; border-radius:4px; padding:10px;\">\n    <p style=\"font-style:normal; font-weight:1000; font-size:1.1em; margin:0 0 10px 0;\">\n        <strong>✨ AI Summary</strong> :\n    </p>\n\n    <li>In March 2022, France had 43,700 public charging points for electric vehicles.</li>\n    <li>Half of the highway service areas are equipped with ultra-fast charging stations.</li>\n    <li>France is among the most equipped European countries, with 20% of the charging points in Europe.</li>\n    <li>The goal is to reach 100,000 charging stations to support future demand for electric vehicles.</li>\n\n</div>\n<!-- /wp:html -->\n\n<!-- wp:separator -->\n<hr class=\"wp-block-separator has-alpha-channel-opacity\"/>\n<!-- /wp:separator -->\n\n## Example of a BAD output:\n```html\n<!-- wp:html -->\n<div class=\"wp-block-group has-background\" style=\"background-color:#f8faff; border-radius:4px; padding:10px;\">\n    <p style=\"font-style:normal; font-weight:1000; font-size:1.1em; margin:0 0 10px 0;\">\n        <strong>✨ AI Summary</strong> :\n    </p>\n\n    <li>In March 2022, France had 43,700 public charging points for electric vehicles.</li>\n    <li>Half of the highway service areas are equipped with ultra-fast charging stations.</li>\n    <li>France is among the most equipped European countries, with 20% of the charging points in Europe.</li>\n    <li>The goal is to reach 100,000 charging stations to support future demand for electric vehicles.</li>\n\n</div>\n<!-- /wp:html -->\n```",
+              "role": "system"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "f6f02386-5bd2-48da-9a7f-4f2373ade5c0",
+      "name": "OpenAI",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        6528,
+        944
+      ],
+      "retryOnFail": true,
+      "typeVersion": 1.8,
+      "onError": "continueRegularOutput"
+    },
+    {
+      "parameters": {
+        "authentication": "serviceAccount",
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "1uO0zaNc5UrLhtdcvETFcZGln_qij-nqpYP06n9GxJUk",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uO0zaNc5UrLhtdcvETFcZGln_qij-nqpYP06n9GxJUk/edit?usp=drivesdk",
+          "cachedResultName": "Template - AI Summary WordPress Posts"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gid=0",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1uO0zaNc5UrLhtdcvETFcZGln_qij-nqpYP06n9GxJUk/edit#gid=0",
+          "cachedResultName": "AI-Summarized Posts"
+        },
+        "columns": {
+          "value": {
+            "post_id": "={{ $json.id }}",
+            "summary": "={{$json.ai_summary}}",
+            "edit_link": "={{ $json.edit_link }}",
+            "post_link": "={{ $json.link }}",
+            "summarized_date": "={{$now}}"
+          },
+          "schema": [
+            {
+              "id": "post_id",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "post_id",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summary",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "summary",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "post_link",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "post_link",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "edit_link",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "edit_link",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "summarized_date",
+              "type": "string",
+              "display": true,
+              "removed": false,
+              "required": false,
+              "displayName": "summarized_date",
+              "defaultMatch": false,
+              "canBeUsedToMatch": true
+            }
+          ],
+          "mappingMode": "autoMapInputData",
+          "matchingColumns": [
+            "post_id"
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "id": "52e8be71-efb1-4f8a-bfdd-69f149bcd05c",
+      "name": "Google Sheets - Add Row",
+      "type": "n8n-nodes-base.googleSheets",
+      "position": [
+        9136,
+        944
+      ],
+      "typeVersion": 4.5
+    },
+    {
+      "parameters": {
+        "authentication": "oAuth2",
+        "select": "channel",
+        "channelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": "C08AN5DJLCT",
+          "cachedResultName": "wp-posts-ai"
+        },
+        "text": "=📄🔔 *New WordPress Post Updated with AI Summary*\n\nThe post *{{ $('Set fields - Prepare data for Gsheets & Slack').item.json.title }}* has been updated with an AI-generated summary at the top of the article.  \nYou can view it here: {{ $('Set fields - Prepare data for Gsheets & Slack').item.json.post_link }}\n\n• *Post ID*: {{ $('Set fields - Prepare data for Gsheets & Slack').item.json.post_id }}\n• *Edit Link*: {{ $('Set fields - Prepare data for Gsheets & Slack').item.json.edit_link }}\n",
+        "otherOptions": {
+          "mrkdwn": true
+        }
+      },
+      "id": "d5349255-d47c-4669-aa31-73967b6c8d2a",
+      "name": "Slack - Notify Channel",
+      "type": "n8n-nodes-base.slack",
+      "position": [
+        9168,
+        1216
+      ],
+      "webhookId": "ab3305f2-3cb8-44f4-b2e6-fb628baf1d6d",
+      "typeVersion": 2.3
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "eae4bb6e-0215-4338-9590-f4b6de6f57a4",
+              "name": "post_id",
+              "type": "string",
+              "value": "={{ $json.body.post_id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "b07c8dc7-c6b2-4291-a2f3-e48a1cb9147f",
+      "name": "Set fields - From Webhook input",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        160,
+        1392
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "## Trigger - Two Options\nTo use this workflow, you have two trigger options.\n\nThe default trigger is **\"When clicking 'Test workflow'\"**, allowing you to manually test the scenario.\n\nIf you want to use this workflow in production, you can choose one of the following triggers. You'll need to **select the one you prefer and enable it**.:\n\n### Schedule Trigger  \nThis trigger checks at regular intervals (e.g., every 5 minutes) if a new post has been published on your WordPress blog and triggers the workflow accordingly.  \n\n✅ **Easy to set up**  \n✅ **Automates AI summaries without manual intervention**  \n\n⚠️ If you run the workflow manually once, the AI-generated summaries will be added to Google Sheets and processed in later steps to prevent duplication.  \n\n💡 **Recommended follow-up nodes:** If you choose this trigger, the following nodes are suggested in the template:  \n- **`Date & Time - Subtract`**: Subtracts the scheduled interval from the current execution timestamp. For example, if the workflow runs every 5 minutes, it subtracts 5 minutes from the execution time.  \n- **`WordPress - Get Posts`**: Uses the output of the  `Date & Time - Subtract` node as a filter to retrieve only posts published after the last execution.  \n\n### Webhook Trigger  \nIf you're familiar with webhooks, you can set up a webhook that triggers when a new post is published.  \n\n✅ **Faster than scheduled triggers**  \n✅ **More event-driven**  \n\nYou can implement this using either:  \n- A **Webhook plugin** on WordPress (not recommended due to plugin dependency).  \n- A **PHP function** that triggers the webhook with authentication for security.  \n\n⚠️ **Be cautious** with how the webhook is triggered—you may not want it to fire on every post edit.  \n\n💡 **Recommended follow-up nodes for this option:**  \n- **`Set Fields - From Webhook Input`**: Configures the fields based on the data sent to the webhook.  \n- **`WordPress - Get Post`**: Retrieves the post using the `post_id` received from the webhook, ensuring higher accuracy than the schedule trigger approach.  \n",
+        "height": 1560,
+        "width": 680,
+        "color": 7
+      },
+      "id": "3902de91-f83a-4c18-9c42-4e70a899b204",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -144,
+        32
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "subtractFromDate",
+        "magnitude": "={{ $json.timestamp }}",
+        "timeUnit": "seconds",
+        "duration": 30,
+        "outputFieldName": "last_execution_date",
+        "options": {}
+      },
+      "id": "b80c1ad5-7034-4b52-81b0-5590ca183b82",
+      "name": "Date & Time - Substract",
+      "type": "n8n-nodes-base.dateTime",
+      "position": [
+        176,
+        1152
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "## WordPress - Get All Posts  \n\nThis node is used for the **initial/test run**. In production, you should use the WordPress node that follows the **Scheduled Trigger** or **Webhook Trigger** instead.  \n\nIt retrieves all existing WordPress posts to generate an AI Summary.  \n\n### 🔹 Considerations:  \n- In this template, the query is **limited to 5 posts** to prevent accidental large-scale execution. This makes it easier to fix any issues.  \n- You can **add filters** (category, tag, date, etc.) to target only the posts for which you want an AI Summary.  \n- You can enable the **\"Get All Posts\"** option in the node if you want summaries for all posts—**but make sure this is intentional**.  \n- The **more posts** you process, the **higher the cost** in OpenAI API usage.  \n",
+        "height": 1080,
+        "width": 600,
+        "color": 7
+      },
+      "id": "541b8847-fdfb-4a4a-bedb-f2aebde43c0f",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        688,
+        512
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Loop Over Items  \n\nSince multiple posts may be retrieved from the previous step, a **\"Loop Over Items\"** node is used to process each post individually, optimizing the execution of subsequent nodes.  \n\n### 🔹 In Production - Using the \"Schedule Trigger\"  \nYou can continue using the **\"Loop Over Items\"** approach in production. Depending on your **publication frequency** and the **schedule interval** you've chosen, multiple posts could be retrieved in a single execution. This ensures each post is processed sequentially.  \n\n### 🔹 In Production - Using the \"Webhook Trigger\"  \nWith a **Webhook Trigger**, the workflow typically runs for **one post at a time**, meaning the **\"Loop Over Items\"** node is not strictly necessary.  \n\n- **You can remove it** for a slightly more efficient workflow.  \n- **However, keeping it won’t cause any issues**—it will simply loop over one item instead of multiple.  \n",
+        "height": 1080,
+        "width": 620,
+        "color": 7
+      },
+      "id": "d11951b5-c020-4ee1-9f58-43d2c9d2ba6b",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1424,
+        512
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Google Sheets - Get Rows & IF Nodes  \n\nThis step is used to **check whether a post already has an AI Summary**.   \n\nFor the Google Sheets node, you can **[make a copy of this Google Sheets template](https://docs.google.com/spreadsheets/d/1uO0zaNc5UrLhtdcvETFcZGln_qij-nqpYP06n9GxJUk/)** by going to **File → Make a copy**.\n\n\n### 🔹 How It Works:  \n1. **On the first execution**, posts retrieved from WordPress and processed for AI summarization are added to a **Google Sheet**.  \n2. **On subsequent executions**, when the workflow retrieves new posts, it checks if the `post_id` is already recorded in Google Sheets.  \n\n### 🔹 IF Node Logic:  \n- ✅ **If a row exists for the `post_id`** → The post already has an AI Summary. The workflow **skips processing** and moves to the `\"Loop Over Items\"` node.  \n- ❌ **If no row exists for the `post_id`** → The post **does not have an AI Summary**, so the workflow continues along the execution path that leads to AI Summary generation.  \n",
+        "height": 1080,
+        "width": 1240,
+        "color": 7
+      },
+      "id": "d7e85010-cf97-4ea2-b22a-288e8b1a3f1d",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        2128,
+        512
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## WordPress - Get Post & HTML to Markdown Nodes  \n\nThis step retrieves the WordPress post data using the `post_id` and converts the HTML content to Markdown. This ensures that the text is formatted in a **clean and structured way** before being sent to the **Text Classifier** node (which works with AI). More details about this step are provided in the next sticky note.  \n\n### 🔹 WordPress - Get Post  \n- The **`context=edit`** option is enabled to retrieve the **raw** post data.  \n- This is necessary because the post content will be **updated later in the workflow**.  \n\n### 🔹 HTML to Markdown  \n- Converts the retrieved HTML content into **Markdown** format.  \n- This makes the text **easier to process** for the LLM (Large Language Model) in the next step.  \n- Markdown ensures that the AI better understands the structure and formatting of the content.  \n",
+        "height": 1080,
+        "width": 1140,
+        "color": 7
+      },
+      "id": "e480b823-fe71-4f92-b3ee-42d3440f122c",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        3456,
+        512
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Text Classifier  \n\nThis step **classifies posts into categories**:  \n\n- **`not_summarized`** → If the post **does not** have a summary, the following nodes execute the AI summary generation.  \n- **`summarized`** → If the post **already** has a summary, the workflow **skips processing**:  \n  - The workflow moves to `\"Loop Over Items\"`.  \n  - The `\"Done\"` branch goes to the `\"Do Nothing\"` node.  \n\nThe LLM model used is **`gpt-4o-mini`**—it's efficient and cost-effective, but you can choose another model if needed.  \n\n### 🔹 Why Use a Text Classifier?  \nThe previous node already filters posts **based on Google Sheets**, but adding this classification step makes the workflow even **more robust**:  \n\n- ✅ **Extra validation**: If a post already has an AI Summary but, for some reason, is **not listed in Google Sheets**, this step **prevents duplicate summaries**.  \n- ✅ **Avoids redundancy**: If a post already contains a **manual or pre-existing summary** at the top (not necessarily AI-generated), this step prevents adding an AI Summary that would be redundant.  \n",
+        "height": 1080,
+        "width": 1140,
+        "color": 7
+      },
+      "id": "521b2d45-8c08-4467-bfdb-61f8e0786b6f",
+      "name": "Sticky Note5",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        4704,
+        512
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## OpenAI - Message a Model  \n\nThis step sends the **Markdown-formatted post** to **GPT-4o-mini**, using a **System Prompt** to instruct the LLM to generate an AI Summary.  \nYou can review and modify the **System Prompt** directly within this node.  \n\n### 🔹 Customization Required  \nTo ensure optimal results, you should:  \n- **Specify your website's theme** in the system prompt. The default example uses **electric mobility**, but you can replace it with a more relevant theme (e.g., **\"sustainable mobility\"**, \"urban transport,\" etc.).  \n- **Modify the \"Good\" and \"Bad\" output examples**—since the template is pre-configured for electric mobility, make sure to adapt the examples to match your content.  \n\n### 🔹 Output Format  \nThe model is instructed to return the summary in **HTML format**, which will be used to update the WordPress post.  \n\n💡 **Customization Tip**:  \nYou may want to adjust the **HTML styling** to better match your WordPress theme.  \nConsider modifying the following elements:  \n- **Background color, text color, and font weight**  \n- **Section title** (e.g., rename `\"AI Summary\"`)  \n- **Padding, margins, and border styling**  \n- **Removing or customizing the separator**  \n\n\n\n\n\n\n\n\n\n\n### 🔹 Default Generated HTML  \n\n***\n\n<!-- wp:html -->\n<div class=\"wp-block-group has-background\" style=\"background-color:#f8faff; border-radius:4px; padding:10px;\">\n    <p style=\"font-style:normal; font-weight:1000; font-size:1.1em; margin:0 0 10px 0;\">\n        <strong>✨ AI Summary</strong> :\n    </p>\n\n    <li>[Key point 1]</li>\n    <li>[Key point 2]</li>\n    <li>[Key point 3]</li>\n    <li>[Key point 4]</li>\n\n</div>\n<!-- /wp:html -->\n\n<!-- wp:separator -->\n<hr class=\"wp-block-separator has-alpha-channel-opacity\"/>\n<!-- /wp:separator -->\n\n***",
+        "height": 1080,
+        "width": 1100,
+        "color": 7
+      },
+      "id": "6ac8ae18-7c88-42b8-a837-45b5d2fe57a6",
+      "name": "Sticky Note6",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        5936,
+        512
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## WordPress - Update Post  \n\nThis API call updates the **WordPress post** and its **excerpt**.  \n\n**https://<your-domain.com>/wp-json/wp/v2/posts/{{ $('Loop Over Items').item.json.id }}**\n\n\n### 🔹 What It Does  \n- **Adds the AI Summary** at the **top** of the post.  \n- **Updates the post excerpt** using data retrieved from the `WordPress - Get Post2` node:  \n- If a **manual excerpt** exists, it is **preserved**.  \n- If the excerpt was simply the **beginning of the article**, it remains unchanged.  \n- This prevents the **AI Summary from replacing the excerpt**, ensuring a **better user experience** on your blog’s article listing page.  \n",
+        "height": 1080,
+        "width": 640,
+        "color": 7
+      },
+      "id": "0f539331-0c7e-434c-acc9-545c3840271d",
+      "name": "Sticky Note7",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        7120,
+        512
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Set Fields - Prepare Data for Google Sheets & Slack  \n\nThis node **sets fields** that will be used in **Google Sheets** and **Slack**.  \nYou can **add or modify fields** as needed to fit your specific use case.  \n### 🔹 Default Fields in This Template:  \nThe following fields are pre-configured:  \n- **`post_id`** → The WordPress post ID (`{{ $json.id }}`)  \n- **`title`** → The rendered title of the post (`{{ $json.title.rendered }}`)  \n- **`post_link`** → The direct URL to the post (`{{ $json.link }}`)  \n- **`edit_link`** → A direct link to edit the post in WordPress (**https://<your-domain>/wp-admin/post.php?post=`{{ $json.id }}`&action=edit**)  \n- **`summary`** → The AI-generated summary from the OpenAI node (`{{ $('OpenAI').item.json.message.content }}`)  \n- **`summary_date`** → The date and time when the AI Summary was generated and added to the post.\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n💡 **Customization Tip**:  \n- You can **add additional fields** if you want to include more data (e.g., **post category, author name, publication date**).  \n- This step ensures that the necessary information is properly structured before sending it to **Google Sheets** and **Slack**.  \n",
+        "height": 1080,
+        "width": 640,
+        "color": 7
+      },
+      "id": "52a4bd19-85e8-459b-af11-b062e9851bcd",
+      "name": "Sticky Note8",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        7856,
+        512
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "d7104604-20f0-4a43-a9bb-6fca50e0cd04",
+              "name": "post_id",
+              "type": "string",
+              "value": "={{ $json.id }}"
+            },
+            {
+              "id": "4fd77b52-80b4-418b-af50-2af563799772",
+              "name": "title",
+              "type": "string",
+              "value": "={{ $json.title.rendered }}"
+            },
+            {
+              "id": "a7c0f1d4-3299-4fdc-8bc2-2ff5a76547d3",
+              "name": "post_link",
+              "type": "string",
+              "value": "={{ $json.link }}"
+            },
+            {
+              "id": "3c0d7efd-5db9-4e3b-8688-7c00f9691391",
+              "name": "edit_link",
+              "type": "string",
+              "value": "=https://<your-domain.com>/wp-admin/post.php?post={{ $json.id }}&action=edit"
+            },
+            {
+              "id": "aef982ed-b470-4690-b585-74d765a4b49f",
+              "name": "summary",
+              "type": "string",
+              "value": "={{ $('OpenAI').item.json.message.content }}"
+            },
+            {
+              "id": "38933eca-dad8-4949-a22b-0e35c9e5c99e",
+              "name": "summary_date",
+              "type": "string",
+              "value": "={{ $now }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "83c7cd45-6cd3-4baf-a781-9559d00dc79b",
+      "name": "Set fields - Prepare data for Gsheets & Slack",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        8144,
+        944
+      ],
+      "typeVersion": 3.4
+    },
+    {
+      "parameters": {
+        "content": "## Google Sheets - Add Row & Slack - Notify  \n\nThis step **logs the post with an AI Summary** into **Google Sheets** and **sends a notification** to Slack.  \n\nFor the Google Sheets node, you can **[make a copy of this Google Sheets template](https://docs.google.com/spreadsheets/d/1uO0zaNc5UrLhtdcvETFcZGln_qij-nqpYP06n9GxJUk/)** by going to **File → Make a copy**.\n\n\n---\n\n### 🔹 Google Sheets - Add Row  \n\nThis node **automatically maps the columns** in Google Sheets, meaning you **don't need to manually define each field**.  \n\n#### 🛠 **Configuration Details**  \n- **Google Sheets Document** → `AI Summary WordPress`  \n- **Sheet Name** → `AI Summarized Posts`  \n- **Mapping Mode** → **Auto-map columns based on field names**  \n- **Automatically added fields** (examples, based on your setup):  \n  - `post_id`  \n  - `summary`  \n  - `post_link`  \n  - `edit_link`  \n  - `summary_date`  \n\n💡 **Since columns are mapped automatically, ensure the column names in Google Sheets match the field names in n8n.**  \n\n---\n\n### 🔹 Slack - Notify  \n\nThis node **sends a message to Slack** when a post has been updated with an **AI Summary**.  \n\n#### 🛠 **Configuration Details**  \n- **Channel** → `wp-posts-ai` (you can choose another channel)  \n- **Message Format** → Simple Text Message  \n- **Notification Text** -> *Configured inside the node* (check the \"Message Text\" field)\n\n\n💡 **Best Practices**:  \n- 🔕 *On the first execution, consider **deactivating** this node if you have many posts to avoid excessive notifications.*  \n- 📢 *Consider **creating a dedicated Slack channel** for this workflow to keep AI summary updates separate from other discussions.*  \n\n",
+        "height": 1080,
+        "width": 600,
+        "color": 7
+      },
+      "id": "3f4b15ee-d687-45b8-8fb8-6fc239601f61",
+      "name": "Sticky Note9",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        8608,
+        512
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "postId": "={{ $('Loop Over Items').item.json.id }}",
+        "options": {
+          "context": "edit"
+        }
+      },
+      "id": "37bffaa6-508e-4e9f-a1f3-d4f718b7e1cb",
+      "name": "WordPress - Get Post2",
+      "type": "n8n-nodes-base.wordpress",
+      "position": [
+        3616,
+        960
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {},
+      "id": "78e0a549-5a58-4dfb-83cc-55809466896e",
+      "name": "No Operation, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        2368,
+        272
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "# 📝 AI-Generated Summary Block for WordPress Posts  \n\n## 🚀 What is this workflow?  \nThis **n8n template** automates the process of adding an **AI-generated summary** at the top of your WordPress posts.  \nIt **retrieves, processes, and updates** your posts dynamically, ensuring efficiency and flexibility without relying on a heavy WordPress plugin.  \n\n## Example of AI Summary Section\n\n![Example of AI Summary Section](https://i.imgur.com/XkNKJsJ.png)  \n\n## 🔄 How It Works  \n1. **Triggers** → Runs on a **scheduled interval** or via a **webhook** when a new post is published.  \n2. **Retrieves posts** → Fetches content from WordPress and converts HTML to Markdown for AI processing.  \n3. **AI Summary Generation** → Uses OpenAI to create a concise summary.  \n4. **Post Update** → Inserts the summary at the top of the post while keeping the original excerpt intact.  \n5. **Data Logging & Notifications** → Saves processed posts to **Google Sheets** and notifies a **Slack channel**.  \n\n## 🎯 Why use this workflow?  \n✅ **No need for a WordPress plugin** → Keeps your site lightweight.  \n✅ **Highly flexible** → Easily connect with **Google Sheets, Slack, or other services**.  \n✅ **Customizable** → Adapt AI prompts, formatting, and integrations to your needs.  \n✅ **Smart filtering** → Ensures posts are not reprocessed unnecessarily.  \n\n💡 *Check the detailed sticky notes for setup instructions and customization options!*  \n",
+        "height": 1100,
+        "width": 660
+      },
+      "id": "165ce696-cc02-45dd-b38b-f57e1f2f5bf0",
+      "name": "Sticky Note10",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -928,
+        192
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "options": {
+          "after": "={{ $json.last_execution_date }}",
+          "context": "edit"
+        }
+      },
+      "id": "fa18acad-b05e-4099-8395-5d4118e8bad2",
+      "name": "WordPress - Get Last Posts",
+      "type": "n8n-nodes-base.wordpress",
+      "position": [
+        416,
+        1152
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "postId": "={{ $json.post_id }}",
+        "options": {
+          "context": "edit"
+        }
+      },
+      "id": "9580b5e9-822f-4abd-86a9-948c102459f9",
+      "name": "WordPress - Get Post1",
+      "type": "n8n-nodes-base.wordpress",
+      "position": [
+        416,
+        1392
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "options": {
+          "context": "edit",
+          "order": "desc",
+          "orderBy": "date"
+        }
+      },
+      "id": "138181b2-c078-4976-8b57-f38e393b38f2",
+      "name": "WordPress - Get All Posts",
+      "type": "n8n-nodes-base.wordpress",
+      "position": [
+        896,
+        976
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "WordPress - Get Post2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI": {
+      "main": [
+        [
+          {
+            "node": "Wordpress - Update Post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Set fields - From Webhook input",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop Over Items": {
+      "main": [
+        [
+          {
+            "node": "No Operation, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Google Sheets - Get rows",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Text Classifier": {
+      "main": [
+        [
+          {
+            "node": "OpenAI",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTML to Markdown": {
+      "main": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Date & Time - Substract",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Text Classifier",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WordPress - Get Post2": {
+      "main": [
+        [
+          {
+            "node": "HTML to Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Slack - Notify Channel": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time - Substract": {
+      "main": [
+        [
+          {
+            "node": "WordPress - Get Last Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets - Add Row": {
+      "main": [
+        [
+          {
+            "node": "Slack - Notify Channel",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wordpress - Update Post": {
+      "main": [
+        [
+          {
+            "node": "Set fields - Prepare data for Gsheets & Slack",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Sheets - Get rows": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "WordPress - Get All Posts": {
+      "main": [
+        [
+          {
+            "node": "Loop Over Items",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set fields - From Webhook input": {
+      "main": [
+        [
+          {
+            "node": "WordPress - Get Post1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When clicking ‘Test workflow’": {
+      "main": [
+        [
+          {
+            "node": "WordPress - Get All Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set fields - Prepare data for Gsheets & Slack": {
+      "main": [
+        [
+          {
+            "node": "Google Sheets - Add Row",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "6d08d78f-e304-4f10-b635-75eabc992c6b",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-17T10:27:58.920Z",
+      "createdAt": "2025-10-17T10:27:58.920Z",
+      "role": "workflow:owner",
+      "workflowId": "JNwJoxLyFJpBUocm",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
