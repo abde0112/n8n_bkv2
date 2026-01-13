@@ -1,0 +1,164 @@
+{
+  "updatedAt": "2025-11-18T16:33:58.000Z",
+  "createdAt": "2025-11-16T18:59:56.832Z",
+  "id": "JXUd9W5SMiJ3g74z",
+  "name": "Project – Technical Milestones",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "make",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2.1,
+      "position": [
+        112,
+        0
+      ],
+      "id": "8a60d2d8-bca0-413a-a3fe-f3e5fe3989f8",
+      "name": "Webhook",
+      "webhookId": "f6674304-3617-4f16-9102-6dfa9df02a55"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        768,
+        0
+      ],
+      "id": "84b95e07-7e98-4e52-a3a2-f55695e98e6f",
+      "name": "Respond to Webhook"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.body }}",
+        "hasOutputParser": true,
+        "options": {
+          "systemMessage": "You are an intelligent lead capture system. Analyze the user's message and extract ALL available contact and business information.\n\nEXTRACTION RULES:\n\n1. CONTACT INFO:\n   - name: Extract full name, first name, or however they introduce themselves\n   - email: Must be valid format (contains @ and domain)\n   - phone: Preserve exactly as written (with country code, dashes, spaces)\n\n2. BUSINESS INFO:\n   - company: Company, organization, or business name\n   - job_title: Their role, position, or title\n   - company_size: If they mention team size, employee count, or company scale\n   - budget: If they mention budget, price range, or investment amount\n\n3. INTEREST & CONTEXT:\n   - interest: What they're asking about, need, or interested in\n   - urgency: If they mention timeline (e.g., \"need ASAP\", \"in 3 months\")\n   - current_solution: If they mention current tools or systems they use\n\n4. SPECIAL HANDLING:\n   - If name is just first name, use it (don't wait for last name)\n   - Capture informal company references: \"I'm at Google\" → company: \"Google\"\n   - Extract implicit information: \"We're a 50-person startup\" → company_size: \"50\"\n   - Identify urgency keywords: \"urgent\", \"ASAP\", \"immediately\", \"deadline\"\n\n5. OUTPUT FORMAT:\n   - Return ONLY valid JSON\n   - Use null for fields not mentioned\n   - Don't invent information\n   - Don't add explanatory text\n\nEXAMPLE INPUTS & OUTPUTS:\n\nInput: \"Hi, I'm Sarah from TechCorp, email sarah@techcorp.com, need CRM solution urgently\"\nOutput:\n{\n  \"name\": \"Sarah\",\n  \"email\": \"sarah@techcorp.com\",\n  \"phone\": null,\n  \"company\": \"TechCorp\",\n  \"job_title\": null,\n  \"company_size\": null,\n  \"budget\": null,\n  \"interest\": \"CRM solution\",\n  \"urgency\": \"urgent\",\n  \"current_solution\": null\n}\n\nInput: \"John Doe here, CEO at InnovateLabs, john.doe@innovate.io, +1-555-0123. We're a 100-person company looking for automation. Budget around $50k\"\nOutput:\n{\n  \"name\": \"John Doe\",\n  \"email\": \"john.doe@innovate.io\",\n  \"phone\": \"+1-555-0123\",\n  \"company\": \"InnovateLabs\",\n  \"job_title\": \"CEO\",\n  \"company_size\": \"100\",\n  \"budget\": \"$50k\",\n  \"interest\": \"automation\",\n  \"urgency\": null,\n  \"current_solution\": null\n}\n\nNow extract from the user's message."
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        416,
+        0
+      ],
+      "id": "8d722cdd-a6d2-4e15-aa63-3f26446e2dd9",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "jsonSchemaExample": "{\n  \"name\": \"string or null\",\n  \"email\": \"string or null\",\n  \"phone\": \"string or null\",\n  \"company\": \"string or null\",\n  \"job_title\": \"string or null\",\n  \"company_size\": \"string or null\",\n  \"budget\": \"string or null\",\n  \"interest\": \"string or null\",\n  \"urgency\": \"string or null\",\n  \"current_solution\": \"string or null\"\n}",
+        "autoFix": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "typeVersion": 1.3,
+      "position": [
+        624,
+        208
+      ],
+      "id": "a77ba46e-cf95-44c5-98e7-ede5f6d7c48f",
+      "name": "Structured Output Parser"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        304,
+        304
+      ],
+      "id": "33c8f1ec-40c2-4574-9aa7-14295e39419f",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Respond to Webhook",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          },
+          {
+            "node": "Structured Output Parser",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "ebc9261d-7efa-41ce-a3c5-c47f99423f3b",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-11-16T18:59:56.853Z",
+      "createdAt": "2025-11-16T18:59:56.853Z",
+      "role": "workflow:owner",
+      "workflowId": "JXUd9W5SMiJ3g74z",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
