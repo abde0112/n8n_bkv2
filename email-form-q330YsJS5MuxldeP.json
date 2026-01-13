@@ -1,0 +1,208 @@
+{
+  "updatedAt": "2025-11-12T10:40:42.000Z",
+  "createdAt": "2025-10-21T09:27:37.813Z",
+  "id": "q330YsJS5MuxldeP",
+  "name": "Email form",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "id": "5df623ad-a3d5-4630-abbd-fa79d6b7cb79",
+      "name": "Email is not valid, do nothing",
+      "type": "n8n-nodes-base.noOp",
+      "position": [
+        880,
+        592
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 1,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "54d84c8a-63ee-40ed-8fb2-301fff0194ba",
+              "operator": {
+                "name": "filter.operator.equals",
+                "type": "string",
+                "operation": "equals"
+              },
+              "leftValue": "={{ $json.status }}",
+              "rightValue": "valid"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a5cbae02-2fa7-4822-b775-5adfdd5520fc",
+      "name": "Check if the email is valid",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        560,
+        368
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "operation": "emailVerifier",
+        "email": "={{ $json.Email }}"
+      },
+      "id": "89cd2866-cfac-46a5-a065-e269f7ab08cb",
+      "name": "Verify email",
+      "type": "n8n-nodes-base.hunter",
+      "position": [
+        304,
+        368
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "formTitle": "Join my mailing list now",
+        "formDescription": "10x your productivity with my A.I. tips. I'll cut the B.S. and give you the most practical tips for A.I. automation.",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "Email",
+              "requiredField": true
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "7c657f8c-a12f-43f4-942a-fdb6c45bf1ac",
+      "name": "Submit form",
+      "type": "n8n-nodes-base.formTrigger",
+      "position": [
+        32,
+        368
+      ],
+      "webhookId": "80be3272-e1bc-47e4-8112-d39488e84f4b",
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "resource": "contact",
+        "email": "={{ $json.Email }}",
+        "additionalFields": {
+          "listIdsUi": {
+            "listIdValues": {
+              "listIds": [
+                "11a55438-d4a8-4740-b054-d273359b7dfe"
+              ]
+            }
+          }
+        }
+      },
+      "id": "e6a8ce48-2e51-468e-a6ca-8fa12d698de9",
+      "name": "Add contact to list",
+      "type": "n8n-nodes-base.sendGrid",
+      "position": [
+        880,
+        352
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Automate Email List Building with n8n and Hunter io\n\n💡 Read the [case study here](https://rumjahn.com/create-email-capture-forms-for-free-using-n8n-and-sendgrid-and-easily-grow-your-subscriber-list/).\n\n📺 Watch the [youtube tutorial here](https://www.youtube.com/watch?v=NgvEHwu19Rs&t=2s)\n\n",
+        "height": 180,
+        "width": 505
+      },
+      "id": "62614e58-b227-4481-88f5-c7b6a3660485",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        0,
+        0
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Hunter io\n\nYou need to get a Hunter.io account and input the API key. There's 50 free credits per month.",
+        "height": 320,
+        "color": 4
+      },
+      "id": "f2096d7b-a9f1-44d4-a868-a86424bd04bc",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        240,
+        208
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Submit form": {
+      "main": [
+        [
+          {
+            "node": "Verify email",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Verify email": {
+      "main": [
+        [
+          {
+            "node": "Check if the email is valid",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check if the email is valid": {
+      "main": [
+        [
+          {
+            "node": "Add contact to list",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Email is not valid, do nothing",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "eebef16b-a4e5-4ff6-9095-1f3d91012fb6",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-21T09:27:37.827Z",
+      "createdAt": "2025-10-21T09:27:37.827Z",
+      "role": "workflow:owner",
+      "workflowId": "q330YsJS5MuxldeP",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
