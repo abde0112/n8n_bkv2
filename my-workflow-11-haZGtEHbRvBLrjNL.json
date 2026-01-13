@@ -1,0 +1,75 @@
+{
+  "updatedAt": "2025-09-27T00:53:50.000Z",
+  "createdAt": "2025-09-27T00:52:51.552Z",
+  "id": "haZGtEHbRvBLrjNL",
+  "name": "My workflow 11",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "80fb8970-6709-42e5-8b52-93a995318ac7",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.wordpress",
+      "typeVersion": 1,
+      "position": [
+        208,
+        0
+      ],
+      "id": "58f44473-3b1d-4d56-8b66-80b752d0df50",
+      "name": "Create a post",
+      "credentials": {
+        "wordpressApi": {
+          "id": "37d6ieAJ3OpJgcQt",
+          "name": "Wordpress account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "Create a post",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "9c7ede72-6904-4f9b-82f3-c537219563ba",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-27T00:52:51.567Z",
+      "createdAt": "2025-09-27T00:52:51.567Z",
+      "role": "workflow:owner",
+      "workflowId": "haZGtEHbRvBLrjNL",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
