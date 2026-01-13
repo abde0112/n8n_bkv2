@@ -1,0 +1,258 @@
+{
+  "updatedAt": "2025-12-02T13:46:25.000Z",
+  "createdAt": "2025-10-20T14:43:36.104Z",
+  "id": "BOcq2ZjfNkJkAHTp",
+  "name": "🧩 Advanced-PROJECT: Build the AI Agent’s Knowledge Base copy",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "6fd6e8de-f9c7-4baa-9308-efadc5fc1e79",
+      "name": "When chat message received",
+      "webhookId": "fe4fa81d-142c-4b1b-8bf8-3817eeef2c0a"
+    },
+    {
+      "parameters": {
+        "options": {
+          "systemMessage": "You are an advanced AI assistant for an e-commerce company.\n\nYou have access to two knowledge sources:\n1. Airtable → Structured data (products, prices, categories, stock, SKUs)\n2. Notion → Unstructured data (FAQs, policies, guides, procedures)\n\nYour mission:\n- Identify what kind of question the user is asking.\n- Choose the right tool:\n   • Airtable → factual, numeric, product-related\n   • Notion → descriptive, policy, explanation\n- Retrieve the data accurately.\n- Combine results if needed to provide a full answer.\n\nBehavior rules:\n1. Always explain how you found the answer (e.g., “According to Airtable, the price is…”).\n2. If both sources are relevant, merge insights clearly.\n3. If information is missing, politely say: “I couldn’t find this data, please check with the support team.”\n4. Keep tone professional, concise, and friendly.\n5. Use structured formatting in your answers:\n   **Answer:**  \n   **Source:** Airtable / Notion  \n   **Confidence:** High / Medium / Low\n\nExample 1:\nUser: “Do you have stock for the Gaming Chair?”\n→ Fetch from Airtable → “Yes, we currently have 8 units in stock.”  \n**Source:** Airtable  \n**Confidence:** High\n\nExample 2:\nUser: “What’s your refund policy?”\n→ Fetch from Notion → “You can return products within 30 days if unopened.”  \n**Source:** Notion  \n**Confidence:** High\n"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "87778c0b-db84-4714-8159-64a25a56d5e6",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        80,
+        208
+      ],
+      "id": "19cb9982-be73-4d9c-8bd2-ccfe9293cae0",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        224,
+        208
+      ],
+      "id": "fb3a6333-3b8b-4316-a9f0-e0f9507ef290",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "base": {
+          "__rl": true,
+          "value": "app5a5P7U0dwkyYXF",
+          "mode": "list",
+          "cachedResultName": "Ark-x Days",
+          "cachedResultUrl": "https://airtable.com/app5a5P7U0dwkyYXF"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tbluYf0YYX7jlKFMn",
+          "mode": "list",
+          "cachedResultName": "E-commerce Agent DB",
+          "cachedResultUrl": "https://airtable.com/app5a5P7U0dwkyYXF/tbluYf0YYX7jlKFMn"
+        },
+        "id": "=",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtableTool",
+      "typeVersion": 2.1,
+      "position": [
+        544,
+        240
+      ],
+      "id": "a926f08f-c4ff-41a9-83d1-57366c13ca48",
+      "name": "Get a record in Airtable",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "D5OyRen7Y9yEq0t5",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "resource": "databasePage",
+        "operation": "getAll",
+        "databaseId": {
+          "__rl": true,
+          "value": "=29295f9ac9ba8028b32ee58ae98b242e",
+          "mode": "id"
+        },
+        "returnAll": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Return_All', ``, 'boolean') }}",
+        "simple": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Simplify', ``, 'boolean') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.notionTool",
+      "typeVersion": 2.2,
+      "position": [
+        400,
+        240
+      ],
+      "id": "a1e9b811-b5f0-4a50-8d29-7d5db18066b1",
+      "name": "Get many database pages in Notion",
+      "credentials": {
+        "notionApi": {
+          "id": "15yDo1cdhGUKYF4b",
+          "name": "Notion account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "checkIfEvaluating"
+      },
+      "type": "n8n-nodes-base.evaluation",
+      "typeVersion": 4.8,
+      "position": [
+        576,
+        0
+      ],
+      "id": "7c56fe00-ed3e-407e-90ec-b63a65c47722",
+      "name": "Evaluation"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        848,
+        -63
+      ],
+      "id": "9208df29-1f7a-4714-b57d-2c6fc7fd6d4b",
+      "name": "Edit Fields"
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get a record in Airtable": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get many database pages in Notion": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Evaluation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Evaluation": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "ecf7260e-b33c-4133-a5d2-0aa878e23f33",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-20T14:43:36.124Z",
+      "createdAt": "2025-10-20T14:43:36.124Z",
+      "role": "workflow:owner",
+      "workflowId": "BOcq2ZjfNkJkAHTp",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
