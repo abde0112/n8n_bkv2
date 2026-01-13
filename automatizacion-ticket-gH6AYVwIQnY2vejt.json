@@ -1,0 +1,328 @@
+{
+  "updatedAt": "2025-11-12T10:38:13.000Z",
+  "createdAt": "2025-10-21T09:24:47.219Z",
+  "id": "gH6AYVwIQnY2vejt",
+  "name": "automatizacion-ticket",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "id": "700113d0-2bfb-45e2-9bac-5061ec121a24",
+      "name": "Schedule Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "position": [
+        320,
+        624
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-4o-mini"
+        },
+        "options": {}
+      },
+      "id": "054dbb2a-94b0-4d80-a988-7485ca12d815",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        1232,
+        800
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "schemaType": "manual",
+        "inputSchema": "{\n  \"type\": \"object\",\n  \"properties\": {\n    \"labels\": {\n      \"type\": \"array\",\n      \"items\": { \"type\": \"string\" }\n    },\n    \"priority\": { \"type\": \"number\" },\n    \"summary\": { \"type\": \"string\" },\n    \"description\": { \"type\": \"string\" }\n  }\n}"
+      },
+      "id": "e9b717b1-3165-43ed-9898-b73971c971fb",
+      "name": "Structured Output Parser",
+      "type": "@n8n/n8n-nodes-langchain.outputParserStructured",
+      "position": [
+        1440,
+        800
+      ],
+      "typeVersion": 1.2
+    },
+    {
+      "parameters": {
+        "content": "## 2. Automate Generation and Triaging of Ticket\n[Read more about the Basic LLM node](https://docs.n8n.io/integrations/builtin/cluster-nodes/root-nodes/n8n-nodes-langchain.chainllm)\n\nNew tickets always need to be properly labelled and prioritised but it's not always possible to get to update all incoming tickets if you're light on hands. Using an AI is a great use-case for triaging of tickets as its contextual understanding helps automates this step.",
+        "height": 540,
+        "width": 700,
+        "color": 7
+      },
+      "id": "2617b8c9-1ad1-49b0-a271-8e9ec17e8162",
+      "name": "Sticky Note1",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        960,
+        416
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "html": "={{ $json.html }}",
+        "options": {}
+      },
+      "id": "d3afea2d-b0ba-42f7-aeaf-ba8129f62f2c",
+      "name": "Markdown",
+      "type": "n8n-nodes-base.markdown",
+      "position": [
+        1056,
+        624
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "removeItemsSeenInPreviousExecutions",
+        "dedupeValue": "={{ $json.id }}",
+        "options": {}
+      },
+      "id": "4fa29738-e7fd-41cf-a6fc-4694d95ea7a6",
+      "name": "Mark as Seen",
+      "type": "n8n-nodes-base.removeDuplicates",
+      "position": [
+        736,
+        624
+      ],
+      "typeVersion": 2
+    },
+    {
+      "parameters": {
+        "content": "## 1. Watch Gmail Inbox for Support Emails\n[Learn more about the Gmail node](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.gmail/)\n\n**This template assumes a group email specifically for support tickets!** If you have a general inbox, you may need to classify and filter each message which might become costly. The \"remove duplicates\" node (ie. \"Mark as seen\") ensures we only process each email exactly once.",
+        "height": 540,
+        "width": 720,
+        "color": 7
+      },
+      "id": "97875180-9deb-4aff-9c09-ab43a2d18bd3",
+      "name": "Sticky Note",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        224,
+        416
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## 3. Create Issue in Linear.App\n[Read more about the Linear.App node](https://docs.n8n.io/integrations/builtin/app-nodes/n8n-nodes-base.linear)\n\nThis is only a simple example to create an issue in Linear.App but easily extendable to add much more!",
+        "height": 440,
+        "width": 460,
+        "color": 7
+      },
+      "id": "5e8569a9-349b-407a-b18b-161c68858da5",
+      "name": "Sticky Note2",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        1680,
+        416
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "## Try It Out!\n### This n8n template watches a Gmail inbox for support messages and creates an equivalent issue item in Linear.\n\n### How it works\n* A scheduled trigger fetches recent Gmail messages from the inbox which collects support requests.\n* These support requests are filtered to ensure they are only processed once and their HTML body is converted to markdown for easier parsing.\n* Each support request is then triaged via an AI Agent which adds appropriate labels, assesses priority and summarises a title and description of the original request.\n* Finally, the AI generated values are used to create an issue in Linear to be actioned.\n\n### How to use\n* Ensure the messages fetched are solely support requests otherwise you'll need to classify messages before processing them.\n* Specify the labels and priorities to use in the system prompt of the AI agent.\n\n### Requirements\n* Gmail for incoming support messages\n* OpenAI for LLM\n* Linear for issue management\n\n### Customising this workflow\n* Consider automating more steps after the issue is created such as attempting issue resolution or capacity planning.\n\n\n### Need Help?\nJoin the [Discord](https://discord.com/invite/XPKeKXeB7d) or ask in the [Forum](https://community.n8n.io/)!\n\nHappy Hacking!",
+        "height": 940,
+        "width": 380
+      },
+      "id": "8c3e1bf7-19c4-4a0f-b386-95ab4c6eb368",
+      "name": "Sticky Note3",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        -208,
+        32
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Reported by {{ $json.from.value[0].name }} <{{ $json.from.value[0].address }}>\nReported at: {{ $now.toISO() }}\nSummary: {{ $json.subject }}\nDescription:\n{{ $json.data.replaceAll('\\n', ' ') }}",
+        "hasOutputParser": true,
+        "messages": {
+          "messageValues": [
+            {
+              "message": "=Your are Issues triage assistant who's task is to\n1) classify and label the given issue.\n2) Prioritise the given issue.\n3) Rewrite the issue summary and description.\n\n## Labels\nUse one or more labels.\n* Technical\n* Account\n* Access\n* Billing\n* Product\n* Training\n* Feedback\n* Complaints\n* Security\n* Privacy\n\n## Priority\n* 1 - highest\n* 2 - high\n* 3 - medium\n* 4 - low\n* 5 - lowest\n\n## Write Summary and Description\n* Remove emotional and anedotal phrases or information\n* Keep to the facts of the matter\n* Highlight what was attempted and is/was failing"
+            }
+          ]
+        }
+      },
+      "id": "7e84859f-a21d-41c0-9821-ead69254517f",
+      "name": "Generate Issue From Support Request",
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "position": [
+        1264,
+        624
+      ],
+      "typeVersion": 1.6
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "limit": 1,
+        "simple": false,
+        "filters": {
+          "q": "to:support@example.com"
+        },
+        "options": {}
+      },
+      "id": "76267bd9-6d2b-41b5-9441-3ea419fa69eb",
+      "name": "Get Recent Messages",
+      "type": "n8n-nodes-base.gmail",
+      "position": [
+        512,
+        624
+      ],
+      "webhookId": "f3528949-056d-4013-ab62-9694e72b38cd",
+      "typeVersion": 2.1
+    },
+    {
+      "parameters": {
+        "teamId": "1c721608-321d-4132-ac32-6e92d04bb487",
+        "title": "={{ $json.output.summary }}",
+        "additionalFields": {
+          "description": "={{ $json.output.description }}\n\n{{ $json.output.labels.map(label => `#${label}`).join(' ') }}",
+          "priorityId": "={{ $json.output.priority ?? 3 }}",
+          "stateId": "92962324-3d1f-4cf8-993b-0c982cc95245"
+        }
+      },
+      "id": "929e3ab4-04d5-4637-a897-61cbe294842b",
+      "name": "Create Issue in Linear.App",
+      "type": "n8n-nodes-base.linear",
+      "position": [
+        1856,
+        624
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "content": "### Gmail Filters\nHere we're using the filter `to:support@example.com` to capture support requests.",
+        "height": 120,
+        "color": 5
+      },
+      "id": "f03ff337-72ce-404c-9299-44834eb5c995",
+      "name": "Sticky Note4",
+      "type": "n8n-nodes-base.stickyNote",
+      "position": [
+        464,
+        800
+      ],
+      "typeVersion": 1
+    }
+  ],
+  "connections": {
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Generate Issue From Support Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Mark as Seen": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Get Recent Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "OpenAI Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Generate Issue From Support Request",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Recent Messages": {
+      "main": [
+        [
+          {
+            "node": "Mark as Seen",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Structured Output Parser": {
+      "ai_outputParser": [
+        [
+          {
+            "node": "Generate Issue From Support Request",
+            "type": "ai_outputParser",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Issue From Support Request": {
+      "main": [
+        [
+          {
+            "node": "Create Issue in Linear.App",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "682e3425-7e1c-48b3-9f18-5bd66b0246cd",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-21T09:24:47.237Z",
+      "createdAt": "2025-10-21T09:24:47.237Z",
+      "role": "workflow:owner",
+      "workflowId": "gH6AYVwIQnY2vejt",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
