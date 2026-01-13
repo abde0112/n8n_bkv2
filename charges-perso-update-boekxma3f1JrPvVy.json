@@ -1,0 +1,1574 @@
+{
+  "updatedAt": "2025-09-23T08:30:06.000Z",
+  "createdAt": "2025-09-23T08:30:04.215Z",
+  "id": "boekxma3f1JrPvVy",
+  "name": "CHARGES PERSO Update",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $now }}",
+        "format": "custom",
+        "customFormat": "MMMM",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        -1504,
+        448
+      ],
+      "id": "f25cf82e-6820-4bf8-bdb8-bd466c4ea917",
+      "name": "Date & Time"
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -1824,
+        448
+      ],
+      "id": "d698711c-bf5d-46d1-9ecf-be7866633bbe",
+      "name": "Telegram Trigger",
+      "webhookId": "20972b1e-c86f-4c68-add9-f221428ccdca"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1SDFp0b-l1ahgZEss9Yj2PMcCT1h39VV_aR8wu9vblwI",
+          "mode": "list",
+          "cachedResultName": "CHARGES PERSO Update",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SDFp0b-l1ahgZEss9Yj2PMcCT1h39VV_aR8wu9vblwI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "={{ $('Date & Time').item.json.formattedDate }}",
+          "mode": "name"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "Date",
+              "lookupValue": "={{ $('Date & Time1').item.json.formattedDate }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1344,
+        448
+      ],
+      "id": "d516c1df-3960-41b4-8abc-a8ab72b32a9f",
+      "name": "Charges Perso"
+    },
+    {
+      "parameters": {
+        "operation": "formatDate",
+        "date": "={{ $today }}",
+        "format": "yyyy-MM-dd",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.dateTime",
+      "typeVersion": 2,
+      "position": [
+        -1664,
+        448
+      ],
+      "id": "3239d896-c520-4439-b85d-dd7c36635025",
+      "name": "Date & Time1"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Example message: \"cafe 15\"\nconst text = $('Telegram Trigger').first().json.message.text.toLowerCase();\n\n\n// Extract amount and category\n// Assumes input like \"add 15 in cafe\"\nconst match = text.match(/(\\d+)\\s+in\\s+(\\w+)/);\nif (!match) {\n  throw new Error(\"Could not parse amount and category from input.\");\n}\n\nconst amount = parseFloat(match[1]);\nconst categoryKey = match[2];\n\n// Map input to exact Google Sheet column names\nconst columnMap = {\n  \"food\": \"Food\",\n  \"cafe\": \"Cafe/Restaurant\",\n  \"transport\": \"Transportation\",\n  \"debt\": \"Debt\",\n  \"shopping\": \"Shopping\",\n  \"subscription\": \"Subscription\",\n  \"other\": \"Other\",\n  \"personal\": \"Personal\",\n  \"house\": \"House\",\n  \"gifts\": \"Gifts\",\n  \"health\": \"Health/Medical\",\n  \"pets\": \"Pets\",\n  \"utilities\": \"Utilities\",\n  \"travel\": \"Travel\"\n};\n\nconst category = columnMap[categoryKey];\nif (!category) {\n  throw new Error(\"Unknown category: \" + categoryKey);\n}\n\nconst today = new Date().toISOString().split(\"T\")[0]; // YYYY-MM-DD\n\nreturn [{\n  amount: amount,\n  category: category,\n  date: today\n}];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1104,
+        128
+      ],
+      "id": "a6a86148-4d4c-4fcb-898b-e9f550476d55",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "19170517-44fd-4195-a9ec-e99b58ec866e",
+                    "leftValue": "Food",
+                    "rightValue": "={{ $('Code in JavaScript').item.json.category }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "dbee3e63-1cdc-44eb-b2b1-146da93715ac",
+                    "leftValue": "Cafe/Restaurant",
+                    "rightValue": "={{ $('Code in JavaScript').item.json.category }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "6a77e484-d11e-4223-baad-1983b5f95c8b",
+                    "leftValue": "Transportation",
+                    "rightValue": "={{ $('Code in JavaScript').item.json.category }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "dabc1496-a788-479e-91ab-f31d9af8ef4f",
+                    "leftValue": "Debt",
+                    "rightValue": "={{ $('Code in JavaScript').item.json.category }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a030f91f-8e60-4975-a076-3035f416d911",
+                    "leftValue": "Shopping",
+                    "rightValue": "={{ $('Code in JavaScript').item.json.category }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "b8d3d73d-146a-4ad6-a399-cbb479e337e6",
+                    "leftValue": "Subscription",
+                    "rightValue": "={{ $('Code in JavaScript').item.json.category }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "18331e7f-820c-4a5b-8a05-16fec41c9b60",
+                    "leftValue": "Other",
+                    "rightValue": "={{ $('Code in JavaScript').item.json.category }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c6d8c437-6c87-495b-a14c-abab42bce3b5",
+                    "leftValue": "Personal",
+                    "rightValue": "={{ $('Code in JavaScript').item.json.category }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "1907e7e4-7043-4712-9b97-5b9b10237e42",
+                    "leftValue": "House",
+                    "rightValue": "={{ $('Code in JavaScript').item.json.category }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "a9957780-1e5c-42a6-9906-126b26bc7b9d",
+                    "leftValue": "Gifts",
+                    "rightValue": "={{ $('Code in JavaScript').item.json.category }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "681a9dd3-3783-4ca5-8261-a8179c14ac79",
+                    "leftValue": "Health/Medical",
+                    "rightValue": "={{ $('Code in JavaScript').item.json.category }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "6a925895-77db-478b-a225-c7ed74417ba0",
+                    "leftValue": "Pets",
+                    "rightValue": "={{ $('Code in JavaScript').item.json.category }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "79ca2d7e-eeaf-45c8-bf4e-2058b488723b",
+                    "leftValue": "Utilities",
+                    "rightValue": "={{ $('Code in JavaScript').item.json.category }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "c066b3df-4fd4-4f41-8721-027097cdb288",
+                    "leftValue": "Travel",
+                    "rightValue": "={{ $('Code in JavaScript').item.json.category }}",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        -544,
+        256
+      ],
+      "id": "73f7071e-221a-4528-ad45-d55d23adfd87",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1SDFp0b-l1ahgZEss9Yj2PMcCT1h39VV_aR8wu9vblwI",
+          "mode": "list",
+          "cachedResultName": "CHARGES PERSO Update",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SDFp0b-l1ahgZEss9Yj2PMcCT1h39VV_aR8wu9vblwI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Date & Time').item.json.formattedDate }}"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Cafe/Restaurant": "=={{ $('Charges Perso').item.json['Cafe/Restaurant'] }}+{{ $('Code in JavaScript').item.json.amount }}",
+            "Date": "={{ $('Date & Time1').item.json.formattedDate }}"
+          },
+          "matchingColumns": [
+            "Date"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Food",
+              "displayName": "Food",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Cafe/Restaurant",
+              "displayName": "Cafe/Restaurant",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Transportation",
+              "displayName": "Transportation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Debt",
+              "displayName": "Debt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Shopping",
+              "displayName": "Shopping",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Subscription",
+              "displayName": "Subscription",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Other",
+              "displayName": "Other",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Personal",
+              "displayName": "Personal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "House",
+              "displayName": "House",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Gifts",
+              "displayName": "Gifts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Health/Medical",
+              "displayName": "Health/Medical",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Pets",
+              "displayName": "Pets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Utilities",
+              "displayName": "Utilities",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Travel",
+              "displayName": "Travel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Amount/Day",
+              "displayName": "Amount/Day",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -192,
+        800
+      ],
+      "id": "a8a1f53b-0ed0-42c1-a943-7ca128fc492e",
+      "name": "Append or update row in sheet3"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1SDFp0b-l1ahgZEss9Yj2PMcCT1h39VV_aR8wu9vblwI",
+          "mode": "list",
+          "cachedResultName": "CHARGES PERSO Update",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SDFp0b-l1ahgZEss9Yj2PMcCT1h39VV_aR8wu9vblwI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Date & Time').item.json.formattedDate }}"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Cafe/Restaurant": "=={{ $('Charges Perso').item.json['Cafe/Restaurant'] }}+{{ $('Code in JavaScript').item.json.amount }}",
+            "Date": "={{ $('Date & Time1').item.json.formattedDate }}"
+          },
+          "matchingColumns": [
+            "Date"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Food",
+              "displayName": "Food",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Cafe/Restaurant",
+              "displayName": "Cafe/Restaurant",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Transportation",
+              "displayName": "Transportation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Debt",
+              "displayName": "Debt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Shopping",
+              "displayName": "Shopping",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Subscription",
+              "displayName": "Subscription",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Other",
+              "displayName": "Other",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Personal",
+              "displayName": "Personal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "House",
+              "displayName": "House",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Gifts",
+              "displayName": "Gifts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Health/Medical",
+              "displayName": "Health/Medical",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Pets",
+              "displayName": "Pets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Utilities",
+              "displayName": "Utilities",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Travel",
+              "displayName": "Travel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Amount/Day",
+              "displayName": "Amount/Day",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -144,
+        768
+      ],
+      "id": "5ae840ce-cb55-4cdb-a8e8-9175513f9d63",
+      "name": "Append or update row in sheet4"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1SDFp0b-l1ahgZEss9Yj2PMcCT1h39VV_aR8wu9vblwI",
+          "mode": "list",
+          "cachedResultName": "CHARGES PERSO Update",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SDFp0b-l1ahgZEss9Yj2PMcCT1h39VV_aR8wu9vblwI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Date & Time').item.json.formattedDate }}"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $('Date & Time1').item.json.formattedDate }}",
+            "Food": "=={{ $('Code in JavaScript').item.json.amount }}+{{ $('Charges Perso').item.json.Food }}"
+          },
+          "matchingColumns": [
+            "Date"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Food",
+              "displayName": "Food",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Cafe/Restaurant",
+              "displayName": "Cafe/Restaurant",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Transportation",
+              "displayName": "Transportation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Debt",
+              "displayName": "Debt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Shopping",
+              "displayName": "Shopping",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Subscription",
+              "displayName": "Subscription",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Other",
+              "displayName": "Other",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Personal",
+              "displayName": "Personal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "House",
+              "displayName": "House",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Gifts",
+              "displayName": "Gifts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Health/Medical",
+              "displayName": "Health/Medical",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Pets",
+              "displayName": "Pets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Utilities",
+              "displayName": "Utilities",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Travel",
+              "displayName": "Travel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Amount/Day",
+              "displayName": "Amount/Day",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -192,
+        -16
+      ],
+      "id": "d5721ab7-8941-4233-b0ea-0fded50b748d",
+      "name": "FOOD"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1SDFp0b-l1ahgZEss9Yj2PMcCT1h39VV_aR8wu9vblwI",
+          "mode": "list",
+          "cachedResultName": "CHARGES PERSO Update",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SDFp0b-l1ahgZEss9Yj2PMcCT1h39VV_aR8wu9vblwI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Date & Time').item.json.formattedDate }}"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Cafe/Restaurant": "=={{ $('Charges Perso').item.json['Cafe/Restaurant'] }}+{{ $('Code in JavaScript').item.json.amount }}",
+            "Date": "={{ $('Date & Time1').item.json.formattedDate }}"
+          },
+          "matchingColumns": [
+            "Date"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Food",
+              "displayName": "Food",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Cafe/Restaurant",
+              "displayName": "Cafe/Restaurant",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Transportation",
+              "displayName": "Transportation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Debt",
+              "displayName": "Debt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Shopping",
+              "displayName": "Shopping",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Subscription",
+              "displayName": "Subscription",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Other",
+              "displayName": "Other",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Personal",
+              "displayName": "Personal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "House",
+              "displayName": "House",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Gifts",
+              "displayName": "Gifts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Health/Medical",
+              "displayName": "Health/Medical",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Pets",
+              "displayName": "Pets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Utilities",
+              "displayName": "Utilities",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Travel",
+              "displayName": "Travel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Amount/Day",
+              "displayName": "Amount/Day",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -112,
+        128
+      ],
+      "id": "9aa2ec41-c9e6-4f64-9f02-6b2ecce14a2e",
+      "name": "Cafe/Restaurant"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "1SDFp0b-l1ahgZEss9Yj2PMcCT1h39VV_aR8wu9vblwI",
+          "mode": "list",
+          "cachedResultName": "CHARGES PERSO Update",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1SDFp0b-l1ahgZEss9Yj2PMcCT1h39VV_aR8wu9vblwI/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "mode": "name",
+          "value": "={{ $('Date & Time').item.json.formattedDate }}"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Date": "={{ $('Date & Time1').item.json.formattedDate }}",
+            "Transportation": "=={{ $('Code in JavaScript').item.json.amount }}+{{ $('Charges Perso').item.json.Transportation }}"
+          },
+          "matchingColumns": [
+            "Date"
+          ],
+          "schema": [
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Food",
+              "displayName": "Food",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Cafe/Restaurant",
+              "displayName": "Cafe/Restaurant",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Transportation",
+              "displayName": "Transportation",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "Debt",
+              "displayName": "Debt",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Shopping",
+              "displayName": "Shopping",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Subscription",
+              "displayName": "Subscription",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Other",
+              "displayName": "Other",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Personal",
+              "displayName": "Personal",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "House",
+              "displayName": "House",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Gifts",
+              "displayName": "Gifts",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Health/Medical",
+              "displayName": "Health/Medical",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Pets",
+              "displayName": "Pets",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Utilities",
+              "displayName": "Utilities",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Travel",
+              "displayName": "Travel",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            },
+            {
+              "id": "Amount/Day",
+              "displayName": "Amount/Day",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        0,
+        224
+      ],
+      "id": "2998a54a-7c90-47a2-ac0a-74d58934830d",
+      "name": "Transportation"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "You are an AI assistant that updates a daily budget tracker in Google Sheets.\n\nRules:\n1. The spreadsheet has a sheet named \"DailyTracker\" with columns:\n   Date | Food | Cafe/Restaurant | Transportation | Debt | Shopping | Subscription | Other | Personal | House | Gifts | Health/Medical | Pets | Utilities | Travel | Amount/Day\n\n2. You will receive input in natural form or a structured message from Telegram, like:\n   \"cafe 15\" \n   \"food 20\" \n   \"transport 10\"\n\n3. Your task is:\n   a) Extract the category and the amount from the input.\n   b) Get today’s date (YYYY-MM-DD format) or use a provided date if specified.\n   c) Find the row for today in the sheet:\n      - If it exists: add the new amount to the existing value in the column corresponding to the category.\n      - If it doesn’t exist: create a new row with today’s date, 0 in all other columns, and put the amount in the correct category column.\n   d) Update the “Amount/Day” column by summing all category columns for that day.\n   e) Confirm the update by returning a message like:\n      \"Added 15 to Cafe/Restaurant for 2025-09-22. New total: 45.\"\n\n4. You should handle variations in category names using this mapping:\n   - food → Food\n   - cafe → Cafe/Restaurant\n   - transport → Transportation\n   - debt → Debt\n   - shopping → Shopping\n   - subscription → Subscription\n   - other → Other\n   - personal → Personal\n   - house → House\n   - gifts → Gifts\n   - health → Health/Medical\n   - pets → Pets\n   - utilities → Utilities\n   - travel → Travel\n\n5. After performing the update, return only a **short confirmation message** with category, date, and new total for that category.\n6. Do not modify any other data in the sheet.\n7. The input may contain multiple updates separated by line breaks. Process each one sequentially.\nreturn output like this \n[\n  { \"amount\": 12, \"category\": \"Food\", \"date\": \"2025-09-22\" },\n  { \"amount\": 16, \"category\": \"Transportation\", \"date\": \"2025-09-22\" }\n]\n",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -1040,
+        448
+      ],
+      "id": "c32916c6-231b-489c-a86b-dcdff1cc8a32",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -1104,
+        656
+      ],
+      "id": "4a90d989-a334-4e7e-8276-240dec4b8519",
+      "name": "Google Gemini Chat Model"
+    }
+  ],
+  "connections": {
+    "Date & Time": {
+      "main": [
+        [
+          {
+            "node": "Charges Perso",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "Date & Time1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Charges Perso": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Date & Time1": {
+      "main": [
+        [
+          {
+            "node": "Date & Time",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Switch": {
+      "main": [
+        [
+          {
+            "node": "FOOD",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Cafe/Restaurant",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Transportation",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "410279ba-7323-45ce-9c27-1731d1f9d4db",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-23T08:30:04.228Z",
+      "createdAt": "2025-09-23T08:30:04.228Z",
+      "role": "workflow:owner",
+      "workflowId": "boekxma3f1JrPvVy",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
