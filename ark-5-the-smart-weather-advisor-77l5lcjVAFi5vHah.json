@@ -1,0 +1,317 @@
+{
+  "updatedAt": "2025-08-14T19:44:47.000Z",
+  "createdAt": "2025-08-12T14:14:20.027Z",
+  "id": "77l5lcjVAFi5vHah",
+  "name": "ark 5 The Smart Weather Advisor",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.manualTrigger",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ],
+      "id": "d3771b74-73a6-464e-8577-0491e8b6e433",
+      "name": "When clicking ‘Execute workflow’"
+    },
+    {
+      "parameters": {
+        "url": "https://goweather.herokuapp.com/weather/casablanca",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "dae4b1d5-1c68-4828-a7b3-35c32b3305f5",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "46ec78a0-8476-4d23-ae9e-2bcf54d9884f",
+              "leftValue": "={{ $json.description }}",
+              "rightValue": "Rain",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        416,
+        0
+      ],
+      "id": "a70c3df0-11fe-4670-82af-0a5674f6ea01",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "7f949be9-2860-4eed-824c-2781c54d9a77",
+              "leftValue": "={{ $json[\"temperature\"].replace(\"+\", \"\").replace(\"°C\", \"\").trim().toNumber() }}",
+              "rightValue": 15,
+              "operator": {
+                "type": "number",
+                "operation": "lt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        624,
+        176
+      ],
+      "id": "44a62f89-8b8c-4e5a-8ce1-642c0eced39e",
+      "name": "If1"
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "5b94fc2e-1a03-4db2-b986-10a49bc25904",
+              "leftValue": "={{ $json[\"wind\"].replace(\"km/h\", \"\").trim().toNumber() }}\n",
+              "rightValue": "30",
+              "operator": {
+                "type": "string",
+                "operation": "equals",
+                "name": "filter.operator.equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        832,
+        256
+      ],
+      "id": "7095ba09-94d5-419c-8bea-44d90d8f333d",
+      "name": "If2"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=Weather Update for the Guild: Looks clear but chilly in Casablanca! Bring a jacket! 🧥",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        944,
+        32
+      ],
+      "id": "631302ba-1cb5-4a54-a219-ce23a83aaa27",
+      "name": "Cold & Clear",
+      "webhookId": "201ad1c3-8a1b-4e0c-91e0-2bcd19b7fd95"
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "=Weather Update for the Guild: Looks like clear skies and pleasant weather in Casablanca at {{ $json.temperature }} ! Enjoy the day! ☀️ ",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1168,
+        432
+      ],
+      "id": "634f841c-1e36-4d91-bfb7-5a0051d31547",
+      "name": "Warm & Clear",
+      "webhookId": "e83cf9aa-ce8c-4b19-9647-95555883ed21",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "WkF81BQ4ghWqwHjW",
+          "name": "Discord Webhook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "Weather Alert for the Guild: It might rain in Casablanca. Don't forget an umbrella! ☂️",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        816,
+        -128
+      ],
+      "id": "85a7b287-1c6d-4410-9f06-cc2c9d0196a4",
+      "name": "Rain",
+      "webhookId": "69e81012-578f-4933-b9a6-9c127f2dba4e",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "WkF81BQ4ghWqwHjW",
+          "name": "Discord Webhook account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "authentication": "webhook",
+        "content": "Weather Update for the Guild: Looks clear but windy in Casablanca at 34°C! Hold onto your hats! 💨",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [
+        1152,
+        192
+      ],
+      "id": "e18ba2fa-914f-464a-af27-a1bf78693598",
+      "name": "Wind Speed",
+      "webhookId": "4e1aebea-8da0-474b-886d-d2323fccc493",
+      "credentials": {
+        "discordWebhookApi": {
+          "id": "WkF81BQ4ghWqwHjW",
+          "name": "Discord Webhook account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When clicking ‘Execute workflow’": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Rain",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Cold & Clear",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "If2",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If2": {
+      "main": [
+        [
+          {
+            "node": "Wind Speed",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Warm & Clear",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "96e83545-0016-4ba4-b6f4-690a65f018c1",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-08-12T14:14:20.058Z",
+      "createdAt": "2025-08-12T14:14:20.058Z",
+      "role": "workflow:owner",
+      "workflowId": "77l5lcjVAFi5vHah",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
