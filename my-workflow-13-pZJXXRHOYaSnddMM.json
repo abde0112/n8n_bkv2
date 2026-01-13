@@ -1,0 +1,115 @@
+{
+  "updatedAt": "2025-10-02T14:45:18.000Z",
+  "createdAt": "2025-10-02T10:42:16.813Z",
+  "id": "pZJXXRHOYaSnddMM",
+  "name": "My workflow 13",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "3695e253-853a-4df0-8e67-7ee2f7e82f68",
+      "name": "Telegram Trigger",
+      "webhookId": "611735f2-37fa-4a1a-af96-5089ebe9e79f",
+      "credentials": {
+        "telegramApi": {
+          "id": "4Zx2OD8qIls5skix",
+          "name": "Telegram NGRK"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "public": true,
+        "mode": "webhook",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        208,
+        0
+      ],
+      "id": "71729c33-0392-4b26-a3f9-8bd4b4407347",
+      "name": "When chat message received",
+      "webhookId": "8e3f5b28-ae0d-4d46-9f23-5ed3d0a5c5f2"
+    },
+    {
+      "parameters": {
+        "modelId": {
+          "__rl": true,
+          "mode": "list",
+          "value": ""
+        },
+        "messages": {
+          "values": [
+            {
+              "content": "hello"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.googleGemini",
+      "typeVersion": 1,
+      "position": [
+        416,
+        0
+      ],
+      "id": "4e176ba1-d2df-442b-9ea6-b0cea8298a87",
+      "name": "Message a model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "Message a model",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "b3bda437-0be9-4d4e-97da-5a12ec8004cd",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-10-02T10:42:16.833Z",
+      "createdAt": "2025-10-02T10:42:16.833Z",
+      "role": "workflow:owner",
+      "workflowId": "pZJXXRHOYaSnddMM",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
