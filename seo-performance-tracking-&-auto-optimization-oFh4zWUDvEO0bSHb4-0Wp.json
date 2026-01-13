@@ -1,0 +1,1063 @@
+{
+  "updatedAt": "2026-01-12T14:21:48.000Z",
+  "createdAt": "2026-01-12T10:38:13.276Z",
+  "id": "oFh4zWUDvEO0bSHb4-0Wp",
+  "name": "SEO Performance Tracking & Auto-Optimization",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "content": "=🎯 WORKFLOW #2: PERFORMANCE TRACKING\\n\\nThis workflow:\\n✅ Tracks all published posts (last 30 days)\\n✅ Fetches Google Search Console data\\n✅ Fetches Google Analytics 4 data\\n✅ Calculates performance scores (0-100)\\n✅ Identifies underperformers\\n✅ Auto-optimizes titles & meta descriptions\\n✅ Sends daily performance report\\n\\n⏰ Runs: Daily at 12:00 PM\\n📊 Cost: ~$0.50-1.00 per day",
+        "height": 456,
+        "width": 406
+      },
+      "id": "6ca42a34-06d9-471c-b24f-39381da07301",
+      "name": "Info",
+      "type": "n8n-nodes-base.stickyNote",
+      "typeVersion": 1,
+      "position": [
+        0,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendEmail"
+      },
+      "id": "a5b2dee9-5025-4ec6-9811-24ceffa81c8b",
+      "name": "Send Performance Report",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        1760,
+        400
+      ],
+      "webhookId": "4fb4c465-56ac-488c-9f6d-59d8668007c2"
+    },
+    {
+      "parameters": {
+        "jsCode": "const allResults = $input.all();\nconst config = $('Set Configuration').first().json;\n\nlet totalArticles = allResults.length;\nlet totalImpressions = 0;\nlet totalClicks = 0;\nlet avgPosition = 0;\nlet totalSessions = 0;\n\nconst topPerformers = [];\nconst needsAttention = [];\nconst optimizedToday = [];\n\nallResults.forEach(item => {\n  const data = item.json;\n  \n  if (data.search_console) {\n    totalImpressions += data.search_console.impressions || 0;\n    totalClicks += data.search_console.clicks || 0;\n    avgPosition += data.search_console.average_position || 0;\n  }\n  \n  if (data.analytics) {\n    totalSessions += data.analytics.sessions || 0;\n  }\n  \n  if (data.performance_score >= 80) {\n    topPerformers.push({\n      title: data.post_title,\n      score: data.performance_score,\n      url: data.post_url\n    });\n  } else if (data.performance_score < 40) {\n    needsAttention.push({\n      title: data.post_title,\n      score: data.performance_score,\n      issues: data.issues,\n      url: data.post_url\n    });\n  }\n  \n  if (data.action_taken === 'title_meta_updated') {\n    optimizedToday.push({\n      title: data.post_title,\n      old_score: data.current_score,\n      url: data.post_url\n    });\n  }\n});\n\navgPosition = totalArticles > 0 ? avgPosition / totalArticles : 0;\n\nconst report = {\n  report_date: new Date().toISOString(),\n  summary: {\n    total_articles: totalArticles,\n    total_impressions: totalImpressions,\n    total_clicks: totalClicks,\n    overall_ctr: totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : 0,\n    avg_position: avgPosition.toFixed(1),\n    total_sessions: totalSessions,\n    top_performers_count: topPerformers.length,\n    needs_attention_count: needsAttention.length,\n    optimized_today_count: optimizedToday.length\n  },\n  top_performers: topPerformers.slice(0, 5),\n  needs_attention: needsAttention.slice(0, 10),\n  optimized_today: optimizedToday,\n  notification_email: config.notification_email\n};\n\nreturn [{json: report}];"
+      },
+      "id": "1c02a172-78fa-482d-87a7-c041136c8689",
+      "name": "Generate Daily Report",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1552,
+        400
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "log-1",
+              "name": "optimization_date",
+              "value": "={{ new Date().toISOString() }}",
+              "type": "string"
+            },
+            {
+              "id": "log-2",
+              "name": "post_id",
+              "value": "={{ $('Parse Recommendations').item.json.post_id }}",
+              "type": "string"
+            },
+            {
+              "id": "log-3",
+              "name": "post_title",
+              "value": "={{ $('Parse Recommendations').item.json.current_title }}",
+              "type": "string"
+            },
+            {
+              "id": "log-4",
+              "name": "old_title",
+              "value": "={{ $('Parse Recommendations').item.json.current_title }}",
+              "type": "string"
+            },
+            {
+              "id": "log-5",
+              "name": "new_title",
+              "value": "={{ $('Parse Recommendations').item.json.optimized_title }}",
+              "type": "string"
+            },
+            {
+              "id": "log-6",
+              "name": "performance_score",
+              "value": "={{ $('Parse Recommendations').item.json.current_score }}",
+              "type": "string"
+            },
+            {
+              "id": "log-7",
+              "name": "action_taken",
+              "value": "title_meta_updated",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "82899e97-bc69-421c-97e0-6dda4429b79c",
+      "name": "Log Optimization",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        2432,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.wordpress_url }}/wp-json/wp/v2/posts/{{ $json.post_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $json.optimized_title }}"
+            },
+            {
+              "name": "excerpt",
+              "value": "={{ $json.optimized_meta }}"
+            },
+            {
+              "name": "meta",
+              "value": "={{ {\"_yoast_wpseo_title\": $json.optimized_title, \"_yoast_wpseo_metadesc\": $json.optimized_meta, \"_optimized_date\": new Date().toISOString()} }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4a56c00d-2504-4446-9b78-b0c64127622c",
+      "name": "Update Title & Meta",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        2208,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const post = $input.first().json;\nconst aiResponse = $json;\n\nlet recommendations;\ntry {\n  const content = aiResponse.choices[0].message.content.replace(/```json\\n?/g, '').replace(/```/g, '').trim();\n  recommendations = JSON.parse(content);\n} catch (e) {\n  console.error('Parse error:', e);\n  recommendations = {\n    optimized_title: post.post_title,\n    optimized_meta: post.post_title,\n    content_improvements: ['Add more depth', 'Include statistics', 'Improve readability'],\n    new_keywords: [],\n    internal_links: []\n  };\n}\n\nreturn [{\n  json: {\n    post_id: post.post_id,\n    post_url: post.post_url,\n    current_title: post.post_title,\n    current_score: post.performance_score,\n    optimized_title: recommendations.optimized_title,\n    optimized_meta: recommendations.optimized_meta,\n    content_improvements: recommendations.content_improvements || [],\n    new_keywords: recommendations.new_keywords || [],\n    internal_links: recommendations.internal_links || [],\n    top_queries: post.search_console.top_queries,\n    issues: post.issues,\n    wordpress_url: post.wordpress_url\n  }\n}];"
+      },
+      "id": "9dda2aa7-60c4-4a37-b9b1-15e7fe8ff6be",
+      "name": "Parse Recommendations",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1984,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-4-turbo-preview"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [{\"role\": \"system\", \"content\": \"You are an SEO optimization expert.\"}, {\"role\": \"user\", \"content\": \"Analyze this underperforming article and provide optimization recommendations:\\n\\nTitle: \" + $json.post_title + \"\\nURL: \" + $json.post_url + \"\\n\\nPerformance Metrics:\\n- Impressions: \" + $json.search_console.impressions + \"\\n- Clicks: \" + $json.search_console.clicks + \"\\n- CTR: \" + $json.search_console.ctr + \"%\\n- Avg Position: \" + $json.search_console.average_position + \"\\n- Bounce Rate: \" + $json.analytics.bounce_rate + \"%\\n- Performance Score: \" + $json.performance_score + \"/100\\n\\nTop Performing Queries:\\n\" + JSON.stringify($json.search_console.top_queries.slice(0, 5)) + \"\\n\\nIssues Identified:\\n\" + $json.issues.join(', ') + \"\\n\\nProvide:\\n1. New optimized title (60 chars max, use top query keywords)\\n2. New meta description (155 chars max, compelling CTA)\\n3. Specific content improvements needed\\n4. Additional keywords to target\\n5. Internal linking suggestions\\n\\nReturn ONLY valid JSON with: optimized_title, optimized_meta, content_improvements (array), new_keywords (array), internal_links (array)\"}] }}"
+            },
+            {
+              "name": "temperature",
+              "value": 0.7
+            },
+            {
+              "name": "max_tokens",
+              "value": 1500
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "990f7577-03d7-422d-8a4a-09f2eae7cace",
+      "name": "Generate Optimization Plan",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1760,
+        112
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "needs-opt",
+              "leftValue": "={{ $json.needs_optimization }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            },
+            {
+              "id": "auto-enabled",
+              "leftValue": "={{ $json.auto_optimize_enabled }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "1e19b8f7-31d7-430d-904f-db518974988f",
+      "name": "Needs Optimization?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        1552,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const post = $('Process Posts Data').item.json;\nconst gscData = $('Get Search Console Data').item.json;\nconst ga4Data = $('Get Analytics Data').item.json;\n\nlet totalImpressions = 0;\nlet totalClicks = 0;\nlet totalPosition = 0;\nlet queryCount = 0;\nlet topQueries = [];\n\nif (gscData && gscData.rows && Array.isArray(gscData.rows)) {\n  gscData.rows.forEach(row => {\n    totalImpressions += row.impressions || 0;\n    totalClicks += row.clicks || 0;\n    totalPosition += row.position || 0;\n    queryCount++;\n    if (row.keys && row.keys[0]) {\n      topQueries.push({\n        query: row.keys[0],\n        clicks: row.clicks || 0,\n        impressions: row.impressions || 0,\n        ctr: row.ctr || 0,\n        position: row.position || 0\n      });\n    }\n  });\n}\n\nconst avgPosition = queryCount > 0 ? totalPosition / queryCount : 0;\nconst ctr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;\n\nlet sessions = 0;\nlet users = 0;\nlet bounceRate = 0;\nlet avgSessionDuration = 0;\n\nif (ga4Data && ga4Data.rows && ga4Data.rows.length > 0) {\n  const row = ga4Data.rows[0];\n  sessions = parseInt(row.metricValues?.[0]?.value || 0);\n  users = parseInt(row.metricValues?.[1]?.value || 0);\n  bounceRate = parseFloat(row.metricValues?.[2]?.value || 0);\n  avgSessionDuration = parseFloat(row.metricValues?.[3]?.value || 0);\n}\n\nlet performanceScore = 0;\n\nif (avgPosition <= 3) performanceScore += 30;\nelse if (avgPosition <= 10) performanceScore += 20;\nelse if (avgPosition <= 20) performanceScore += 10;\n\nif (ctr >= 5) performanceScore += 25;\nelse if (ctr >= 3) performanceScore += 15;\nelse if (ctr >= 1) performanceScore += 10;\n\nif (sessions >= 100) performanceScore += 25;\nelse if (sessions >= 50) performanceScore += 15;\nelse if (sessions >= 20) performanceScore += 10;\n\nif (bounceRate <= 40) performanceScore += 10;\nelse if (bounceRate <= 60) performanceScore += 5;\n\nif (avgSessionDuration >= 180) performanceScore += 10;\nelse if (avgSessionDuration >= 120) performanceScore += 5;\n\ntopQueries.sort((a, b) => b.clicks - a.clicks);\n\nconst needsOptimization = performanceScore < post.min_performance_score;\n\nconst issues = [];\nif (totalImpressions < 100) issues.push('Low search visibility');\nif (ctr < 2) issues.push('Low click-through rate');\nif (avgPosition > 20) issues.push('Poor ranking position');\nif (bounceRate > 70) issues.push('High bounce rate');\nif (avgSessionDuration < 90) issues.push('Low engagement time');\n\nreturn [{\n  json: {\n    post_id: post.post_id,\n    post_url: post.post_url,\n    post_title: post.post_title,\n    post_slug: post.post_slug,\n    days_since_publish: post.days_since_publish,\n    search_console: {\n      impressions: totalImpressions,\n      clicks: totalClicks,\n      ctr: parseFloat(ctr.toFixed(2)),\n      average_position: parseFloat(avgPosition.toFixed(1)),\n      top_queries: topQueries.slice(0, 10)\n    },\n    analytics: {\n      sessions: sessions,\n      users: users,\n      bounce_rate: parseFloat(bounceRate.toFixed(2)),\n      avg_session_duration: parseFloat(avgSessionDuration.toFixed(0))\n    },\n    performance_score: performanceScore,\n    needs_optimization: needsOptimization,\n    issues: issues,\n    status: performanceScore >= 80 ? 'excellent' : performanceScore >= 60 ? 'good' : performanceScore >= 40 ? 'average' : 'poor',\n    tracked_at: new Date().toISOString(),\n    wordpress_url: post.wordpress_url,\n    auto_optimize_enabled: post.auto_optimize_enabled\n  }\n}];"
+      },
+      "id": "76091e72-42c5-4088-8fd4-79aba088987b",
+      "name": "Calculate Performance Score",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1328,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "propertyId": "={{ $json.ga4_property_id }}",
+        "metricsGA4": {
+          "metricValues": [
+            {}
+          ]
+        },
+        "dimensionsGA4": {
+          "dimensionValues": [
+            {}
+          ]
+        },
+        "additionalFields": {}
+      },
+      "id": "bda0b485-3f5f-47f1-b807-1f3f3dd93c50",
+      "name": "Get Analytics Data",
+      "type": "n8n-nodes-base.googleAnalytics",
+      "typeVersion": 2,
+      "position": [
+        1104,
+        208
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "1f2668b7-5c6b-4ec3-b0f6-bf4f86e09b1e",
+      "name": "Get Search Console Data",
+      "type": "n8n-nodes-base.googleSearchConsole",
+      "typeVersion": 1,
+      "position": [
+        880,
+        208
+      ],
+      "credentials": {}
+    },
+    {
+      "parameters": {
+        "jsCode": "const posts = $input.first().json;\nconst config = $('Set Configuration').first().json;\nif (!Array.isArray(posts) || posts.length === 0) {\n  return [];\n}\nconst processedPosts = posts.map(post => ({\n  json: {\n    post_id: post.id,\n    post_url: post.link,\n    post_slug: post.slug,\n    post_title: post.title.rendered,\n    post_date: post.date,\n    post_modified: post.modified,\n    excerpt: post.excerpt ? post.excerpt.rendered.replace(/<[^>]*>/g, '').substring(0, 200) : '',\n    days_since_publish: Math.floor((Date.now() - new Date(post.date).getTime()) / (1000 * 60 * 60 * 24)),\n    wordpress_url: config.wordpress_url,\n    gsc_property_url: config.gsc_property_url,\n    ga4_property_id: config.ga4_property_id,\n    min_performance_score: config.min_performance_score,\n    auto_optimize_enabled: config.auto_optimize_enabled\n  }\n}));\nreturn processedPosts;"
+      },
+      "id": "2f1a1d11-b921-4881-9f1f-09277b332828",
+      "name": "Process Posts Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        672,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.wordpress_url }}/wp-json/wp/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "100"
+            },
+            {
+              "name": "status",
+              "value": "publish"
+            },
+            {
+              "name": "orderby",
+              "value": "date"
+            },
+            {
+              "name": "order",
+              "value": "desc"
+            },
+            {
+              "name": "after",
+              "value": "={{ new Date(Date.now() - $json.tracking_days * 24 * 60 * 60 * 1000).toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "c43af8f3-1587-468f-b317-ec13439e7603",
+      "name": "Fetch Published Posts",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        448,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "config-201",
+              "name": "wordpress_url",
+              "value": "https://yoursite.com",
+              "type": "string"
+            },
+            {
+              "id": "config-202",
+              "name": "tracking_days",
+              "value": 30,
+              "type": "number"
+            },
+            {
+              "id": "config-203",
+              "name": "min_performance_score",
+              "value": 40,
+              "type": "number"
+            },
+            {
+              "id": "config-204",
+              "name": "auto_optimize_enabled",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "config-205",
+              "name": "gsc_property_url",
+              "value": "https://yoursite.com",
+              "type": "string"
+            },
+            {
+              "id": "config-206",
+              "name": "ga4_property_id",
+              "value": "123456789",
+              "type": "string"
+            },
+            {
+              "id": "config-207",
+              "name": "notification_email",
+              "value": "seo@yoursite.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "319ee019-6608-48b4-b467-e64230b8e7f0",
+      "name": "Set Configuration",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        224,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 12 * * *"
+            }
+          ]
+        }
+      },
+      "id": "5b3049d5-471a-419c-92d2-dab715c1fc9d",
+      "name": "Daily Tracking Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        0,
+        208
+      ]
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "cronExpression",
+              "expression": "0 12 * * *"
+            }
+          ]
+        }
+      },
+      "id": "75a3d74d-09ec-438f-b6c7-82df8982da3d",
+      "name": "Daily Tracking Trigger1",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.1,
+      "position": [
+        -1152,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "config-201",
+              "name": "wordpress_url",
+              "value": "https://iptvs-subscription.com",
+              "type": "string"
+            },
+            {
+              "id": "config-202",
+              "name": "tracking_days",
+              "value": 30,
+              "type": "number"
+            },
+            {
+              "id": "config-203",
+              "name": "min_performance_score",
+              "value": 40,
+              "type": "number"
+            },
+            {
+              "id": "config-204",
+              "name": "auto_optimize_enabled",
+              "value": true,
+              "type": "boolean"
+            },
+            {
+              "id": "config-205",
+              "name": "gsc_property_url",
+              "value": "https://iptvs-subscription.com",
+              "type": "string"
+            },
+            {
+              "id": "config-206",
+              "name": "ga4_property_id",
+              "value": "REPLACE_WITH_GA4_ID",
+              "type": "string"
+            },
+            {
+              "id": "config-207",
+              "name": "notification_email",
+              "value": "your-email@example.com",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "a7fc5d21-0cc6-435c-80e8-915fc3d8c516",
+      "name": "Set Configuration1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        -928,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "url": "={{ $json.wordpress_url }}/wp-json/wp/v2/posts",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "per_page",
+              "value": "100"
+            },
+            {
+              "name": "status",
+              "value": "publish"
+            },
+            {
+              "name": "orderby",
+              "value": "date"
+            },
+            {
+              "name": "order",
+              "value": "desc"
+            },
+            {
+              "name": "after",
+              "value": "={{ new Date(Date.now() - $json.tracking_days * 24 * 60 * 60 * 1000).toISOString() }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "9416a7be-41c2-42ce-b6ae-90202a926e4a",
+      "name": "Fetch Published Posts1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        -720,
+        992
+      ],
+      "credentials": {
+        "httpHeaderAuth": {
+          "id": "sUsF1PJTwZs9piAp",
+          "name": "perplexity"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const posts = $input.first().json;\nconst config = $('Set Configuration1').first().json;\nif (!Array.isArray(posts) || posts.length === 0) {\n  return [];\n}\nconst processedPosts = posts.map(post => ({\n  json: {\n    post_id: post.id,\n    post_url: post.link,\n    post_slug: post.slug,\n    post_title: post.title.rendered,\n    post_date: post.date,\n    post_modified: post.modified,\n    excerpt: post.excerpt ? post.excerpt.rendered.replace(/<[^>]*>/g, '').substring(0, 200) : '',\n    days_since_publish: Math.floor((Date.now() - new Date(post.date).getTime()) / (1000 * 60 * 60 * 24)),\n    wordpress_url: config.wordpress_url,\n    gsc_property_url: config.gsc_property_url,\n    ga4_property_id: config.ga4_property_id,\n    min_performance_score: config.min_performance_score,\n    auto_optimize_enabled: config.auto_optimize_enabled\n  }\n}));\nreturn processedPosts;"
+      },
+      "id": "ef3578a8-e753-42e0-8780-b7ff35641268",
+      "name": "Process Posts Data1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -496,
+        992
+      ]
+    },
+    {
+      "parameters": {},
+      "id": "27e61096-34c4-4802-bacf-4abc127bdb23",
+      "name": "Get Search Console Data1",
+      "type": "n8n-nodes-base.googleSearchConsole",
+      "typeVersion": 1,
+      "position": [
+        -272,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "propertyId": "={{ $json.ga4_property_id }}",
+        "metricsGA4": {
+          "metricValues": [
+            {}
+          ]
+        },
+        "dimensionsGA4": {
+          "dimensionValues": [
+            {}
+          ]
+        },
+        "additionalFields": {}
+      },
+      "id": "1e3e457d-89d4-4042-86dd-0cda26a04317",
+      "name": "Get Analytics Data1",
+      "type": "n8n-nodes-base.googleAnalytics",
+      "typeVersion": 2,
+      "position": [
+        -48,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const post = $('Process Posts Data1').item.json;\nconst gscData = $('Get Search Console Data1').item.json;\nconst ga4Data = $('Get Analytics Data1').item.json;\n\nlet totalImpressions = 0;\nlet totalClicks = 0;\nlet totalPosition = 0;\nlet queryCount = 0;\nlet topQueries = [];\n\nif (gscData && gscData.rows && Array.isArray(gscData.rows)) {\n  gscData.rows.forEach(row => {\n    totalImpressions += row.impressions || 0;\n    totalClicks += row.clicks || 0;\n    totalPosition += row.position || 0;\n    queryCount++;\n    if (row.keys && row.keys[0]) {\n      topQueries.push({\n        query: row.keys[0],\n        clicks: row.clicks || 0,\n        impressions: row.impressions || 0,\n        ctr: row.ctr || 0,\n        position: row.position || 0\n      });\n    }\n  });\n}\n\nconst avgPosition = queryCount > 0 ? totalPosition / queryCount : 0;\nconst ctr = totalImpressions > 0 ? (totalClicks / totalImpressions) * 100 : 0;\n\nlet sessions = 0;\nlet users = 0;\nlet bounceRate = 0;\nlet avgSessionDuration = 0;\n\nif (ga4Data && ga4Data.rows && ga4Data.rows.length > 0) {\n  const row = ga4Data.rows[0];\n  sessions = parseInt(row.metricValues?.[0]?.value || 0);\n  users = parseInt(row.metricValues?.[1]?.value || 0);\n  bounceRate = parseFloat(row.metricValues?.[2]?.value || 0);\n  avgSessionDuration = parseFloat(row.metricValues?.[3]?.value || 0);\n}\n\nlet performanceScore = 0;\n\nif (avgPosition <= 3) performanceScore += 30;\nelse if (avgPosition <= 10) performanceScore += 20;\nelse if (avgPosition <= 20) performanceScore += 10;\n\nif (ctr >= 5) performanceScore += 25;\nelse if (ctr >= 3) performanceScore += 15;\nelse if (ctr >= 1) performanceScore += 10;\n\nif (sessions >= 100) performanceScore += 25;\nelse if (sessions >= 50) performanceScore += 15;\nelse if (sessions >= 20) performanceScore += 10;\n\nif (bounceRate <= 40) performanceScore += 10;\nelse if (bounceRate <= 60) performanceScore += 5;\n\nif (avgSessionDuration >= 180) performanceScore += 10;\nelse if (avgSessionDuration >= 120) performanceScore += 5;\n\ntopQueries.sort((a, b) => b.clicks - a.clicks);\n\nconst needsOptimization = performanceScore < post.min_performance_score;\n\nconst issues = [];\nif (totalImpressions < 100) issues.push('Low search visibility');\nif (ctr < 2) issues.push('Low click-through rate');\nif (avgPosition > 20) issues.push('Poor ranking position');\nif (bounceRate > 70) issues.push('High bounce rate');\nif (avgSessionDuration < 90) issues.push('Low engagement time');\n\nreturn [{\n  json: {\n    post_id: post.post_id,\n    post_url: post.post_url,\n    post_title: post.post_title,\n    post_slug: post.post_slug,\n    days_since_publish: post.days_since_publish,\n    search_console: {\n      impressions: totalImpressions,\n      clicks: totalClicks,\n      ctr: parseFloat(ctr.toFixed(2)),\n      average_position: parseFloat(avgPosition.toFixed(1)),\n      top_queries: topQueries.slice(0, 10)\n    },\n    analytics: {\n      sessions: sessions,\n      users: users,\n      bounce_rate: parseFloat(bounceRate.toFixed(2)),\n      avg_session_duration: parseFloat(avgSessionDuration.toFixed(0))\n    },\n    performance_score: performanceScore,\n    needs_optimization: needsOptimization,\n    issues: issues,\n    status: performanceScore >= 80 ? 'excellent' : performanceScore >= 60 ? 'good' : performanceScore >= 40 ? 'average' : 'poor',\n    tracked_at: new Date().toISOString(),\n    wordpress_url: post.wordpress_url,\n    auto_optimize_enabled: post.auto_optimize_enabled\n  }\n}];"
+      },
+      "id": "feb536b1-afe8-4378-a3c8-94059176c4fc",
+      "name": "Calculate Performance Score1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        176,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "conditions": [
+            {
+              "id": "needs-opt",
+              "leftValue": "={{ $json.needs_optimization }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            },
+            {
+              "id": "auto-enabled",
+              "leftValue": "={{ $json.auto_optimize_enabled }}",
+              "rightValue": true,
+              "operator": {
+                "type": "boolean",
+                "operation": "true"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "d6222a56-185e-440a-9d4a-60ec89f30461",
+      "name": "Needs Optimization?1",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2,
+      "position": [
+        400,
+        992
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://api.openai.com/v1/chat/completions",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "model",
+              "value": "gpt-4-turbo-preview"
+            },
+            {
+              "name": "messages",
+              "value": "={{ [{\"role\": \"system\", \"content\": \"You are an SEO optimization expert.\"}, {\"role\": \"user\", \"content\": \"Analyze this underperforming article and provide optimization recommendations:\\n\\nTitle: \" + $json.post_title + \"\\nURL: \" + $json.post_url + \"\\n\\nPerformance Metrics:\\n- Impressions: \" + $json.search_console.impressions + \"\\n- Clicks: \" + $json.search_console.clicks + \"\\n- CTR: \" + $json.search_console.ctr + \"%\\n- Avg Position: \" + $json.search_console.average_position + \"\\n- Bounce Rate: \" + $json.analytics.bounce_rate + \"%\\n- Performance Score: \" + $json.performance_score + \"/100\\n\\nTop Performing Queries:\\n\" + JSON.stringify($json.search_console.top_queries.slice(0, 5)) + \"\\n\\nIssues Identified:\\n\" + $json.issues.join(', ') + \"\\n\\nProvide:\\n1. New optimized title (60 chars max, use top query keywords)\\n2. New optimized meta description (155 chars max, compelling CTA)\\n3. Specific content improvements needed\\n4. Additional keywords to target\\n5. Internal linking suggestions\\n\\nReturn ONLY valid JSON with: optimized_title, optimized_meta, content_improvements (array), new_keywords (array), internal_links (array)\"}] }}"
+            },
+            {
+              "name": "temperature",
+              "value": 0.7
+            },
+            {
+              "name": "max_tokens",
+              "value": 1500
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "81fa1823-cbb0-4948-8cfa-21e368dcb183",
+      "name": "Generate Optimization Plan1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        608,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const post = $input.first().json;\nconst aiResponse = $json;\n\nlet recommendations;\ntry {\n  const content = aiResponse.choices[0].message.content.replace(/```json\\n?/g, '').replace(/```/g, '').trim();\n  recommendations = JSON.parse(content);\n} catch (e) {\n  console.error('Parse error:', e);\n  recommendations = {\n    optimized_title: post.post_title,\n    optimized_meta: post.post_title,\n    content_improvements: ['Add more depth', 'Include statistics', 'Improve readability'],\n    new_keywords: [],\n    internal_links: []\n  };\n}\n\nreturn [{\n  json: {\n    post_id: post.post_id,\n    post_url: post.post_url,\n    current_title: post.post_title,\n    current_score: post.performance_score,\n    optimized_title: recommendations.optimized_title,\n    optimized_meta: recommendations.optimized_meta,\n    content_improvements: recommendations.content_improvements || [],\n    new_keywords: recommendations.new_keywords || [],\n    internal_links: recommendations.internal_links || [],\n    top_queries: post.search_console.top_queries,\n    issues: post.issues,\n    wordpress_url: post.wordpress_url\n  }\n}];"
+      },
+      "id": "a00de9ba-1ec8-4685-bfec-d95b150000ad",
+      "name": "Parse Recommendations1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        832,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $json.wordpress_url }}/wp-json/wp/v2/posts/{{ $json.post_id }}",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "httpHeaderAuth",
+        "sendBody": true,
+        "bodyParameters": {
+          "parameters": [
+            {
+              "name": "title",
+              "value": "={{ $json.optimized_title }}"
+            },
+            {
+              "name": "excerpt",
+              "value": "={{ $json.optimized_meta }}"
+            },
+            {
+              "name": "meta",
+              "value": "={{ {\"_yoast_wpseo_title\": $json.optimized_title, \"_yoast_wpseo_metadesc\": $json.optimized_meta, \"_optimized_date\": new Date().toISOString()} }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "94e6632e-3c6e-4eed-bccb-17cda9607deb",
+      "name": "Update Title & Meta1",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        1056,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "log-1",
+              "name": "optimization_date",
+              "value": "={{ new Date().toISOString() }}",
+              "type": "string"
+            },
+            {
+              "id": "log-2",
+              "name": "post_id",
+              "value": "={{ $('Parse Recommendations1').item.json.post_id }}",
+              "type": "string"
+            },
+            {
+              "id": "log-3",
+              "name": "post_title",
+              "value": "={{ $('Parse Recommendations1').item.json.current_title }}",
+              "type": "string"
+            },
+            {
+              "id": "log-4",
+              "name": "old_title",
+              "value": "={{ $('Parse Recommendations1').item.json.current_title }}",
+              "type": "string"
+            },
+            {
+              "id": "log-5",
+              "name": "new_title",
+              "value": "={{ $('Parse Recommendations1').item.json.optimized_title }}",
+              "type": "string"
+            },
+            {
+              "id": "log-6",
+              "name": "performance_score",
+              "value": "={{ $('Parse Recommendations1').item.json.current_score }}",
+              "type": "string"
+            },
+            {
+              "id": "log-7",
+              "name": "action_taken",
+              "value": "title_meta_updated",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "4b7ea759-e854-4480-9eba-3167359f069a",
+      "name": "Log Optimization1",
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.3,
+      "position": [
+        1280,
+        880
+      ]
+    },
+    {
+      "parameters": {
+        "jsCode": "const allResults = $input.all();\nconst config = $('Set Configuration1').first().json;\n\nlet totalArticles = allResults.length;\nlet totalImpressions = 0;\nlet totalClicks = 0;\nlet avgPosition = 0;\nlet totalSessions = 0;\n\nconst topPerformers = [];\nconst needsAttention = [];\nconst optimizedToday = [];\n\nallResults.forEach(item => {\n  const data = item.json;\n  \n  if (data.search_console) {\n    totalImpressions += data.search_console.impressions || 0;\n    totalClicks += data.search_console.clicks || 0;\n    avgPosition += data.search_console.average_position || 0;\n  }\n  \n  if (data.analytics) {\n    totalSessions += data.analytics.sessions || 0;\n  }\n  \n  if (data.performance_score >= 80) {\n    topPerformers.push({\n      title: data.post_title,\n      score: data.performance_score,\n      url: data.post_url\n    });\n  } else if (data.performance_score < 40) {\n    needsAttention.push({\n      title: data.post_title,\n      score: data.performance_score,\n      issues: data.issues,\n      url: data.post_url\n    });\n  }\n  \n  if (data.action_taken === 'title_meta_updated') {\n    optimizedToday.push({\n      title: data.post_title,\n      old_score: data.current_score,\n      url: data.post_url\n    });\n  }\n});\n\navgPosition = totalArticles > 0 ? avgPosition / totalArticles : 0;\n\nconst report = {\n  report_date: new Date().toISOString(),\n  summary: {\n    total_articles: totalArticles,\n    total_impressions: totalImpressions,\n    total_clicks: totalClicks,\n    overall_ctr: totalImpressions > 0 ? ((totalClicks / totalImpressions) * 100).toFixed(2) : 0,\n    avg_position: avgPosition.toFixed(1),\n    total_sessions: totalSessions,\n    top_performers_count: topPerformers.length,\n    needs_attention_count: needsAttention.length,\n    optimized_today_count: optimizedToday.length\n  },\n  top_performers: topPerformers.slice(0, 5),\n  needs_attention: needsAttention.slice(0, 10),\n  optimized_today: optimizedToday,\n  notification_email: config.notification_email\n};\n\nreturn [{json: report}];"
+      },
+      "id": "136801b3-05eb-4e70-928c-72ef28b319a6",
+      "name": "Generate Daily Report1",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        400,
+        1184
+      ]
+    },
+    {
+      "parameters": {
+        "operation": "sendEmail"
+      },
+      "id": "fc1677d7-84fb-4964-b7d0-923de5991b86",
+      "name": "Send Performance Report1",
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.1,
+      "position": [
+        608,
+        1184
+      ],
+      "webhookId": "e40b25d2-7f87-4744-9c70-8c38377afa15"
+    }
+  ],
+  "connections": {
+    "Generate Daily Report": {
+      "main": [
+        [
+          {
+            "node": "Send Performance Report",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Title & Meta": {
+      "main": [
+        [
+          {
+            "node": "Log Optimization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Recommendations": {
+      "main": [
+        [
+          {
+            "node": "Update Title & Meta",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Optimization Plan": {
+      "main": [
+        [
+          {
+            "node": "Parse Recommendations",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs Optimization?": {
+      "main": [
+        [
+          {
+            "node": "Generate Optimization Plan",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Performance Score": {
+      "main": [
+        [
+          {
+            "node": "Generate Daily Report",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Needs Optimization?",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Analytics Data": {
+      "main": [
+        [
+          {
+            "node": "Calculate Performance Score",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Published Posts": {
+      "main": [
+        [
+          {
+            "node": "Process Posts Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Configuration": {
+      "main": [
+        [
+          {
+            "node": "Fetch Published Posts",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Tracking Trigger": {
+      "main": [
+        [
+          {
+            "node": "Set Configuration",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Daily Tracking Trigger1": {
+      "main": [
+        [
+          {
+            "node": "Set Configuration1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Set Configuration1": {
+      "main": [
+        [
+          {
+            "node": "Fetch Published Posts1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Fetch Published Posts1": {
+      "main": [
+        [
+          {
+            "node": "Process Posts Data1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Analytics Data1": {
+      "main": [
+        [
+          {
+            "node": "Calculate Performance Score1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Calculate Performance Score1": {
+      "main": [
+        [
+          {
+            "node": "Needs Optimization?1",
+            "type": "main",
+            "index": 0
+          },
+          {
+            "node": "Generate Daily Report1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Needs Optimization?1": {
+      "main": [
+        [
+          {
+            "node": "Generate Optimization Plan1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Optimization Plan1": {
+      "main": [
+        [
+          {
+            "node": "Parse Recommendations1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Parse Recommendations1": {
+      "main": [
+        [
+          {
+            "node": "Update Title & Meta1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Update Title & Meta1": {
+      "main": [
+        [
+          {
+            "node": "Log Optimization1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Generate Daily Report1": {
+      "main": [
+        [
+          {
+            "node": "Send Performance Report1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "availableInMCP": false
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "7a5b34bc-cc80-4117-910a-0d392bf556ca",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2026-01-12T10:38:13.309Z",
+      "createdAt": "2026-01-12T10:38:13.309Z",
+      "role": "workflow:owner",
+      "workflowId": "oFh4zWUDvEO0bSHb4-0Wp",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
