@@ -1,0 +1,99 @@
+{
+  "updatedAt": "2025-08-17T18:58:24.000Z",
+  "createdAt": "2025-08-14T20:09:41.732Z",
+  "id": "J8yno0J9vP6kJcAj",
+  "name": "My workflow 4",
+  "active": false,
+  "isArchived": true,
+  "nodes": [
+    {
+      "parameters": {
+        "path": "/whatsapp-incoming",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        288
+      ],
+      "webhookId": "whatsapp-webhook-789",
+      "id": "0ac8dffd-0c5f-4ba9-a0b2-8bcc60c169b7"
+    },
+    {
+      "parameters": {
+        "functionCode": "return {\n  to: $node[\"Webhook\"].json[\"from\"],\n  message: \"ECHO: \" + $node[\"Webhook\"].json[\"text\"]\n};"
+      },
+      "name": "Format Response",
+      "type": "n8n-nodes-base.function",
+      "typeVersion": 1,
+      "position": [
+        192,
+        288
+      ],
+      "id": "60138ca6-2118-447d-aa62-b16446766d12"
+    },
+    {
+      "parameters": {
+        "url": "http://localhost:3000/send",
+        "jsonParameters": true,
+        "options": {}
+      },
+      "name": "Send to WhatsApp",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 1,
+      "position": [
+        384,
+        288
+      ],
+      "id": "dcebdf87-d9e6-46ca-a880-8a789749eb41"
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Format Response",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Response": {
+      "main": [
+        [
+          {
+            "node": "Send to WhatsApp",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "fb41bf54-a6dc-42cb-a7c3-47d6670fe018",
+  "activeVersionId": null,
+  "triggerCount": 1,
+  "shared": [
+    {
+      "updatedAt": "2025-08-14T20:09:41.753Z",
+      "createdAt": "2025-08-14T20:09:41.753Z",
+      "role": "workflow:owner",
+      "workflowId": "J8yno0J9vP6kJcAj",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
