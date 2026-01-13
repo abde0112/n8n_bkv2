@@ -1,0 +1,282 @@
+{
+  "updatedAt": "2025-11-10T11:15:21.000Z",
+  "createdAt": "2025-11-03T18:44:54.864Z",
+  "id": "FHyo5WIV1bXnh5Et",
+  "name": "Redis Stateful_AI_Workflow",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "operation": "set",
+        "key": "=session-id",
+        "value": "={{ $json.id }}"
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        512,
+        160
+      ],
+      "id": "470a654d-a245-4d82-bd8f-ba0581d9f193",
+      "name": "Redis",
+      "credentials": {
+        "redis": {
+          "id": "xuIhZM4B9ekzet7a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "formTitle": "id",
+        "formFields": {
+          "values": [
+            {
+              "fieldLabel": "id"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.formTrigger",
+      "typeVersion": 2.3,
+      "position": [
+        96,
+        160
+      ],
+      "id": "853a54e8-a22c-45a5-b6b4-6b1de876f87d",
+      "name": "On form submission",
+      "webhookId": "0a6b9cb8-f6b8-42ee-b855-e25b83341c37"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "467c92b4-afa4-4f28-9233-0ad0bcb83a91",
+              "name": "id",
+              "value": "=session-{{ $json.id }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        304,
+        160
+      ],
+      "id": "31a1a8cf-7a5d-4951-a281-cd906f58e46d",
+      "name": "Edit Fields"
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "session-id",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redis",
+      "typeVersion": 1,
+      "position": [
+        720,
+        160
+      ],
+      "id": "527e4e87-a46e-4d99-b4e8-669954c7eda4",
+      "name": "Redis1",
+      "credentials": {
+        "redis": {
+          "id": "xuIhZM4B9ekzet7a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3,
+      "position": [
+        128,
+        384
+      ],
+      "id": "ae76c6f0-a0e8-4e99-a9c7-c9d4fc82c7b9",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -48,
+        384
+      ],
+      "id": "2b0f336b-ab02-4256-90fe-89ba8f4b576c",
+      "name": "When chat message received",
+      "webhookId": "abb5726a-48b9-43fb-b29b-4d08306e84bf"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -16,
+        592
+      ],
+      "id": "94948ede-8601-462c-94f0-516d20328974",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "SX4TgzNyXd9nY9M1",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "@n8n/n8n-nodes-langchain.memoryRedisChat",
+      "typeVersion": 1.5,
+      "position": [
+        160,
+        608
+      ],
+      "id": "f49d89a2-ec33-443a-830c-f36e3ec984f0",
+      "name": "Redis Chat Memory",
+      "credentials": {
+        "redis": {
+          "id": "xuIhZM4B9ekzet7a",
+          "name": "Redis account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "get",
+        "key": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Key', ``, 'string') }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.redisTool",
+      "typeVersion": 1,
+      "position": [
+        320,
+        608
+      ],
+      "id": "f518cb9a-83a6-4b50-a2fc-c315ba9e9f7e",
+      "name": "Redis2",
+      "credentials": {
+        "redis": {
+          "id": "xuIhZM4B9ekzet7a",
+          "name": "Redis account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "On form submission": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields": {
+      "main": [
+        [
+          {
+            "node": "Redis",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis": {
+      "main": [
+        [
+          {
+            "node": "Redis1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Redis2": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "pinData": {},
+  "versionId": "9673d182-629c-4993-b2dd-5ab5910aafee",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-11-03T18:44:54.883Z",
+      "createdAt": "2025-11-03T18:44:54.883Z",
+      "role": "workflow:owner",
+      "workflowId": "FHyo5WIV1bXnh5Et",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
