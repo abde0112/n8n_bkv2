@@ -1,0 +1,1179 @@
+{
+  "updatedAt": "2025-09-24T10:38:49.000Z",
+  "createdAt": "2025-09-22T08:20:25.323Z",
+  "id": "VeyaStjpldynaVkp",
+  "name": "Menu-Driven Multi-Purpose AI Chatbot",
+  "active": false,
+  "isArchived": false,
+  "nodes": [
+    {
+      "parameters": {
+        "resource": "chat",
+        "chatId": "={{ $json.result.chat.id }}"
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -400,
+        32
+      ],
+      "id": "4636372c-0593-4222-a719-e7d6942c3a18",
+      "name": "Get a chat",
+      "webhookId": "e2f79d5a-f04c-4a95-8f02-10a7b2989e36"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "leftValue": "1️⃣ Demo AI Agent ",
+                    "rightValue": "Demo AI Agent ",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "b81905c9-d61a-42c8-b53e-4b81fd7d3495"
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "436c0e05-cc83-4135-80b7-1c64a97bc91f",
+                    "leftValue": "2️⃣ Web Hosting & Pricing ",
+                    "rightValue": "Web Hosting & Pricing ",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "592189b2-fa46-4476-8791-499ba5aa60af",
+                    "leftValue": "3️⃣ Tasks Manager ",
+                    "rightValue": "Tasks Manager ",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 2
+                },
+                "conditions": [
+                  {
+                    "id": "d791f8fc-d0fe-40b7-8bf5-e67f4ee7382b",
+                    "leftValue": "4️⃣ Personal Charges / Income & Expenses ",
+                    "rightValue": "Personal Charges / Income & Expenses ",
+                    "operator": {
+                      "type": "string",
+                      "operation": "equals",
+                      "name": "filter.operator.equals"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              }
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.2,
+      "position": [
+        0,
+        0
+      ],
+      "id": "5493d73d-a1db-4287-a336-1349b129f89b",
+      "name": "Switch"
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "id": "ed5ad567-83e7-42a2-80b8-33be117b3e23",
+      "name": "OpenAI Chat Model",
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "position": [
+        -1472,
+        496
+      ],
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "operation": "append",
+        "documentId": {
+          "__rl": true,
+          "value": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit?usp=sharing",
+          "mode": "url"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "Sheet1",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit#gid=0"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "user_id": "=",
+            "message": "=",
+            "timestamp": "=",
+            "User_name": "="
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "user_id",
+              "displayName": "user_id",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "User_name",
+              "displayName": "User_name",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "timestamp",
+              "displayName": "timestamp",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "message",
+              "displayName": "message",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "ai_response",
+              "displayName": "ai_response",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1696,
+        640
+      ],
+      "id": "0b7b5dc6-24e8-4d99-946c-1c3b44a35d35",
+      "name": "Append row in sheet"
+    },
+    {
+      "parameters": {
+        "jsCode": "const history = items.map(i => `User: ${i.json.message}\\nAI: ${i.json.ai_response || \"(not answered yet)\"}`).join(\"\\n\");\nreturn [{ json: { session_history: history } }];\n"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        -1392,
+        640
+      ],
+      "id": "dc0ba13d-5236-43b4-a24d-583418f0b52c",
+      "name": "return last messages"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw",
+          "mode": "list",
+          "cachedResultName": "AI Customer Support Chat for Web Hosting",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 609017273,
+          "mode": "list",
+          "cachedResultName": "Domains",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit#gid=609017273"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2192,
+        640
+      ],
+      "id": "8a76427e-1a6a-4521-916d-1d5b8d83880d",
+      "name": "Domains"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw",
+          "mode": "list",
+          "cachedResultName": "AI Customer Support Chat for Web Hosting",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 328675267,
+          "mode": "list",
+          "cachedResultName": "Hosting",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit#gid=328675267"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -2032,
+        640
+      ],
+      "id": "b14eccb0-c83a-442a-b31d-45b50e2e1fc0",
+      "name": "Hosting"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw",
+          "mode": "list",
+          "cachedResultName": "AI Customer Support Chat for Web Hosting",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1189409887,
+          "mode": "list",
+          "cachedResultName": "FAQs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit#gid=1189409887"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1872,
+        640
+      ],
+      "id": "391da6e6-aba5-4170-aef0-80691c02cd5b",
+      "name": "Get row(s) in sheet"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw",
+          "mode": "list",
+          "cachedResultName": "AI Customer Support Chat for Web Hosting",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": "gid=0",
+          "mode": "list",
+          "cachedResultName": "user",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit#gid=0"
+        },
+        "filtersUI": {
+          "values": [
+            {
+              "lookupColumn": "user_id",
+              "lookupValue": "={{ $('Listen for incoming events1').item.json.message.from.id }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 4.7,
+      "position": [
+        -1552,
+        640
+      ],
+      "id": "a3baa052-5337-4762-a176-30f5092d36f0",
+      "name": "User",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "id": "4118e01f-f5ba-4848-b234-687900333b01",
+      "name": "Listen for incoming events1",
+      "type": "n8n-nodes-base.telegramTrigger",
+      "position": [
+        -2096,
+        128
+      ],
+      "webhookId": "322dce18-f93e-4f86-b9b1-3305519b7834",
+      "typeVersion": 1
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "version": 2,
+            "leftValue": "",
+            "caseSensitive": true,
+            "typeValidation": "strict"
+          },
+          "combinator": "and",
+          "conditions": [
+            {
+              "id": "a0bf9719-4272-46f6-ab3b-eda6f7b44fd8",
+              "operator": {
+                "type": "string",
+                "operation": "empty",
+                "singleValue": true
+              },
+              "leftValue": "={{ $json.message.text }}",
+              "rightValue": ""
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "dba7532c-c93b-4a5d-aab6-e5affe2ef510",
+      "name": "If1",
+      "type": "n8n-nodes-base.if",
+      "position": [
+        -1552,
+        144
+      ],
+      "typeVersion": 2.2
+    },
+    {
+      "parameters": {
+        "resource": "audio",
+        "operation": "transcribe",
+        "options": {}
+      },
+      "id": "67dcffe5-48cf-4a6f-8a01-a2d79e5ae9a7",
+      "name": "Speech to Text1",
+      "type": "@n8n/n8n-nodes-langchain.openAi",
+      "position": [
+        -1184,
+        80
+      ],
+      "typeVersion": 1.3
+    },
+    {
+      "parameters": {
+        "fields": {
+          "values": [
+            {
+              "name": "text",
+              "stringValue": "={{ $json?.message?.text || \"\" }}"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "id": "2ce97cd5-a306-4bec-8b80-161861d1f690",
+      "name": "Voice or Text1",
+      "type": "n8n-nodes-base.set",
+      "position": [
+        -1872,
+        144
+      ],
+      "typeVersion": 3.2
+    },
+    {
+      "parameters": {
+        "resource": "file",
+        "fileId": "={{ $('Listen for incoming events1').item.json.message.voice.file_id }}",
+        "additionalFields": {}
+      },
+      "id": "420e094f-45da-46f7-85e1-0ba6b3722a8a",
+      "name": "Get Voice File1",
+      "type": "n8n-nodes-base.telegram",
+      "position": [
+        -1376,
+        64
+      ],
+      "webhookId": "24273e7e-6133-415e-8627-a9d6dc0f107c",
+      "typeVersion": 1.1
+    },
+    {
+      "parameters": {
+        "contextWindowLength": 30
+      },
+      "id": "7d440405-5720-4c08-8954-77d31aa2f285",
+      "cid": "Ikx1Y2FzIFBleXJpbiI",
+      "name": "Simple Memory",
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "creator": "Lucas Peyrin",
+      "position": [
+        -1280,
+        512
+      ],
+      "typeVersion": 1.3,
+      "notes": "© 2025 Lucas Peyrin"
+    },
+    {
+      "parameters": {
+        "options": {
+          "temperature": 0
+        }
+      },
+      "id": "7cd97a0c-9b2d-49c1-8f03-200a28955222",
+      "cid": "Ikx1Y2FzIFBleXJpbiI",
+      "name": "Gemini",
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "creator": "Lucas Peyrin",
+      "position": [
+        -1328,
+        368
+      ],
+      "typeVersion": 1,
+      "notes": "© 2025 Lucas Peyrin"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=<role>\nYou are a Telegram AI Assistant powered by n8n.  \nYour job is to serve as a **menu-driven chatbot** that can switch between different modules depending on the user’s choice.  \n\n### Main Behavior\n- If `user_state` is null or \"menu\", always show this main menu:\n\nHello! Please choose an option:  \n1️⃣ Demo AI Agent  \n2️⃣ Web Hosting & Pricing  \n3️⃣ Tasks Manager  \n4️⃣ Personal Charges / Income & Expenses  \nType the number or name of the module.  \n\n- Accept numbers or names. Confirm the user’s choice, set `user_state`, and guide them with available commands.  \n- Support `\"back\"` or `\"menu\"` at any time to return to the main menu.  \n- Replies must be concise, friendly, and contextual.  \n\n---\n\n### Module 1: Demo AI Agent\nYou are the **n8n Demo AI Agent**, created by Lucas Peyrin as part of the *Your First AI Agent* template.  \n- Personality: Friendly, slightly educational, enthusiastic about automation.  \n- Goal: Dem\nthis the message  {{ $('Listen for incoming events1').item.json.message.text }}",
+        "options": {}
+      },
+      "id": "20997036-b73b-4422-aaaf-a4771933d39d",
+      "cid": "Ikx1Y2FzIFBleXJpbiI",
+      "name": "Your First AI Agent",
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "creator": "Lucas Peyrin",
+      "position": [
+        -864,
+        240
+      ],
+      "typeVersion": 2,
+      "notes": "© 2025 Lucas Peyrin"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Gets a joke from the jokeapi.",
+        "url": "https://v2.jokeapi.dev/joke/Any?blacklistFlags=nsfw,religious,political,racist,sexist,explicit&type=single",
+        "options": {},
+        "optimizeResponse": true,
+        "fieldsToInclude": "selected",
+        "fields": "joke"
+      },
+      "id": "988d43d6-1cf0-43ad-84f3-13d8afc86c43",
+      "cid": "Ikx1Y2FzIFBleXJpbiI",
+      "name": "get_a_joke",
+      "type": "n8n-nodes-base.httpRequestTool",
+      "creator": "Lucas Peyrin",
+      "position": [
+        -448,
+        672
+      ],
+      "typeVersion": 4.2,
+      "notes": "© 2025 Lucas Peyrin"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "Gets the difference (in days) between now and a set date.",
+        "operation": "getTimeBetweenDates",
+        "startDate": "={{ $now }}",
+        "endDate": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('End_Date', `Put the date to compare with now here.`, 'string') }}",
+        "outputFieldName": "now_day_difference",
+        "options": {}
+      },
+      "id": "c214819a-b138-4243-b7f4-5a558d8e1855",
+      "cid": "Ikx1Y2FzIFBleXJpbiI",
+      "name": "days_from_now",
+      "type": "n8n-nodes-base.dateTimeTool",
+      "creator": "Lucas Peyrin",
+      "position": [
+        -304,
+        672
+      ],
+      "typeVersion": 2,
+      "notes": "© 2025 Lucas Peyrin"
+    },
+    {
+      "parameters": {},
+      "id": "e42dfb35-d444-4994-8751-f92790109d02",
+      "cid": "Ikx1Y2FzIFBleXJpbiI",
+      "name": "wikipedia",
+      "type": "@n8n/n8n-nodes-langchain.toolWikipedia",
+      "creator": "Lucas Peyrin",
+      "position": [
+        -160,
+        672
+      ],
+      "typeVersion": 1,
+      "notes": "© 2025 Lucas Peyrin"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Generate a secure Password.",
+        "action": "generate",
+        "dataPropertyName": "password",
+        "encodingType": "base64",
+        "stringLength": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Length', `Usually 8 to 16 works well.`, 'number') }}"
+      },
+      "id": "43c619cd-cdeb-46a3-88ff-957c05bbfc35",
+      "cid": "Ikx1Y2FzIFBleXJpbiI",
+      "name": "create_password",
+      "type": "n8n-nodes-base.cryptoTool",
+      "creator": "Lucas Peyrin",
+      "position": [
+        -16,
+        672
+      ],
+      "typeVersion": 1,
+      "notes": "© 2025 Lucas Peyrin"
+    },
+    {
+      "parameters": {
+        "description": "Calculates the fixed monthly payment for a loan using the standard amortization formula. Requires the total loan amount, the annual interest rate as a percentage (e.g., 5 for 5%), and the loan term in years.",
+        "jsCode": "const principal = query.loan_amount;\nconst annualRate = query.annual_rate;\nconst years = query.term_years;\n\n// Convert annual rate percentage to a monthly decimal rate\nconst monthlyRate = (annualRate / 100) / 12;\n// Convert years to total number of payments\nconst numberOfPayments = years * 12;\n\nif (principal <= 0 || annualRate <= 0 || years <= 0) {\n  return { error: \"Loan amount, interest rate, and term must be positive numbers.\" };\n}\n\n// Amortization formula: M = P * [r(1+r)^n] / [(1+r)^n - 1]\nconst monthlyPayment = principal * (monthlyRate * Math.pow(1 + monthlyRate, numberOfPayments)) / (Math.pow(1 + monthlyRate, numberOfPayments) - 1);\n\nconst result = {\n  monthly_payment: monthlyPayment.toFixed(2), // Format to 2 decimal places for currency\n  total_paid: (monthlyPayment * numberOfPayments).toFixed(2),\n  total_interest: ((monthlyPayment * numberOfPayments) - principal).toFixed(2)\n};\n\nreturn JSON.stringify(result);",
+        "specifyInputSchema": true,
+        "jsonSchemaExample": "{\n\t\"loan_amount\": 250000,\n    \"annual_rate\": 6.5,\n    \"term_years\": 30\n}"
+      },
+      "id": "f2553dbe-1f0c-440b-b3be-ab7017c987fb",
+      "cid": "Ikx1Y2FzIFBleXJpbiI",
+      "name": "calculate_loan_payment",
+      "type": "@n8n/n8n-nodes-langchain.toolCode",
+      "creator": "Lucas Peyrin",
+      "position": [
+        160,
+        672
+      ],
+      "typeVersion": 1.3,
+      "notes": "© 2025 Lucas Peyrin"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Gets the latest n8n blog posts.",
+        "url": "https://n8n.io/blog/rss",
+        "options": {}
+      },
+      "id": "ec6f0999-903b-4720-9470-8efd13839168",
+      "cid": "Ikx1Y2FzIFBleXJpbiI",
+      "name": "n8n_blog_rss_feed",
+      "type": "n8n-nodes-base.rssFeedReadTool",
+      "creator": "Lucas Peyrin",
+      "position": [
+        336,
+        672
+      ],
+      "typeVersion": 1.2,
+      "notes": "© 2025 Lucas Peyrin"
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Listen for incoming events1').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        -304,
+        256
+      ],
+      "id": "d638560c-cbaf-4607-a546-f8a58ef9d4d4",
+      "name": "Send a text message1",
+      "webhookId": "39ce3ae1-99b5-4dc9-b8c6-e4db40a537fd"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw",
+          "mode": "list",
+          "cachedResultName": "AI Customer Support Chat for Web Hosting",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 609017273,
+          "mode": "list",
+          "cachedResultName": "Domains",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit#gid=609017273"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -1120,
+        528
+      ],
+      "id": "98f066db-bf69-4823-a342-039ed29a983c",
+      "name": "Domains1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw",
+          "mode": "list",
+          "cachedResultName": "AI Customer Support Chat for Web Hosting",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 328675267,
+          "mode": "list",
+          "cachedResultName": "Hosting",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit#gid=328675267"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -688,
+        832
+      ],
+      "id": "24d62786-1739-4fa3-b539-224603a95b52",
+      "name": "Hosting1"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw",
+          "mode": "list",
+          "cachedResultName": "AI Customer Support Chat for Web Hosting",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 1189409887,
+          "mode": "list",
+          "cachedResultName": "FAQs",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/1L4YE7zWcKJrnvWJ0kbyD5H189XasuKqLRHG8nv03rgw/edit#gid=1189409887"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -992,
+        496
+      ],
+      "id": "e8602a04-d447-4031-9605-5ab04a35c995",
+      "name": "Faq"
+    },
+    {
+      "parameters": {
+        "descriptionType": "manual",
+        "toolDescription": "=Create a task in Google Tasks {{ $json.output }}",
+        "task": "MTQ0NDgyNzgxMTE0NjAwMDg3MDU6MDow",
+        "title": "=task",
+        "additionalFields": {
+          "notes": "={{ $json.output }}"
+        }
+      },
+      "type": "n8n-nodes-base.googleTasksTool",
+      "typeVersion": 1,
+      "position": [
+        -624,
+        640
+      ],
+      "id": "9757fac1-41b5-494d-b805-495534141f01",
+      "name": "Create a task in Google Tasks"
+    },
+    {
+      "parameters": {
+        "documentId": {
+          "__rl": true,
+          "value": "19Lxs3QIdVSttrEYx5VQ9JnryepsS7Qza6S5iPxElJvY",
+          "mode": "list",
+          "cachedResultName": "CHARGES PERSO 2025",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19Lxs3QIdVSttrEYx5VQ9JnryepsS7Qza6S5iPxElJvY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 795064712,
+          "mode": "list",
+          "cachedResultName": "SEPTEMBRE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19Lxs3QIdVSttrEYx5VQ9JnryepsS7Qza6S5iPxElJvY/edit#gid=795064712"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -992,
+        768
+      ],
+      "id": "fefaea26-6d31-4dc4-b363-eeb03618ff03",
+      "name": "CHarges Perso"
+    },
+    {
+      "parameters": {
+        "operation": "appendOrUpdate",
+        "documentId": {
+          "__rl": true,
+          "value": "19Lxs3QIdVSttrEYx5VQ9JnryepsS7Qza6S5iPxElJvY",
+          "mode": "list",
+          "cachedResultName": "CHARGES PERSO 2025",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19Lxs3QIdVSttrEYx5VQ9JnryepsS7Qza6S5iPxElJvY/edit?usp=drivesdk"
+        },
+        "sheetName": {
+          "__rl": true,
+          "value": 795064712,
+          "mode": "list",
+          "cachedResultName": "SEPTEMBRE",
+          "cachedResultUrl": "https://docs.google.com/spreadsheets/d/19Lxs3QIdVSttrEYx5VQ9JnryepsS7Qza6S5iPxElJvY/edit#gid=795064712"
+        },
+        "columns": {
+          "mappingMode": "autoMapInputData",
+          "value": {},
+          "matchingColumns": [
+            "date"
+          ],
+          "schema": [
+            {
+              "id": "date",
+              "displayName": "date",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true,
+              "removed": false
+            },
+            {
+              "id": "transport",
+              "displayName": "transport",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "cafe/restau",
+              "displayName": "cafe/restau",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "shopping ",
+              "displayName": "shopping ",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "divers",
+              "displayName": "divers",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "abounements",
+              "displayName": "abounements",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            },
+            {
+              "id": "Somme/jour",
+              "displayName": "Somme/jour",
+              "required": false,
+              "defaultMatch": false,
+              "display": true,
+              "type": "string",
+              "canBeUsedToMatch": true
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.googleSheetsTool",
+      "typeVersion": 4.7,
+      "position": [
+        -832,
+        624
+      ],
+      "id": "8527b9e3-c763-4716-88d0-3ae7c00b85d8",
+      "name": "Append or update row in sheet in Google Sheets"
+    }
+  ],
+  "connections": {
+    "Get a chat": {
+      "main": [
+        [
+          {
+            "node": "Switch",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append row in sheet": {
+      "main": [
+        [
+          {
+            "node": "User",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Domains": {
+      "main": [
+        [
+          {
+            "node": "Hosting",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hosting": {
+      "main": [
+        [
+          {
+            "node": "Get row(s) in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get row(s) in sheet": {
+      "main": [
+        [
+          {
+            "node": "Append row in sheet",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "User": {
+      "main": [
+        [
+          {
+            "node": "return last messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Listen for incoming events1": {
+      "main": [
+        [
+          {
+            "node": "Voice or Text1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If1": {
+      "main": [
+        [
+          {
+            "node": "Get Voice File1",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Speech to Text1": {
+      "main": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Voice or Text1": {
+      "main": [
+        [
+          {
+            "node": "If1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Voice File1": {
+      "main": [
+        [
+          {
+            "node": "Speech to Text1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Gemini": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Your First AI Agent": {
+      "main": [
+        [
+          {
+            "node": "Send a text message1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "get_a_joke": {
+      "ai_tool": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "days_from_now": {
+      "ai_tool": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "wikipedia": {
+      "ai_tool": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "create_password": {
+      "ai_tool": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "calculate_loan_payment": {
+      "ai_tool": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "n8n_blog_rss_feed": {
+      "ai_tool": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Domains1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Hosting1": {
+      "ai_tool": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Faq": {
+      "ai_tool": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Create a task in Google Tasks": {
+      "ai_tool": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "CHarges Perso": {
+      "ai_tool": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Append or update row in sheet in Google Sheets": {
+      "ai_tool": [
+        [
+          {
+            "node": "Your First AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "staticData": null,
+  "meta": null,
+  "pinData": {},
+  "versionId": "5301f802-b9f0-4cfb-81c1-0c91b073cb39",
+  "activeVersionId": null,
+  "triggerCount": 0,
+  "shared": [
+    {
+      "updatedAt": "2025-09-22T08:20:25.340Z",
+      "createdAt": "2025-09-22T08:20:25.340Z",
+      "role": "workflow:owner",
+      "workflowId": "VeyaStjpldynaVkp",
+      "projectId": "HHopAZ4lOFgjhBzT"
+    }
+  ],
+  "activeVersion": null,
+  "tags": []
+}
